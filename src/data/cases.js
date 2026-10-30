@@ -254,7 +254,7 @@ export const CASES = [
 },
 {
   id: "c3", no: 3, title: "Chiếc Trâm Ngọc", place: "Nhà cổ ông Tư · phố Hàng Ngang",
-  level: "★★★★★ Khó nhất", budget: 16,
+  level: "★★★★ Khó", budget: 16,
   clock: { start: "22:00" },
   world: [
     { at: "23:00", kind: "leave", id: "tung", text: "Tùng bắt chuyến xe đêm về Sài Gòn vì công việc, không còn ở nhà ông Tư." },
@@ -362,5 +362,153 @@ export const CASES = [
       hint: "Đèn phòng thờ tắt lúc 21h, và có một ánh đèn pin ở cửa lúc 21h40." }
   ],
   explanation: "<p><b>Bước 1 — Biên bản:</b> đúng 3 trong 6 lời khai là thật.</p><p><b>Bước 2 — Thử từng người làm thủ phạm rồi đếm số lời đúng:</b> Tùng hoặc Thu → 4 lời đúng; Hoa hoặc Ngọc → 2 lời đúng; Minh hoặc Phúc → 3 lời đúng.</p><p><b>Bước 3 — Ngăn bí mật:</b> chỉ các con ruột và chú Phúc biết cách mở. Loại Minh (cháu, sống xa, chưa từng được chỉ), loại Ngọc, loại Hoa (con dâu, không nằm trong nhóm được chỉ cách). Tùng và Thu bị loại vì đếm được 4 lời đúng, không khớp biên bản. Chỉ còn chú Phúc.</p><p><b>Kiểm lại:</b> nếu là chú Phúc thì lời của Tùng đúng (“không phải Minh, không phải Ngọc”), lời của Thu đúng (“không phải Hoa”), lời của Hoa đúng (“thủ phạm là Phúc”). Lời của Phúc sai, lời của Minh sai, lời của Ngọc sai. Đúng ba lời thật — khớp biên bản.</p>"
+},
+{
+  id: "c4", no: 4, title: "Sổ Đỏ Hàng Bông", place: "Văn phòng công chứng Đông Hưng · phố Hàng Bông",
+  level: "★★★★★ Ác mộng", budget: 12,
+  // Đồng hồ bắt đầu lúc 21h. Hai diễn biến buộc người chơi làm việc sớm: một nghi phạm rời thành phố và một đoạn ghi bị xóa.
+  clock: { start: "21:00" },
+  world: [
+    { at: "22:30", kind: "leave", id: "long", text: "Long bắt chuyến xe khách về Hưng Yên lúc 22h30, không còn ở thành phố. Anh không thể bị hỏi thêm." },
+    { at: "23:40", kind: "gone", id: "cam_thang", text: "Hệ thống camera hầm tự ghi đè sau hai giờ. Đoạn 19h48 không còn trích xuất được." }
+  ],
+  intro: "Tối thứ Năm, văn phòng công chứng Đông Hưng đóng cửa lúc 18h. Sổ đỏ gốc của mảnh đất ba tầng ở phố Hàng Bông được cất trong kho lưu trữ tầng hầm, chờ ký sang tên sáng mai. Lúc 21h, nhân viên mở tủ hồ sơ và thấy ngăn số 2 trống trơn. Cửa chính đã khóa; cửa hông chỉ mở bằng thẻ từ, và cầu thang xuống hầm có camera. Sáu người có mặt quanh việc này, ai cũng có lời khai. Bạn có 12 giờ, và có những việc sẽ không đợi bạn.",
+  suspects: [
+    { id: "thinh", name: "Thịnh", role: "Công chứng viên · 48 tuổi", bio: "Người ký sổ công chứng. Khóa cửa chính lúc 19h30 rồi về nhà.",
+      look: { skin: "#e8bf98", hair: "short", hc: "#2b2b2b", top: "#37474f", acc: "tie", ac: "#b71c1c" } },
+    { id: "van", name: "Vân", role: "Thư ký · 27 tuổi", bio: "Mới vào làm được ba tháng. Trực quầy lễ tân.",
+      look: { skin: "#f5d6bc", hair: "long", hc: "#1f1a17", top: "#ad1457", acc: "none" } },
+    { id: "dat", name: "Đạt", role: "Môi giới bất động sản · 41 tuổi", bio: "Từng dẫn khách xem nhà ở Hàng Bông. Nói nhanh, hay né câu hỏi về tiền.",
+      look: { skin: "#d9a77c", hair: "short", hc: "#3d2c20", top: "#1565c0", acc: "tie", ac: "#f9a825" } },
+    { id: "long", name: "Long", role: "Con trai bà Hương · 34 tuổi", bio: "Phản đối bán đất, cho rằng mảnh đất này là của cả nhà.",
+      look: { skin: "#e3b48b", hair: "short", hc: "#222", top: "#6d4c41", acc: "scarf", ac: "#2f5d8a" } },
+    { id: "kien", name: "Kiên", role: "Thợ bảo trì máy lạnh · 50 tuổi", bio: "Đến sửa máy lạnh tầng hai tối đó, mang theo vali đồ nghề.",
+      look: { skin: "#c98f63", hair: "hat", hc: "#6b4a2b", top: "#4f6b3a", acc: "mustache" } },
+    { id: "huong", name: "Bà Hương", role: "Chủ mảnh đất · 66 tuổi", bio: "Đang bán mảnh đất ba tầng. Hồ sơ gốc đã giao cho văn phòng để sang tên.",
+      look: { skin: "#f0c9a0", hair: "bun", hc: "#9e9e9e", top: "#7a3e8f", acc: "glasses" } }
+  ],
+  locations: [
+    { id: "notary", name: "Văn phòng công chứng · sảnh", time: "21:00", scene: "notary", hs: [
+      ["loi_thinh", 330, 520, "Hỏi Thịnh"], ["loi_van", 740, 560, "Hỏi Vân"], ["phieu_khach", 900, 430, "Sổ cấp thẻ khách"],
+      ["so_bao_tri", 1110, 300, "Sổ bảo trì"], ["thu_phan_doi", 1000, 600, "Thư phản đối"], ["loi_kien", 1240, 560, "Hỏi Kiên"] ] },
+    { id: "stair", name: "Cầu thang xuống tầng hầm", time: "19:48", scene: "stair", hs: [
+      ["cam_thang", 800, 190, "Camera cầu thang"], ["the_tu", 960, 520, "Nhật ký cửa hông"] ] },
+    { id: "vault", name: "Kho lưu trữ tầng hầm", time: "Bất kỳ lúc nào", scene: "archive", hs: [
+      ["so_dat", 560, 520, "Tủ hồ sơ · ngăn 2"], ["hop_dong_no", 1080, 600, "Ngăn kéo dưới bàn", "soi"] ] },
+    { id: "cafe", name: "Quán cà phê đối diện", time: "19:00", scene: "alley_rain", hs: [
+      ["loi_dat", 560, 540, "Hỏi Đạt"], ["loi_long", 1000, 540, "Hỏi Long"], ["cafe_log", 1220, 420, "Sổ bàn quán"] ] },
+    { id: "home", name: "Nhà bà Hương · phố Hàng Đào", time: "21:30", scene: "altar", hs: [
+      ["loi_huong", 800, 540, "Hỏi bà Hương"] ] }
+  ],
+  actions: [
+    { id: "loi_thinh", cost: 1, type: "Lời khai", title: "Thịnh: khóa cửa lúc 19h30",
+      text: "Thịnh khai ông khóa cửa chính lúc 19h30 rồi về nhà ở Cầu Giấy. Tối đó ông không quay lại tòa nhà và không đưa thẻ từ cho ai.",
+      visual: { k: "who", id: "thinh" },
+      alibi: { who: "thinh", from: "19:30", to: "21:00", at: "Nhà riêng · Cầu Giấy" } },
+    { id: "loi_van", cost: 1, type: "Lời khai", title: "Vân: trực quầy đến 21h",
+      text: "Vân khai cô trực ở quầy lễ tân từ 18h30 đến 21h, không rời chỗ và không đụng đến cửa hông.",
+      visual: { k: "who", id: "van" },
+      alibi: { who: "van", from: "18:30", to: "21:00", at: "Quầy lễ tân" } },
+    { id: "loi_kien", cost: 1, type: "Lời khai", title: "Kiên: sửa máy lạnh tầng hai",
+      text: "Kiên khai anh lên tầng hai sửa máy lạnh từ 19h30 đến 20h20, rồi xuống sảnh và về bằng cửa chính. Anh chỉ mang vali đồ nghề, không có thẻ từ của văn phòng.",
+      visual: { k: "who", id: "kien" },
+      alibi: { who: "kien", from: "19:30", to: "20:20", at: "Tầng hai · máy lạnh" } },
+    { id: "loi_dat", cost: 1, type: "Lời khai", title: "Đạt: ngồi quán cà phê",
+      text: "Đạt khai ngồi cùng Long ở quán cà phê đối diện từ 19h đến 20h30 để bàn chuyện đất, rồi về nhà. Anh nói không biết gì về thẻ khách của văn phòng.",
+      visual: { k: "who", id: "dat" },
+      alibi: { who: "dat", from: "19:00", to: "20:30", at: "Quán cà phê đối diện" } },
+    { id: "loi_long", cost: 1, type: "Lời khai", title: "Long: ngồi một mình",
+      text: "Long khai anh ngồi một mình ở quán cà phê từ 19h đến 21h30 và đọc tin nhắn. Anh khẳng định không gặp Đạt tối đó và không đến văn phòng.",
+      visual: { k: "who", id: "long" },
+      alibi: { who: "long", from: "19:00", to: "21:30", at: "Quán cà phê đối diện" } },
+    { id: "loi_huong", cost: 1, type: "Lời khai", title: "Bà Hương: ở nhà cả tối",
+      text: "Bà Hương khai bà ở nhà ở Hàng Đào suốt tối cùng con dâu. Hồ sơ gốc do văn phòng giữ, và bà không có thẻ hay chìa nào của văn phòng.",
+      visual: { k: "who", id: "huong" },
+      alibi: { who: "huong", from: "19:00", to: "21:30", at: "Nhà riêng · Hàng Đào" } },
+    { id: "phieu_khach", cost: 1, type: "Hồ sơ", title: "Sổ cấp thẻ khách",
+      text: "Sổ cấp thẻ ghi thẻ khách số 3 được cấp cho Đạt hai tuần trước để xem nhà. Ô “ngày trả lại” để trống, không có chữ ký nhận lại.",
+      visual: { k: "paper", alt: "Sổ cấp thẻ khách", title: "SỔ CẤP THẺ KHÁCH",
+        rows: ["Thẻ khách số 3 · cấp 16/10", "Người nhận: Đạt, môi giới", "Ngày trả lại: để trống"], stamp: "CHƯA TRẢ" } },
+    { id: "so_bao_tri", cost: 1, type: "Hồ sơ", title: "Sổ bảo trì máy lạnh",
+      text: "Sổ bảo trì ghi Kiên vào tầng hai lúc 19h30 và ra lúc 20h20, có chữ ký của anh và của người đứng quầy.",
+      visual: { k: "paper", alt: "Sổ bảo trì máy lạnh", title: "SỔ BẢO TRÌ",
+        rows: ["Tầng hai · máy lạnh số 2", "19h30 · Kiên vào, ký tên", "20h20 · Kiên ra, ký tên"] },
+      spans: [{ who: "kien", from: "19:30", to: "20:20", at: "Tầng hai · máy lạnh" }] },
+    { id: "thu_phan_doi", cost: 1, type: "Hồ sơ", title: "Thư phản đối bán đất",
+      text: "Lá thư gửi văn phòng xin hoãn việc ký sang tên, ký tên Long. Thư nói đất là của cả nhà, và không nhắc đến sổ đỏ hay thẻ từ.",
+      visual: { k: "paper", alt: "Thư phản đối bán đất", title: "THƯ PHẢN ĐỐI",
+        rows: ["Xin hoãn việc ký sang tên", "Đất là của cả nhà, không bán", "Người gửi: Long, con trai bà Hương"] } },
+    { id: "the_tu", cost: 1, type: "Hồ sơ", title: "Nhật ký cửa hông",
+      text: "Nhật ký thẻ từ ghi các lượt quẹt. Cửa hông chỉ mở bằng thẻ: thẻ số 3 quẹt vào lúc 19h48 và ra lúc 20h31. Thẻ của Vân và Thịnh đã ra cửa chính trước 19h30.",
+      visual: { k: "paper", alt: "Nhật ký thẻ từ", title: "NHẬT KÝ THẺ TỪ",
+        rows: ["18h35 · Vân · cửa chính · ra", "19h25 · Thịnh · cửa chính · ra", "19h48 · Thẻ số 3 · cửa hông vào", "20h31 · Thẻ số 3 · cửa hông ra"] },
+      spans: [
+        { who: "van", from: "18:35", to: "18:40", at: "Cửa chính" },
+        { who: "thinh", from: "19:25", to: "19:30", at: "Cửa chính" },
+        { who: "dat", needs: ["phieu_khach"], from: "19:48", to: "20:31", at: "Cửa hông" }
+      ] },
+    { id: "cam_thang", cost: 2, type: "Camera", title: "Cầu thang xuống hầm",
+      text: "19h48: một người đội mũ lưỡi trai, mặt khuất dưới vành mũ, đi xuống cầu thang hầm từ cửa hông. 20h31: người đó đi lên và rời khung hình. Không nhận diện được ai.",
+      visual: { k: "cam", scene: "cam_corridor", time: "19:48", cam: "CAM CẦU THANG HẦM", alt: "Người đội mũ lưỡi trai đi xuống cầu thang hầm lúc 19h48" },
+      spans: [{ from: "19:48", to: "20:31", at: "Cầu thang xuống hầm" }] },
+    { id: "so_dat", cost: 1, type: "Hồ sơ", title: "Hồ sơ đất Hàng Bông",
+      text: "Hồ sơ mảnh đất ba tầng chờ ký sang tên sáng mai. Ngăn 1 còn đủ bản vẽ. Ngăn 2, nơi lẽ ra có sổ đỏ gốc, đã trống.",
+      visual: { k: "paper", alt: "Hồ sơ đất Hàng Bông", title: "HỒ SƠ ĐẤT HÀNG BÔNG",
+        rows: ["Nhà 3 tầng · chờ ký sang tên", "Ngăn 1: bản vẽ · còn đủ", "Ngăn 2: sổ đỏ gốc · TRỐNG"], stamp: "CHỜ KÝ" } },
+    { id: "hop_dong_no", cost: 1, type: "Hồ sơ", title: "Giấy vay nóng của Đạt",
+      text: "Giấy vay ghi Đạt nợ 2,3 tỷ tiền vay nóng, hạn trả thứ Hai tuần này. Chủ nợ chỉ nhận sổ đất gốc làm tài sản đảm bảo, không nhận bản photo.",
+      visual: { k: "paper", alt: "Giấy vay nóng", title: "GIẤY VAY NÓNG",
+        rows: ["Người vay: Đạt · 2,3 tỷ", "Hạn trả: thứ Hai tuần này", "Tài sản đảm bảo: sổ đất gốc"] } },
+    { id: "cafe_log", cost: 1, type: "Hồ sơ", title: "Sổ bàn quán cà phê",
+      text: "Sổ ghi bàn số 2 chỉ có Long, từ 19h đến khi thanh toán lúc 21h30. Không có khách thứ hai nào được ghi cùng bàn.",
+      visual: { k: "paper", alt: "Sổ bàn quán cà phê", title: "SỔ BÀN QUÁN",
+        rows: ["Bàn 2 · Long · từ 19h00", "Không ghi thêm khách ở bàn 2", "Thanh toán: 21h30"] },
+      spans: [{ who: "long", from: "19:00", to: "21:30", at: "Quán cà phê đối diện" }] },
+    { id: "dat_thu", cost: 0, via: "confront", type: "Lời khai", title: "Đạt thừa nhận: thẻ số 3",
+      text: "Đạt tái mặt. Anh thừa nhận thẻ khách số 3 vẫn nằm trong túi áo từ hôm dẫn khách xem nhà, và tối đó anh xuống tầng hầm bằng cửa hông. Anh nói chỉ lấy một tập hồ sơ cũ và không đụng đến ngăn 2.",
+      visual: { k: "who", id: "dat" } },
+    { id: "van_thu", cost: 0, via: "confront", type: "Lời khai", title: "Vân nhớ lại: thẻ số 3",
+      text: "Vân nhớ ra tuần trước Đạt xin giữ thẻ khách số 3 thêm vài hôm. Cô đồng ý, không ghi vào sổ và không nói với ai.",
+      visual: { k: "who", id: "van" } }
+  ],
+  culprit: "dat",
+  // Đưa chứng cứ cho người đã bị hỏi. Đạt và Vân có phản ứng mở lời khai mới.
+  confront: [
+    { who: "dat", clue: "phieu_khach", reveal: "dat_thu",
+      text: "Đạt liếc tờ sổ rồi cười gượng: “Thẻ đó thì sao? Tôi đâu có ghi là đã trả.” Anh đổ mồ hôi, và cuối cùng nhận mình vẫn giữ thẻ." },
+    { who: "dat", clue: "hop_dong_no",
+      text: "Đạt nhìn tờ giấy vay một lúc lâu. “Chuyện nợ là chuyện riêng của tôi. Không liên quan đến sổ đất.”" },
+    { who: "van", clue: "phieu_khach", reveal: "van_thu",
+      text: "Vân đọc sổ cấp thẻ, mặt tái đi: “Anh Đạt có xin giữ thẻ... tôi tưởng không phải chuyện lớn.”" },
+    { who: "van", clue: "the_tu",
+      text: "Vân cúi đầu: “Tôi về sớm để đón con. Tôi nói dối vì sợ bị mắng.”" },
+    { who: "thinh", clue: "the_tu",
+      text: "Thịnh xem nhật ký, giọng rắn lại: “Thẻ của tôi ra cửa chính lúc 19h25. Tôi không biết gì về cửa hông.”" },
+    { who: "long", clue: "thu_phan_doi",
+      text: "Long đọc lại lá thư của chính mình rồi nói: “Tôi muốn giữ đất, nhưng tôi không lấy sổ. Tôi ngồi ở quán suốt buổi.”" },
+    { who: "huong", clue: "so_dat",
+      text: "Bà Hương nhìn ngăn 2 trống, tay run: “Sổ gốc tôi đã giao cho văn phòng. Tôi không hiểu sao nó lại mất.”" }
+  ],
+  // Chuỗi chứng minh: động cơ, cơ hội, phương tiện. Mỗi bước có vài hồ sơ đúng, còn lại là nhiễu.
+  chain: [
+    { key: "motive", label: "Động cơ", ask: "Ai đang cần tiền gấp và cần chính sổ đất gốc?", ids: ["hop_dong_no"],
+      hint: "Có một hồ sơ nằm trong ngăn kéo kho, không hiện ra ngay. Hãy đưa đèn pin quét khắp kho." },
+    { key: "opportunity", label: "Cơ hội", ask: "Ai đã vào được cửa hông và xuống kho lúc tủ bị mở?", ids: ["the_tu", "cam_thang"],
+      hint: "Cửa hông chỉ mở bằng thẻ từ. Nhật ký và camera cầu thang ghi cùng một khoảng giờ." },
+    { key: "means", label: "Phương tiện", ask: "Ai đang giữ thẻ mở được cửa hông?", ids: ["phieu_khach", "dat_thu"],
+      hint: "Thẻ khách số 3 không được ghi là đã trả. Ai đang giữ nó?" }
+  ],
+  // Kết nối giữa các hồ sơ
+  links: [
+    { a: "hop_dong_no", b: "phieu_khach", kind: "liên hệ", about: "dat",
+      text: "Đạt cần sổ đất gốc để trả nợ, và thẻ mở cửa hông được cấp cho chính anh." },
+    { a: "the_tu", b: "loi_dat", kind: "mâu thuẫn", about: "dat",
+      text: "Đạt khai ngồi ở quán cà phê đến 20h30, nhưng thẻ của anh đã quẹt ở cửa hông từ 19h48." },
+    { a: "loi_long", b: "cafe_log", kind: "liên hệ", about: "long",
+      text: "Sổ bàn quán xác nhận Long ngồi một mình ở đó suốt từ 19h đến 21h30." },
+    { a: "so_bao_tri", b: "loi_kien", kind: "liên hệ", about: "kien",
+      text: "Sổ bảo trì khớp với giờ Kiên khai: lên tầng hai lúc 19h30, xuống lúc 20h20." }
+  ],
+  explanation: "<p><b>Cửa hông chỉ mở bằng thẻ từ.</b> Nhật ký ghi thẻ số 3 quẹt vào lúc 19h48 và ra lúc 20h31; camera cầu thang ghi một người đội mũ đi xuống hầm đúng khoảng ấy.</p><p><b>Thẻ số 3 là của ai?</b> Sổ cấp thẻ ghi thẻ được cấp cho Đạt hai tuần trước và chưa bao giờ được trả lại. Khi bị đưa sổ, Đạt thừa nhận đã giữ thẻ và xuống hầm.</p><p><b>Động cơ:</b> giấy vay nóng ghi Đạt nợ 2,3 tỷ, hạn trả thứ Hai. Chủ nợ chỉ nhận sổ đất gốc làm tài sản đảm bảo, nên chỉ sổ gốc mới cứu được anh.</p><p><b>Lời khai của Đạt sai:</b> anh khai ngồi quán cà phê đến 20h30, nhưng sổ bàn quán chỉ ghi Long ngồi một mình, và nhật ký thẻ cho thấy thẻ của anh đã ở cửa hông từ 19h48.</p><p><b>Loại trừ những người khác:</b> Thịnh ra cửa chính lúc 19h25 và không dùng cửa hông sau đó. Vân khai trực quầy đến 21h, nhưng nhật ký ghi cô ra cửa chính lúc 18h35, và cô không giữ thẻ số 3. Kiên ở tầng hai theo sổ bảo trì từ 19h30 đến 20h20, và không có thẻ. Long ngồi ở quán cà phê suốt từ 19h đến 21h30, và không có thẻ. Bà Hương ở nhà, không có thẻ, và là chủ của chính tài sản.</p>"
 }
 ];

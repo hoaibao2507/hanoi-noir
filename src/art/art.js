@@ -891,7 +891,9 @@ const ART = (() => {
     gallery:    { kind: "room", wall: "#e9dab9", floor: "#8c5a33", trim: "#b08a3e", lamp: "#fff1c8" },
     gate:       { kind: "room", wall: "#27303b", floor: "#363f4a", trim: "#161b22", lamp: "#ffd58a" },
     corridor:   { kind: "room", wall: "#2a333e", floor: "#2f3742", trim: "#171d25", lamp: "#dff3ff" },
-    banquet:    { kind: "room", wall: "#4a2c18", floor: "#5a3a22", trim: "#2c170a", lamp: "#ffd27a" }
+    banquet:    { kind: "room", wall: "#4a2c18", floor: "#5a3a22", trim: "#2c170a", lamp: "#ffd27a" },
+    notary:     { kind: "room", wall: "#e6dcc4", floor: "#6e4a2c", trim: "#5a3d22", lamp: "#fff1d0" },
+    stair:      { kind: "room", wall: "#243039", floor: "#2a3038", trim: "#141a22", lamp: "#ffe2a0" }
   };
 
   // Gradient dùng chung cho hai bên của một cảnh (tiền tố k là tiền tố cảnh + "-w")
@@ -964,12 +966,103 @@ const ART = (() => {
       sideL + `<g transform="translate(${OX} 0)">${body}</g>` + seam + sideR + `</svg>`;
   }
 
+  // Văn phòng công chứng: quầy lễ tân, kệ hồ sơ, đồng hồ treo tường và cửa chính kính
+  function notary() {
+    const k = "notary";
+    const defs = blurs(k) +
+      lin(`${k}-wall`, [[0, "#ece2c9"], [1, "#b9a27a"]]) +
+      lin(`${k}-floor`, [[0, "#6e4a2c"], [1, "#2b1a0e"]]) +
+      lin(`${k}-desk`, [[0, "#8a5a33"], [1, "#3a2212"]]) +
+      lin(`${k}-glass`, [[0, "#1d2d46", 0.9], [1, "#0a1220", 0.95]]);
+    let b = rect(0, 0, 1600, 720, `url(#${k}-wall)`) + rect(0, 0, 1600, 36, "#3a2c1e");
+    b += rect(540, 64, 520, 70, "#1f3a5f", 'rx="8"');
+    b += rect(556, 76, 488, 46, "none", 'rx="5" stroke="#c9a227" stroke-width="2"');
+    b += txt(800, 108, "VĂN PHÒNG CÔNG CHỨNG", 26, "#f7d68a", 'text-anchor="middle" letter-spacing="3"');
+    [420, 800, 1180].forEach((x) => { b += rect(x - 30, 36, 60, 10, "#2a2119", 'rx="3"') + glow(k, x, 50, 110, "#fff1d0", 0.35); });
+
+    // Đồng hồ treo tường chỉ 21h, kệ hồ sơ bên trái
+    b += circle(1330, 230, 58, "#f5efe0", 'stroke="#5a3d22" stroke-width="8"');
+    b += line(1330, 230, 1330, 186, "#2b2b2b", 4) + line(1330, 230, 1300, 230, "#2b2b2b", 4) + circle(1330, 230, 5, "#2b2b2b");
+    [300, 430].forEach((y) => { b += rect(60, y, 320, 12, "#5a3d22"); });
+    const spines = ["#7a1f17", "#1f4e6b", "#c9a227", "#3b5b2a", "#6b3a6b", "#8a5a33", "#2b3a48"];
+    [300, 430].forEach((y) => spines.forEach((col, i) => { b += rect(74 + i * 42, y - 74, 30, 74, col, 'rx="2"'); }));
+
+    // Thịnh đứng bên kệ, Vân sau quầy (vẽ trước quầy để quầy che phần thân)
+    b += figure(330, 400, 1, { top: "#37474f", hair: "short", hc: "#2b2b2b", skin: "#e8bf98", tie: "#b71c1c" });
+    b += figure(740, 380, 1, { top: "#ad1457", hair: "long", hc: "#1f1a17", skin: "#f5d6bc" });
+
+    // Quầy lễ tân, giấy tờ và chuông
+    b += rect(500, 520, 520, 120, `url(#${k}-desk)`, 'rx="4"');
+    b += rect(480, 500, 560, 22, "#b07a44", 'rx="4"');
+    b += rect(700, 470, 60, 30, "#f3ead2", 'rx="2"');
+    b += circle(900, 486, 9, "#c9a227") + rect(892, 492, 16, 6, "#c9a227", 'rx="2"');
+
+    // Tủ hồ sơ sau quầy
+    b += rect(1040, 320, 230, 260, "#5e4329", 'rx="4"');
+    [0, 1, 2, 3].forEach((r) => {
+      b += line(1050, 352 + r * 62, 1260, 352 + r * 62, "#3a2814", 3);
+      b += rect(1130, 336 + r * 62, 30, 8, "#c9a227", 'rx="2"');
+    });
+
+    // Cửa chính kính, và Kiên đứng cạnh cửa với vali đồ nghề
+    b += rect(1370, 360, 170, 360, "#4a2c16", 'rx="4"');
+    b += rect(1386, 376, 138, 330, `url(#${k}-glass)`);
+    b += path("M1400 380 L1450 380 L1400 520 Z", "#ffffff", 'opacity=".08"');
+    b += txt(1455, 352, "CỬA CHÍNH", 13, "#f7d68a", 'text-anchor="middle" letter-spacing="2"');
+    b += figure(1240, 430, 1, { top: "#4f6b3a", hair: "hat", hc: "#6b4a2b", skin: "#c98f63", pants: "#23262d" });
+    b += rect(1200, 580, 60, 46, "#5a3a22", 'rx="5"') + rect(1218, 570, 24, 12, "none", 'rx="4" stroke="#2b1d12" stroke-width="3"');
+
+    // Sàn gỗ và ánh đèn
+    b += rect(0, 720, 1600, 180, `url(#${k}-floor)`);
+    for (let i = -6; i <= 6; i++) b += line(800 + i * 90, 720, 800 + i * 260, 900, "#2b1a0e", 2, 'opacity=".5"');
+    b += haze(k, 800, 520, 360, "#fff1d0", 0.1);
+    return frame("Văn phòng công chứng", defs, b);
+  }
+
+  // Cầu thang xuống tầng hầm: cửa hông có đầu đọc thẻ từ, camera trần và bậc đi xuống
+  function stair() {
+    const k = "stair";
+    const defs = blurs(k) +
+      lin(`${k}-ceil`, [[0, "#1d2530"], [1, "#0e131a"]]) +
+      lin(`${k}-wall`, [[0, "#2c3440"], [1, "#141a22"]]) +
+      lin(`${k}-step`, [[0, "#525d68"], [1, "#2a3139"]]) +
+      lin(`${k}-door`, [[0, "#3d2d1e"], [1, "#22180f"]]);
+    let b = rect(0, 0, 1600, 900, "#121820");
+    b += path("M0 0 H1600 L1200 260 H400 Z", `url(#${k}-ceil)`);
+    b += path("M0 0 L400 260 L400 900 L0 900 Z", "#243039") + path("M1600 0 L1200 260 L1200 900 L1600 900 Z", "#243039");
+    b += rect(400, 260, 800, 640, `url(#${k}-wall)`);
+    b += line(0, 140, 400, 262, "#3b4650", 8) + line(1600, 140, 1200, 262, "#3b4650", 8);
+    b += glow(k, 800, 90, 200, "#ffe2a0", 0.25) + circle(800, 40, 8, "#ffe2a0");
+
+    // Cửa hông và đầu đọc thẻ từ bên cạnh
+    b += rect(680, 300, 200, 260, "#2b1f14", 'rx="4"');
+    b += rect(696, 316, 168, 244, `url(#${k}-door)`);
+    b += txt(780, 292, "CỬA HÔNG", 14, "#f7d68a", 'text-anchor="middle" letter-spacing="2"');
+    b += rect(918, 420, 40, 60, "#1e2a36", 'rx="6"') + rect(924, 428, 28, 20, "#7fd1b9", 'rx="3" opacity=".85"');
+    b += glow(k, 938, 438, 36, "#7fd1b9", 0.5);
+
+    // Camera trần (điểm điều tra)
+    b += rect(790, 170, 20, 12, "#444");
+    b += rect(770, 180, 60, 26, "#2b2b30", 'rx="5"');
+    b += circle(770, 193, 6, "#0d1116") + circle(818, 186, 3, "#ff4d4d");
+
+    // Lan can và các bậc đi xuống tầng hầm, bậc gần thì rộng hơn
+    b += line(400, 420, 480, 600, "#8a8f96", 5) + line(1200, 420, 1120, 600, "#8a8f96", 5);
+    for (let i = 0; i < 6; i++) {
+      const y = 610 + i * 45;
+      b += rect(480 - i * 20, y, 640 + i * 40, 26, `url(#${k}-step)`);
+      b += rect(480 - i * 20, y + 26, 640 + i * 40, 10, "#15191f");
+    }
+    b += haze(k, 800, 640, 320, "#9fc3dd", 0.1);
+    return frame("Cầu thang xuống tầng hầm", defs, b);
+  }
+
   /* ---------- Bảng đăng ký cảnh ---------- */
   const SCENES = {
     shop, altar,
     alley: () => alley(false),
     alley_rain: () => alley(true),
-    archive, gallery, gate, corridor, banquet, menu
+    archive, gallery, gate, corridor, banquet, notary, stair, menu
   };
 
   return {

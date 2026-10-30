@@ -1,6 +1,6 @@
 # Hanoi Noir · Vụ Án Phố Cổ
 
-Trò chơi điều tra 3 vụ án ở phố cổ Hà Nội, chạy trên trình duyệt.
+Trò chơi điều tra 4 vụ án ở phố cổ Hà Nội, chạy trên trình duyệt.
 Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc dùng mũi tên để xem hai bên,
 đi qua cửa để sang địa điểm khác, nút chức năng nằm ở bốn góc.
 
@@ -37,7 +37,7 @@ Font chữ tải từ Google Fonts nên cần Internet. Biểu tượng, GSAP, P
 | `src/ui/ambience.js` | Hiệu ứng môi trường trong Phaser: bụi trong đèn pin, mưa, khói hương, ánh đèn lập lòe; bật theo cảnh qua `AMBIENT` |
 | `src/ui/dom.js` | Tiện ích DOM; đổi `<i>` thành SVG biểu tượng |
 | `src/art/art.js` | Minh họa SVG: cảnh, hai bên thế giới, chân dung, camera, tài liệu |
-| `src/data/cases.js` | Dữ liệu 3 vụ: nghi phạm, địa điểm, tọa độ điểm điều tra, hồ sơ |
+| `src/data/cases.js` | Dữ liệu 4 vụ: nghi phạm, địa điểm, tọa độ điểm điều tra, hồ sơ |
 | `src/styles/main.css` | Token thiết kế (`@theme`) và các thành phần giao diện |
 | `tests/rules.test.js` | Kiểm thử đơn vị (`npm test`) |
 

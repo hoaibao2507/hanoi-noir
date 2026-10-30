@@ -307,6 +307,18 @@ test("vụ 3: alibi của Phúc bị bác sau khi thú nhận quay lại phòng 
   assert.equal(r.by.clue, "phuc_thu");
 });
 
+test("vụ 4: Đạt bị bác khi nhật ký cửa hông đã gắn với sổ cấp thẻ; Long được xác nhận bởi sổ bàn quán", () => {
+  const c4 = CASES[3];
+  const base = { ...newGame(3, c4), done: { loi_dat: true, the_tu: true } };
+  assert.equal(alibisOf(base, c4).find((a) => a.who === "dat").status, "open", "chưa biết thẻ số 3 là của ai");
+  const r = alibisOf({ ...base, done: { ...base.done, phieu_khach: true } }, c4).find((a) => a.who === "dat");
+  assert.equal(r.status, "clash");
+  assert.equal(r.by.clue, "the_tu");
+
+  const long = alibisOf({ ...newGame(3, c4), done: { loi_long: true, cafe_log: true } }, c4).find((a) => a.who === "long");
+  assert.equal(long.status, "proof");
+});
+
 test("dữ liệu dòng thời gian nhất quán: người, hồ sơ điều kiện và khoảng giờ đều hợp lệ", () => {
   const toMin = (t) => {
     const [h, m] = t.split(":").map(Number);
