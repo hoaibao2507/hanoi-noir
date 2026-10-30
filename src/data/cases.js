@@ -17,7 +17,7 @@ export const TYPES = {
 export const CASES = [
 {
   id: "c1", no: 1, title: "Hộp Trầm Hương", place: "Tiệm đồ cổ Hoa Sen · phố Hàng Bạc",
-  level: "★★ Dễ", budget: 8,
+  level: "★★ Dễ", budget: 12,
   // Đồng hồ bắt đầu lúc clock.start; mỗi giờ điều tra là một giờ trôi qua. Đến mốc "at" thì diễn biến xảy ra:
   // "gone" làm mất một hồ sơ chưa thu, "leave" khiến một nghi phạm rời thành phố (không hỏi được nữa).
   clock: { start: "08:00" },
@@ -143,7 +143,7 @@ export const CASES = [
 },
 {
   id: "c2", no: 2, title: "Bức Tranh Mất Tích", place: "Phòng tranh Thanh Trúc · phố Hàng Gai",
-  level: "★★★ Vừa khó", budget: 7,
+  level: "★★★ Vừa khó", budget: 12,
   clock: { start: "21:30" },
   world: [
     { at: "22:30", kind: "leave", id: "tuan", text: "Tuấn xin về sớm vì có chuyến bay lúc 23h30. Cảnh sát cho anh ra về." },
@@ -254,7 +254,7 @@ export const CASES = [
 },
 {
   id: "c3", no: 3, title: "Chiếc Trâm Ngọc", place: "Nhà cổ ông Tư · phố Hàng Ngang",
-  level: "★★★★★ Khó nhất", budget: 11,
+  level: "★★★★★ Khó nhất", budget: 16,
   clock: { start: "22:00" },
   world: [
     { at: "23:00", kind: "leave", id: "tung", text: "Tùng bắt chuyến xe đêm về Sài Gòn vì công việc, không còn ở nhà ông Tư." },

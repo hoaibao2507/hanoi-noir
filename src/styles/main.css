@@ -553,6 +553,10 @@ body[data-screen="menu"] .pan { display: none !important; }
 .sheet .btn { box-shadow: 0 4px 0 #553607, 0 10px 22px rgba(0, 0, 0, 0.25); }
 .sheet .btn-blood { box-shadow: 0 4px 0 #6e2418, 0 10px 22px rgba(0, 0, 0, 0.25); }
 .sheet .vis svg { border-color: rgba(42, 29, 16, 0.2); }
+/* Nút lựa chọn trong hộp thoại có nền sáng: chữ phải tối, không dùng màu kem của nền tối */
+.sheet .lkc { color: #2a1d10; background: rgba(255, 255, 255, 0.45); border-color: rgba(42, 29, 16, 0.25); }
+.sheet .lkc:hover { border-color: #8a5a14; }
+.sheet .lkc.on { color: #5a3a10; background: rgba(240, 179, 90, 0.35); border-color: #b7791f; }
 .expl {
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid rgba(42, 29, 16, 0.15);

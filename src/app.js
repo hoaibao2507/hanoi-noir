@@ -6,7 +6,7 @@ import { CASES } from "./data/cases.js";
 import { ART } from "./art/art.js";
 import { createStore } from "./state/store.js";
 import * as R from "./game/rules.js";
-import { loadSave, storeSave, clearSave } from "./game/save.js";
+import { loadSave, storeSave, clearSave, loadRun, storeRun, clearRun } from "./game/save.js";
 import { doorsFor } from "./world/doors.js";
 import { WORLD_W, OX, COMP_W } from "./world/layout.js";
 import * as stage from "./ui/stage.js";
@@ -81,6 +81,9 @@ async function startCase(i) {
   O.closeSheet();
   const c = CASES[i];
   accuse = emptyAccuse();
+  // Vụ đang dở: chọn lại đúng vụ đó thì tiếp tục từ chỗ đã dừng, không bắt đầu lại từ đầu
+  const run = loadRun();
+  if (run && run.idx === i && resumeRun(run)) return O.toast(`Tiếp tục ${c.title}`);
   const g0 = { ...R.newGame(i, c), busy: true };
   announced = R.nowMinutes(g0, c);
   store.set({ screen: "case", game: g0, nb: false });
@@ -150,7 +153,8 @@ function finish(win) {
   const s = store.get(), g = s.game, c = CASES[g.idx];
   if (win) {
     const save = R.recordWin(s.save, g.idx, c.id, g);
-    store.set({ save });
+    // Thắng thì hồ sơ đóng, nên ván này không còn gì để khôi phục
+    store.set({ save, game: { ...g, over: true } });
     storeSave(save);
     O.showSheet(T.verdictWinHTML(c, g.idx, g.wrong, save));
   } else {
@@ -191,8 +195,35 @@ function checkLinks() {
 
 function resetProgress() {
   clearSave();
+  clearRun();
   store.set({ save: R.emptySave() });
   O.closeSheet();
+}
+
+// Ván đang chơi được lưu sau mỗi thay đổi, để tải lại trang không mất tiến độ. Ván đã kết thúc thì xóa
+function persistRun() {
+  const s = store.get();
+  if (s.screen !== "case" || !s.game) return;
+  if (s.game.over) return clearRun();
+  storeRun({ idx: s.game.idx, game: { ...s.game, busy: false } });
+}
+
+// Đưa một ván đã lưu trở lại màn hình. Trả về false nếu ván đã kết thúc hoặc không khớp với dữ liệu vụ hiện tại
+function resumeRun(run) {
+  if (!run || run.game.over || !CASES[run.idx] || !CASES[run.idx].locations[run.game.loc]) return false;
+  const c = CASES[run.idx];
+  // Dữ liệu vụ có thể đã đổi sau khi lưu: hồ sơ đã thu mà không còn tồn tại thì không khôi phục
+  if (!run.game.found.every((id) => c.actions.some((a) => a.id === id))) return false;
+  const g = { ...run.game, busy: false };
+  announced = R.nowMinutes(g, c);
+  store.set({ screen: "case", game: g, nb: false });
+  return true;
+}
+
+// Tải lại trang: nếu còn ván chưa kết thúc thì đưa người chơi về đúng vụ và địa điểm đó
+function restoreRun() {
+  const run = loadRun();
+  if (run && !resumeRun(run)) clearRun();
 }
 
 /* ---------- Hành động gắn với data-action ---------- */
@@ -227,6 +258,8 @@ export const actions = {
 export function boot() {
   stage.mountStage();
   onLampMove(lightSecrets);
+  restoreRun();
+  store.subscribe(persistRun);
   store.subscribe(render);
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
