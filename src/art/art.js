@@ -893,7 +893,9 @@ const ART = (() => {
     corridor:   { kind: "room", wall: "#2a333e", floor: "#2f3742", trim: "#171d25", lamp: "#dff3ff" },
     banquet:    { kind: "room", wall: "#4a2c18", floor: "#5a3a22", trim: "#2c170a", lamp: "#ffd27a" },
     notary:     { kind: "room", wall: "#e6dcc4", floor: "#6e4a2c", trim: "#5a3d22", lamp: "#fff1d0" },
-    stair:      { kind: "room", wall: "#243039", floor: "#2a3038", trim: "#141a22", lamp: "#ffe2a0" }
+    stair:      { kind: "room", wall: "#243039", floor: "#2a3038", trim: "#141a22", lamp: "#ffe2a0" },
+    pharmacy:   { kind: "room", wall: "#4a2c18", floor: "#6b4a2b", trim: "#2a160a", lamp: "#ffcf7a" },
+    lab:        { kind: "room", wall: "#2c3d35", floor: "#3a4a42", trim: "#121c17", lamp: "#dff3ff" }
   };
 
   // Gradient dùng chung cho hai bên của một cảnh (tiền tố k là tiền tố cảnh + "-w")
@@ -1057,12 +1059,108 @@ const ART = (() => {
     return frame("Cầu thang xuống tầng hầm", defs, b);
   }
 
+  // Hiệu thuốc bắc Bảo An Đường: tủ ô thuốc kín tường, bảng hiệu đỏ vàng, quầy gỗ có cân tiểu ly
+  function pharmacy() {
+    const k = "pharmacy";
+    const defs = blurs(k) +
+      lin(`${k}-wall`, [[0, "#5a3a22"], [1, "#22130a"]]) +
+      lin(`${k}-floor`, [[0, "#6b4a2b"], [1, "#2a180b"]]) +
+      lin(`${k}-cab`, [[0, "#6e4426"], [1, "#3a2210"]]) +
+      lin(`${k}-drawer`, [[0, "#7d4f2b"], [1, "#4a2a12"]]) +
+      lin(`${k}-counter`, [[0, "#a06a3a"], [1, "#4a2a12"]]);
+    let b = rect(0, 0, 1600, 720, `url(#${k}-wall)`) + rect(0, 0, 1600, 34, "#1a0e06");
+
+    // Tủ ô thuốc kín tường: bốn hàng ngăn kéo, mỗi ngăn có nhãn giấy và núm đồng
+    b += rect(60, 150, 1480, 360, `url(#${k}-cab)`, 'rx="6"');
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 10; c++) {
+        const x = 80 + c * 146, y = 170 + r * 88;
+        b += rect(x, y, 130, 76, `url(#${k}-drawer)`, 'rx="3"');
+        b += rect(x + 18, y + 8, 94, 14, "#f3ead2", 'rx="2"');
+        b += rect(x + 55, y + 42, 20, 6, "#c9a227", 'rx="2"');
+      }
+    }
+
+    // Bảng hiệu đỏ viền vàng, và ánh đèn vàng ấm
+    b += rect(520, 56, 560, 70, "#8b1e1e", 'rx="8"');
+    b += rect(536, 68, 528, 46, "none", 'rx="5" stroke="#f0c15a" stroke-width="2"');
+    b += txt(800, 100, "BẢO AN ĐƯỜNG", 26, "#f7d68a", 'text-anchor="middle" letter-spacing="3"');
+    b += glow(k, 800, 90, 150, "#ffcf7a", 0.25);
+    b += haze(k, 800, 420, 420, "#ffcf7a", 0.12);
+
+    // Chủ hiệu đứng sau quầy (vẽ trước quầy để quầy che phần thân)
+    b += figure(560, 330, 1, { top: "#e8f0ec", hair: "bun", hc: "#1f1a17", skin: "#e8c4a0", pants: "#2b2f3a" });
+
+    // Quầy gỗ có cân tiểu ly và hai bình sứ
+    b += rect(280, 540, 1040, 26, "#c08a50", 'rx="4"');
+    b += rect(300, 566, 1000, 154, `url(#${k}-counter)`, 'rx="4"');
+    b += vase(430, 540, 50, 90, "#7a3e2a") + vase(1400, 540, 60, 110, "#2f6b4f");
+    b += line(1180, 470, 1180, 500, "#2b1d12", 4) + line(1120, 500, 1240, 500, "#2b1d12", 4);
+    b += line(1120, 500, 1104, 530, "#8a6b3a", 2) + line(1120, 500, 1136, 530, "#8a6b3a", 2);
+    b += line(1240, 500, 1224, 530, "#8a6b3a", 2) + line(1240, 500, 1256, 530, "#8a6b3a", 2);
+    b += path("M1090 530 Q1120 556 1150 530 Z", "#c9a227") + path("M1210 530 Q1240 556 1270 530 Z", "#c9a227");
+
+    // Sàn gỗ và vệt sáng dài trên sàn
+    b += rect(0, 720, 1600, 180, `url(#${k}-floor)`);
+    for (let i = -6; i <= 6; i++) b += line(800 + i * 90, 720, 800 + i * 260, 900, "#2b1a0e", 2, 'opacity=".5"');
+    return frame("Hiệu thuốc Bảo An Đường", defs, b);
+  }
+
+  // Phòng bào chế sau nhà: bàn gỗ dài, tủ dụng cụ có ổ khóa với ngăn trống, và tấm vải phủ thi thể trên sàn
+  function lab() {
+    const k = "lab";
+    const defs = blurs(k) +
+      lin(`${k}-wall`, [[0, "#2c3d35"], [1, "#121c17"]]) +
+      lin(`${k}-floor`, [[0, "#3a4a42"], [1, "#161f1a"]]) +
+      lin(`${k}-table`, [[0, "#8a5a33"], [1, "#3d2412"]]) +
+      lin(`${k}-cab`, [[0, "#5c4a36"], [1, "#2a2118"]]) +
+      lin(`${k}-cloth`, [[0, "#f1ede0"], [1, "#cfc8b4"]]);
+    let b = rect(0, 0, 1600, 720, `url(#${k}-wall)`) + rect(0, 0, 1600, 30, "#0b120e");
+
+    // Đèn huỳnh quang trần, và cửa sổ nhỏ nhìn ra đêm mưa
+    b += rect(560, 40, 480, 14, "#dff3ff", 'rx="6"') + glow(k, 800, 60, 260, "#dff3ff", 0.3);
+    b += rect(60, 110, 200, 150, "#1b2a24", 'rx="4"') + rect(72, 122, 176, 126, "#0a1512");
+    for (let i = 0; i < 6; i++) b += line(90 + i * 28, 130 + (i % 3) * 20, 80 + i * 28, 160 + (i % 3) * 20, "#9fc3dd", 1.2, 'opacity=".35"');
+
+    // Kệ bình thuốc và bó thảo dược khô bên trái
+    [300, 420].forEach((y) => { b += rect(60, y, 360, 12, "#5a3d22"); });
+    b += vase(120, 300, 50, 70, "#2f6b4f") + vase(200, 300, 46, 60, "#7a3e2a") + vase(280, 300, 50, 66, "#8a6b3a") + vase(350, 300, 40, 54, "#3d4f6b");
+    for (let i = 0; i < 7; i++) b += line(90 + i * 48, 420, 90 + i * 48, 470 + (i % 3) * 14, i % 2 ? "#6b8e4e" : "#8a6b3a", 6, 'stroke-linecap="round"');
+
+    // Tủ dụng cụ có ổ khóa; ngăn trên trống, nơi lẽ ra có chày đồng
+    b += rect(1100, 260, 320, 330, `url(#${k}-cab)`, 'rx="6"');
+    b += rect(1116, 276, 288, 130, "none", 'rx="4" stroke="#6b5a40" stroke-width="2"');
+    b += rect(1156, 306, 208, 70, "none", 'rx="6" stroke="#f2c94c" stroke-width="2" stroke-dasharray="6 5"');
+    b += txt(1260, 350, "trống", 14, "#f2c94c", 'text-anchor="middle" font-style="italic"');
+    b += rect(1116, 420, 288, 156, "none", 'rx="4" stroke="#6b5a40" stroke-width="2"');
+    b += rect(1230, 462, 40, 50, "#b8891a", 'rx="4"') + circle(1250, 478, 6, "#2b1d12") + rect(1247, 482, 6, 16, "#2b1d12");
+
+    // Bàn bào chế dài: cối đồng, bát thuốc và một vệt sạch trên mặt bàn
+    b += rect(260, 560, 760, 26, `url(#${k}-table)`, 'rx="4"');
+    b += rect(280, 586, 16, 134, "#3d2412") + rect(1000, 586, 16, 134, "#3d2412");
+    b += path("M400 556 Q452 606 504 556 Z", "#6e655a") + rect(396, 548, 112, 10, "#8a8072", 'rx="4"');
+    b += path("M660 556 Q690 530 720 556 Z", "#efe6d0") + rect(640, 548, 100, 8, "#d8cbb0", 'rx="3"');
+    b += rect(840, 548, 130, 8, "#a7bca8", 'opacity=".25"');
+
+    // Ghế đổ và tấm vải phủ thi thể trên sàn
+    b += rect(620, 712, 64, 14, "#5a3d22", 'rx="4" transform="rotate(-18 652 719)"');
+    b += path("M800 738 Q860 716 930 740 Q900 764 800 738 Z", "#5a0f0f", 'opacity=".75"');
+    b += path("M770 724 Q880 690 1010 716 L1046 752 Q900 774 770 748 Z", `url(#${k}-cloth)`);
+    b += path("M1010 716 L1046 752 Q1040 752 1030 748", "none", 'stroke="#9d9584" stroke-width="2"');
+
+    // Sàn gạch sẫm và ánh sáng hắt từ đèn trần
+    b += rect(0, 720, 1600, 180, `url(#${k}-floor)`);
+    for (let i = -6; i <= 6; i++) b += line(800 + i * 70, 720, 800 + i * 240, 900, "#0b120e", 2, 'opacity=".5"');
+    b += haze(k, 800, 420, 420, "#dff3ff", 0.1);
+    return frame("Phòng bào chế sau nhà", defs, b);
+  }
+
   /* ---------- Bảng đăng ký cảnh ---------- */
   const SCENES = {
     shop, altar,
     alley: () => alley(false),
     alley_rain: () => alley(true),
-    archive, gallery, gate, corridor, banquet, notary, stair, menu
+    archive, gallery, gate, corridor, banquet, notary, stair, pharmacy, lab, menu
   };
 
   return {

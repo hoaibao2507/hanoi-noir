@@ -319,6 +319,36 @@ test("vụ 4: Đạt bị bác khi nhật ký cửa hông đã gắn với sổ 
   assert.equal(long.status, "proof");
 });
 
+test("vụ 5: Kim bị bác bằng lời thú nhận, bằng chị Ngân, hoặc bằng camera khi đã có đăng ký xe", () => {
+  const c5 = CASES[4];
+  const kimOf = (g) => alibisOf(g, c5).find((a) => a.who === "kim");
+  assert.equal(kimOf({ ...newGame(4, c5), done: { loi_kim: true, kim_thu: true } }).by.clue, "kim_thu");
+  assert.equal(kimOf({ ...newGame(4, c5), done: { loi_kim: true, ngan_thu: true } }).by.clue, "ngan_thu");
+  const cam = kimOf({ ...newGame(4, c5), done: { loi_kim: true, cam_ngo: true, dang_ky_xe: true } });
+  assert.equal(cam.status, "clash");
+  assert.equal(cam.by.clue, "cam_ngo");
+  assert.equal(kimOf({ ...newGame(4, c5), done: { loi_kim: true, cam_ngo: true } }).status, "open", "camera chưa gắn được người khi chưa có đăng ký xe");
+});
+
+test("vụ 5: năm người còn lại đều được xác nhận hoặc bị bác bằng hồ sơ ngoài lời khai", () => {
+  const c5 = CASES[4];
+  const status = (done, who) => alibisOf({ ...newGame(4, c5), done }, c5).find((a) => a.who === who).status;
+  assert.equal(status({ loi_thang: true, hoa_don_hb: true }, "thang"), "proof");
+  assert.equal(status({ loi_han: true, phieu_cam: true }, "han"), "clash", "Hân khai dối, và phiếu cầm đồ bao trọn khung 21h00–21h24 ở nơi khác");
+  assert.equal(status({ loi_tien: true, ghi_quan_tra: true }, "tien"), "proof");
+  assert.equal(status({ loi_ngan: true, ghi_quan_tra: true }, "ngan"), "proof");
+  assert.equal(status({ loi_quang: true, ve_tau: true }, "quang"), "proof");
+});
+
+test("vụ 5: chỉ chuỗi chứng minh đúng mới buộc tội được Kim, và biên bản không cho biết ai có chìa", () => {
+  const c5 = CASES[4];
+  const good = { motive: "so_nhap", opportunity: "cam_ngo", means: "tu_dung_cu" };
+  assert.equal(judge(c5, "kim", good).win, true);
+  assert.equal(judge(c5, "kim", { ...good, means: "hien_truong" }).win, false, "biên bản không cho biết ai có chìa");
+  assert.equal(judge(c5, "han", good).win, false, "sai người thì không thắng");
+  assert.equal(judge(c5, "kim", { ...good, opportunity: "ve_tau" }).win, false, "vé tàu của Quang không chứng minh cơ hội của Kim");
+});
+
 test("dữ liệu dòng thời gian nhất quán: người, hồ sơ điều kiện và khoảng giờ đều hợp lệ", () => {
   const toMin = (t) => {
     const [h, m] = t.split(":").map(Number);
@@ -373,6 +403,16 @@ test("nghi phạm rời đi: không hỏi thêm và không đưa chứng cứ đ
   assert.equal(isGone(gone, c1, "khai"), false, "lời khai đã thu không mất");
   const still = { ...after(c1, 0, 2), done: { khai: true, xe: true }, found: ["khai", "xe"] };
   assert.ok(confrontOptions(still, c1, "khai").includes("xe"), "trước khi rời đi thì vẫn đưa được");
+});
+
+test("vụ 5: túi vải bị đổ lúc 23h, camera ghi đè lúc 00h30, và Thắng rời đi lúc 23h30", () => {
+  const c5 = CASES[4];
+  assert.equal(isOpen(after(c5, 4, 0), c5, "tui_vai"), true, "22h còn kịp");
+  assert.equal(isOpen(after(c5, 4, 1), c5, "tui_vai"), false, "23h thùng rác đã bị đổ");
+  assert.equal(isOpen(after(c5, 4, 2), c5, "cam_ngo"), true, "0h còn kịp xem camera");
+  assert.equal(isOpen(after(c5, 4, 3), c5, "cam_ngo"), false, "1h camera đã ghi đè");
+  assert.equal(departed(after(c5, 4, 1), c5, "thang"), false, "23h còn ở thành phố");
+  assert.equal(departed(after(c5, 4, 2), c5, "thang"), true, "0h đã rời đi");
 });
 
 test("diễn biến: báo đúng một lần theo thứ tự, và qua nửa đêm vẫn đúng", () => {
