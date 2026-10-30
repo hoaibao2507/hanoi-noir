@@ -1,0 +1,15 @@
+# Thư viện cài bằng npm (khôi phục bằng npm install)
+node_modules/
+
+# Bản build (tạo lại bằng npm run build)
+dist/
+
+# Biến môi trường và file cục bộ
+.env
+.env.*
+
+# File hệ điều hành và trình soạn thảo
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

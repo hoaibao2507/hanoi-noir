@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Hanoi Noir: trò chơi điều tra vụ án phố cổ Hà Nội, toàn màn hình, chạy trên trình duyệt.">
+  <title>Hanoi Noir · Vụ Án Phố Cổ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif+Display:wght@500;700&display=swap">
+</head>
+<body class="bg-night text-ink font-ui antialiased" data-screen="menu">
+
+  <!-- Sân khấu panorama: thế giới phủ kín màn hình, camera kéo ngang -->
+  <div id="scene" aria-label="Khung cảnh điều tra">
+    <div id="gl" aria-hidden="true"></div>
+    <div id="world">
+      <div id="world-art"></div>
+      <div id="world-doors"></div>
+      <div id="world-hs"></div>
+    </div>
+  </div>
+
+  <!-- Nút mép màn hình để xem hai bên thế giới (không phải để đi tới địa điểm) -->
+  <button id="pan-l" class="pan pan-l" data-action="pan" data-dir="-1" aria-label="Xem bên trái"><i class="fa-solid fa-chevron-left"></i></button>
+  <button id="pan-r" class="pan pan-r" data-action="pan" data-dir="1" aria-label="Xem bên phải"><i class="fa-solid fa-chevron-right"></i></button>
+
+  <!-- Lớp giao diện: bốn góc, tiêu đề, thanh trạng thái -->
+  <div id="ui" class="pointer-events-none fixed inset-0 z-20"></div>
+
+  <!-- Sổ tay điều tra -->
+  <aside id="notebook" class="nb nb-desk" aria-label="Sổ tay điều tra">
+    <div class="flex items-center justify-between gap-3 px-5 pt-5 pb-3">
+      <div>
+        <h3 class="text-xl">📒 Sổ tay điều tra</h3>
+        <p class="text-xs text-ink-2 mt-0.5">Nghi phạm · hồ sơ · đối chiếu</p>
+      </div>
+      <button class="btn btn-ghost nb-close" data-action="nb-toggle" aria-label="Đóng sổ tay"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="nb-body" class="flex-1 overflow-y-auto px-5 pb-6"></div>
+  </aside>
+
+  <!-- Lớp chuyển cảnh -->
+  <div id="curtain" aria-hidden="true">
+    <div id="card"><div class="k"></div><div class="t"></div><div class="s"></div></div>
+  </div>
+
+  <!-- Hộp thoại kiểu hồ sơ giấy -->
+  <div id="modal" class="hidden" role="dialog" aria-modal="true"></div>
+
+  <!-- Thông báo nhanh -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
