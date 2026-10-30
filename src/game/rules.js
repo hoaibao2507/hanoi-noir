@@ -263,7 +263,7 @@ export function remainingAt(game, c, loc) {
   return loc.hs.filter(([id]) => !game.done[id] && !isGone(game, c, id));
 }
 
-// Tiến độ lưu: số sao tốt nhất của mỗi vụ và số vụ đã mở
+// Tiến độ lưu: số sao tốt nhất của mỗi vụ. Mọi vụ đều mở từ đầu; unlocked chỉ giữ để tương thích bản lưu cũ
 export function recordWin(save, caseIdx, caseId, game) {
   const st = starsFor(game.wrong);
   return {
@@ -275,6 +275,5 @@ export function recordWin(save, caseIdx, caseId, game) {
 
 export const totalStars = (save, cases) => cases.reduce((s, c) => s + (save.stars[c.id] || 0), 0);
 export const allSolved = (save, cases) => cases.every((c) => save.stars[c.id]);
-export const isLocked = (save, caseIdx) => caseIdx > save.unlocked;
 
 export const emptySave = () => ({ unlocked: 0, stars: {} });

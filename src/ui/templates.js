@@ -6,7 +6,7 @@ import { CASES, TYPES } from "../data/cases.js";
 import { ART } from "../art/art.js";
 import { OX, WORLD_W, WORLD_H, DOOR_W } from "../world/layout.js";
 import {
-  isOpen, remainingAt, starsFor, allSolved, totalStars, isLocked, linksOf,
+  isOpen, remainingAt, starsFor, allSolved, totalStars, linksOf,
   CONFRONT_COST, questioned, confrontOptions, alibisOf, timelineEvents, hasTimeline,
   isGone, clockAt, eventsDone, departed
 } from "../game/rules.js";
@@ -21,13 +21,10 @@ const starsHTML = (n, max = 3) =>
 /* ---------- Màn hình chính ---------- */
 export function menuHTML(save) {
   const cards = CASES.map((c, i) => {
-    const locked = isLocked(save, i);
     const st = save.stars[c.id] || 0;
-    const info = locked
-      ? `<span class="text-ink-2"><i class="fa-solid fa-lock"></i> Hoàn thành vụ trước để mở</span>`
-      : `<span class="inline-flex items-center gap-2">${starsHTML(st)}<span class="text-xs text-ink-2">${st ? "đã đạt" : "chưa khép hồ sơ"}</span></span>`;
-    return `<button class="case-card${locked ? " locked" : ""}" ${locked ? "disabled" : `data-action="start" data-i="${i}"`}
-        aria-label="Vụ ${c.no}: ${esc(c.title)}${locked ? ", đang khóa" : ""}">
+    const info = `<span class="inline-flex items-center gap-2">${starsHTML(st)}<span class="text-xs text-ink-2">${st ? "đã đạt" : "chưa khép hồ sơ"}</span></span>`;
+    return `<button class="case-card" data-action="start" data-i="${i}"
+        aria-label="Vụ ${c.no}: ${esc(c.title)}">
       <span class="thumb">${ART.scene(c.locations[0].scene)}</span>
       <span class="block p-4 text-left">
         <span class="kicker block">Vụ ${c.no} · ${c.level}</span>
@@ -501,7 +498,7 @@ export const helpHTML = () => `
 
 export const resetHTML = () => `
   <h2>Xoá toàn bộ tiến độ?</h2>
-  <p class="muted">${CASES.length} vụ sẽ bị khóa lại từ vụ 1 và số sao sẽ mất.</p>
+  <p class="muted">Số sao của cả ${CASES.length} vụ sẽ mất.</p>
   <div class="row"><button class="btn btn-ghost" data-action="close">Huỷ</button><button class="btn btn-blood" data-action="reset-confirm">Xoá tiến độ</button></div>`;
 
 export { starsHTML };

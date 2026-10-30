@@ -9,6 +9,7 @@ import {
 } from "../src/game/rules.js";
 import { doorPlan, DOOR_SLOTS, DOOR_W, OX, COMP_W, WORLD_W } from "../src/world/layout.js";
 import { doorsFor } from "../src/world/doors.js";
+import { menuHTML } from "../src/ui/templates.js";
 
 const c1 = CASES[0];
 
@@ -347,6 +348,13 @@ test("vụ 5: chỉ chuỗi chứng minh đúng mới buộc tội được Kim,
   assert.equal(judge(c5, "kim", { ...good, means: "hien_truong" }).win, false, "biên bản không cho biết ai có chìa");
   assert.equal(judge(c5, "han", good).win, false, "sai người thì không thắng");
   assert.equal(judge(c5, "kim", { ...good, opportunity: "ve_tau" }).win, false, "vé tàu của Quang không chứng minh cơ hội của Kim");
+});
+
+test("mọi vụ đều mở từ đầu: menu không khóa vụ nào, kể cả khi chưa thắng vụ trước", () => {
+  const html = menuHTML(emptySave());
+  assert.equal((html.match(/data-action="start"/g) || []).length, CASES.length, "mọi thẻ vụ đều bấm được");
+  assert.equal(html.includes("locked"), false, "không còn lớp khóa");
+  assert.equal(html.includes("disabled"), false, "không còn nút bị vô hiệu");
 });
 
 test("dữ liệu dòng thời gian nhất quán: người, hồ sơ điều kiện và khoảng giờ đều hợp lệ", () => {
