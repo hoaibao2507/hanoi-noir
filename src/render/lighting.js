@@ -25,10 +25,10 @@ export function createLighting(scene, glOn) {
   ensurePuff(scene);
 
   scene.lights.enable().setAmbientColor(AMBIENT);
-  const beam = scene.lights.addLight(0, 0, 360, BEAM_COLOR, 0.95, 90);
+  const beam = scene.lights.addLight(0, 0, 360, BEAM_COLOR, 0.8, 90);
   const pool = Array.from({ length: POOL }, () => scene.lights.addLight(-999, -999, 200, 0xffb05a, 0, 24));
   const halos = Array.from({ length: POOL }, () => scene.add.image(0, 0, "puff").setBlendMode("ADD").setDepth(6).setVisible(false));
-  const beamHalo = scene.add.image(0, 0, "puff").setBlendMode("ADD").setDepth(6).setTint(BEAM_COLOR).setAlpha(0.1);
+  const beamHalo = scene.add.image(0, 0, "puff").setBlendMode("ADD").setDepth(6).setTint(BEAM_COLOR).setAlpha(0.08);
 
   // Chỉnh màu cả khung hình: bớt rực, thêm tương phản cho đúng chất phim đen
   try {
@@ -69,8 +69,8 @@ export function createLighting(scene, glOn) {
       beam.x = env.cur.x;
       beam.y = env.cur.y;
       beam.radius = Math.max(280, Math.min(400, Math.min(env.W, env.H) * 0.5));
-      beam.intensity = 0.95 * buzz * (1 + calm * 0.025 * Math.sin(t * 0.011));
-      beamHalo.setPosition(env.cur.x, env.cur.y).setScale((beam.radius * 1.3) / 128).setAlpha(0.1 * buzz);
+      beam.intensity = 0.8 * buzz * (1 + calm * 0.025 * Math.sin(t * 0.011));
+      beamHalo.setPosition(env.cur.x, env.cur.y).setScale((beam.radius * 1.3) / 128).setAlpha(0.08 * buzz);
 
       for (let i = 0; i < POOL; i++) {
         const lamp = lamps[i], light = pool[i], halo = halos[i];
