@@ -33,6 +33,11 @@ export function mountStage() {
   window.addEventListener("pointercancel", onUp);
   scene.addEventListener("wheel", onWheel, { passive: false });
   window.addEventListener("resize", () => layout());
+  // Focus bàn phím vào một nút nằm ngoài khung nhìn sẽ cuộn vùng overflow:hidden này; camera đã tự lo vị trí nên luôn trả về 0
+  scene.addEventListener("scroll", () => {
+    scene.scrollLeft = 0;
+    scene.scrollTop = 0;
+  });
   layout();
 }
 
@@ -53,11 +58,11 @@ export function setArt(key, build, sceneKey) {
     artEl.innerHTML = svg;
     return;
   }
-  const { base, overlay } = gl.splitArt(svg);
+  const { base, overlay, figs } = gl.splitArt(svg);
   artEl.innerHTML = svg;
   gl.setArt(base, sceneKey, () => {
     if (artKey === key) artEl.innerHTML = overlay;
-  });
+  }, figs);
 }
 
 export function setDoors(html) {

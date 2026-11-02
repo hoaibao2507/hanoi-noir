@@ -13,7 +13,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
 - Thư viện: Vite 8, Tailwind CSS 4 (`@tailwindcss/vite`), GSAP (hoạt ảnh UI), Phaser 4.2.1 (nền cảnh + hiệu ứng),
   Font Awesome SVG core (icon), `vite-plugin-singlefile`.
 - Build ra **một file** `dist/index.html` (JS, CSS, SVG gộp hết), mở trực tiếp bằng trình duyệt được. Chỉ font Google Fonts tải từ mạng.
-- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 37 test, không cần trình duyệt).
+- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 62 test, không cần trình duyệt).
 - Không có router, không backend. Lưu tiến độ bằng `localStorage`.
 - `dist/` và `node_modules/` bị gitignore.
 
@@ -31,8 +31,13 @@ src/
   data/cases.js       DỮ LIỆU 5 vụ án (file lớn nhất, ~80 KB)
   world/layout.js     Hằng số thế giới 2400x900, vị trí cửa
   world/doors.js      doorsFor(): sinh danh sách cửa của một địa điểm
+  art/people.js       figure() và portrait(): người trong cảnh và chân dung, chung một bộ vẽ (tỉ lệ 6,9 đầu)
   art/art.js          Toàn bộ minh họa SVG sinh bằng code (~74 KB)
   render/world.js     Lớp Phaser: raster hóa SVG nền, vẽ, đồng bộ với DOM
+  render/lighting.js  Ánh sáng thật (Phaser Lights): đèn pin, nguồn sáng dò trong tranh, quầng sáng, chỉnh màu
+  render/analyze.js   Từ nền đã raster: bản đồ pháp tuyến giả, vị trí nguồn sáng, probe màu
+  render/actors.js    Nhân vật thành mảnh riêng: thở, nghiêng theo con trỏ, đổ bóng
+  ui/pinboard.js      Bảng ghim kéo thả của tab Liên kết (sợi chỉ SVG)
   ui/stage.js         Camera panorama (kéo, bánh xe, phím), nối DOM với Phaser
   ui/cursor.js        Đèn pin theo con trỏ + độ nghiêng parallax
   ui/flashlight.js    Hiện/mờ "dấu vết ẩn" theo khoảng cách tới đèn pin
@@ -204,6 +209,16 @@ Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual
 - `evidence(v)`: `paper` (giấy tờ), `cam` (khung camera, loại `cam_moto|cam_suv|cam_corridor|cam_rain`), `lock`, `box`; `who` dùng `portrait`.
 - ID gradient/filter phải duy nhất toàn trang (dùng tiền tố cảnh `k` hoặc `uid()`).
 
+### 6.9 Lớp hình ảnh nâng cao (xem thêm README, mục "Hình ảnh")
+- `people.js` bọc mỗi `figure()` trong `<g class="fig" data-fig="x,đỉnh,chân,nửa rộng,ngồi,tỉ lệ,màu giày">`; **đừng bỏ nhóm này**, `actors.js`/`parseFigures` và test `render.test.js` dựa vào nó.
+- Người: cao 229 đơn vị cục bộ × `s`; `o.sex`/`look.sex` ghi đè giới tính suy từ tóc; phụ kiện của `figure()` là `glasses`, `mustache`, `tie`, `scarf` (màu). Người ngồi chỉ vẽ tới y=140.
+- `render/world.js` dựng theo thứ tự: raster → `analyze()` (pháp tuyến + nguồn sáng + probe) → `addImage(key, canvas, normal)` + `setLighting(true)`
+  → `lighting.setScene` → `actors.setScene` → `ambience.setScene`. Độ sâu: nền 0, mảnh nhân vật 1, bóng 2, bụi/khói/mưa 2–3, quầng sáng 6.
+- `phaser-core` không có `LightsPlugin`: alias `phaser-lights` trong `vite.config.js` + `plugins.scene` trong cấu hình game. Mất một trong hai là `scene.lights` undefined và đèn thật tắt (CSS vẫn chạy).
+- `#scene` là vùng `overflow:hidden`: focus bàn phím vào nút ngoài khung nhìn từng làm nó cuộn lệch, nên `stage.js` luôn trả `scrollLeft/Top` về 0.
+- `overlays.js`: `veil(kicker, title, sub, swap, origin)` (mống mắt qua biến CSS `--r`, `--cx`, `--cy`; `--r` âm nghĩa là đen kín), `pushIn/pushOut`, `shake`, `bars`,
+  `showSheet(html, {cinema})`, `showTestimony/hideTestimony`, `flyToNotebook`. Tất cả bỏ qua khi giảm chuyển động.
+
 ## 7. Việc thường làm
 
 **Thêm địa điểm/điểm điều tra**: vẽ cảnh trong `art.js` + đăng ký `SCENES` + thêm `FLANK` → thêm `locations[]` trong `cases.js`
@@ -225,4 +240,4 @@ trong `tests/rules.test.js` nếu cần, và số vụ nhắc trong README/help 
 - `busy` là khóa trong lúc chuyển cảnh (`veil`); các hành động trong rules từ chối khi `busy`.
 - Hoạt ảnh vào cảnh dùng `animateEntrance` (GSAP) và bỏ qua `.is-secret` vì độ mờ của chúng do đèn pin điều khiển.
 - Commit dùng thông điệp tiếng Việt, ngắn, mô tả thay đổi (xem `git log`).
-- Chưa có CI, linter hay formatter; kiểm tra duy nhất là `npm test` (37 test đang xanh).
+- Chưa có CI, linter hay formatter; kiểm tra duy nhất là `npm test` (62 test đang xanh).

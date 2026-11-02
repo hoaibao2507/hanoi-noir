@@ -6,6 +6,9 @@
 
 export const MAX_LIVES = 3;
 export const CONFRONT_COST = 1; // giờ cho mỗi lần đưa chứng cứ
+export const LOCK_TRIES = 3;    // số lần thử mã trước khi thiết bị tự khóa
+export const LOCK_PENALTY = 1;  // giờ mất khi thiết bị tự khóa
+export const MAX_DEDUCE = 4;    // số hồ sơ tối đa ghép được trong một suy luận
 
 // Trạng thái một vụ đang điều tra
 export function newGame(caseIdx, c) {
@@ -23,6 +26,11 @@ export function newGame(caseIdx, c) {
     pick: [],
     links: [],
     lkResult: null,
+    dpick: [],
+    ddResult: null,
+    ddTries: 0,
+    ddFrom: {},
+    lockTries: {},
     confronted: {},
     wrong: 0,
     over: false,
@@ -33,10 +41,56 @@ export function newGame(caseIdx, c) {
 
 export const actionOf = (c, id) => c.actions.find((a) => a.id === id);
 
-// Điểm điều tra có thể thực hiện ngay không (đủ giờ, chưa làm, hồ sơ chưa đóng, chưa mất theo đồng hồ)
+// Điểm điều tra còn bị khóa vì chưa có hồ sơ mở khóa ("gate", thường là một kết luận)
+export const gated = (game, c, id) => {
+  const a = actionOf(c, id);
+  return !!a && !!a.gate && !game.done[a.gate];
+};
+
+// Hồ sơ đến muộn (diễn biến "arrive"): số phút còn phải chờ, hoặc 0 khi đã có
+export function pendingMinutes(game, c, id) {
+  const w = (c.world || []).find((x) => x.kind === "arrive" && x.id === id);
+  if (!w) return 0;
+  return Math.max(0, absMinutes(c, w.at) - nowMinutes(game, c));
+}
+export const isPending = (game, c, id) => !game.done[id] && pendingMinutes(game, c, id) > 0;
+// Mốc giờ hồ sơ đến ("HH:MM"), hoặc null nếu hồ sơ không đến muộn
+export const arrivalOf = (c, id) => ((c.world || []).find((w) => w.kind === "arrive" && w.id === id) || {}).at || null;
+// Số giờ nguyên phải chờ để hồ sơ đến (làm tròn lên, vì giờ điều tra tính theo giờ nguyên)
+export const waitHours = (game, c, id) => Math.ceil(pendingMinutes(game, c, id) / 60);
+
+// Điểm điều tra có thể thực hiện ngay không (đủ giờ, chưa làm, hồ sơ chưa đóng, chưa mất theo đồng hồ, đã mở khóa, đã đến)
 export function isOpen(game, c, id) {
   const a = actionOf(c, id);
-  return !!a && !game.done[id] && !game.over && game.hours >= a.cost && !isGone(game, c, id);
+  return (
+    !!a && !a.via && !game.done[id] && !game.over && game.hours >= a.cost &&
+    !isGone(game, c, id) && !gated(game, c, id) && !isPending(game, c, id)
+  );
+}
+
+// Chờ tới khi hồ sơ đến: tốn số giờ chờ, rồi vẫn còn đủ giờ để đọc hồ sơ. Không đủ thì giữ nguyên trạng thái
+export function waitFor(game, c, id) {
+  const a = actionOf(c, id);
+  if (game.busy || game.over || !a || a.via || game.done[id] || gated(game, c, id) || isGone(game, c, id)) return game;
+  const need = waitHours(game, c, id);
+  if (need <= 0 || game.hours < need + a.cost) return game;
+  return { ...game, hours: game.hours - need };
+}
+
+// Thử mã của một điểm điều tra có khóa. Đúng thì làm điểm đó luôn. Sai ba lần thì thiết bị tự khóa và mất giờ.
+// status: "open" (mở được), "wrong" (sai, còn "left" lần), "locked" (bị khóa, mất giờ), "closed" (không thử được)
+export function attemptLock(game, c, id, code) {
+  const a = actionOf(c, id);
+  if (!a || !a.lock || !isOpen(game, c, id)) return { game, status: "closed" };
+  if (code === a.lock.code) return { game: performAct(game, c, id), status: "open" };
+  const tries = (game.lockTries[id] || 0) + 1;
+  if (tries >= LOCK_TRIES) {
+    return {
+      game: { ...game, hours: Math.max(0, game.hours - LOCK_PENALTY), lockTries: { ...game.lockTries, [id]: 0 } },
+      status: "locked"
+    };
+  }
+  return { game: { ...game, lockTries: { ...game.lockTries, [id]: tries } }, status: "wrong", left: LOCK_TRIES - tries };
 }
 
 // Thực hiện một điểm điều tra: trừ giờ, ghi hồ sơ
@@ -65,6 +119,61 @@ export function cycleMatrix(game, rid, act) {
 
 // Khóa của một cặp hồ sơ, không phụ thuộc thứ tự chọn
 export const pairKey = (a, b) => [a, b].sort().join("|");
+
+/* ---------- Suy luận: ghép hồ sơ thành kết luận ---------- */
+
+const sameSet = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+
+// Chọn hoặc bỏ chọn một hồ sơ (kể cả kết luận đã có) để ghép. Chỉ hồ sơ đã thu mới chọn được; tối đa MAX_DEDUCE
+export function pickDeduce(game, id) {
+  if (!game.done[id]) return game;
+  const dpick = game.dpick.includes(id)
+    ? game.dpick.filter((x) => x !== id)
+    : [...game.dpick, id].slice(-MAX_DEDUCE);
+  return { ...game, dpick, ddResult: null };
+}
+
+// Suy luận viết sẵn cho đúng tập hồ sơ này (không phân biệt thứ tự), hoặc null
+export const deductionFor = (c, ids) => (c.deduce || []).find((d) => sameSet(d.needs, ids)) || null;
+
+// Ghép các hồ sơ đang chọn. Đúng thì ghi kết luận mới (không tốn giờ). Sai thì chỉ đếm số lần thử.
+// ddResult.status: "new" (kết luận mới), "known" (đã có kết luận này), "none" (chưa cho kết luận nào)
+export function tryDeduce(game, c) {
+  if (game.dpick.length < 2) return game;
+  const d = deductionFor(c, game.dpick);
+  if (!d) return { ...game, ddTries: (game.ddTries || 0) + 1, ddResult: { status: "none" } };
+  if (game.done[d.gives]) return { ...game, ddResult: { status: "known", gives: d.gives } };
+  return {
+    ...game,
+    done: { ...game.done, [d.gives]: true },
+    found: [...game.found, d.gives],
+    dpick: [],
+    ddFrom: { ...(game.ddFrom || {}), [d.gives]: d.needs },
+    ddResult: { status: "new", gives: d.gives }
+  };
+}
+
+// Mọi kết luận đã đủ hồ sơ để rút ra (dùng cho kiểm thử: một người chơi hoàn hảo luôn rút hết)
+export function closeDeductions(game, c) {
+  let g = game;
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const d of c.deduce || []) {
+      if (g.done[d.gives] || !d.needs.every((id) => g.done[id])) continue;
+      g = { ...g, done: { ...g.done, [d.gives]: true }, found: [...g.found, d.gives], ddFrom: { ...(g.ddFrom || {}), [d.gives]: d.needs } };
+      changed = true;
+    }
+  }
+  return g;
+}
+
+// Kết luận (hoặc hồ sơ) mà việc có được "id" sẽ mở ra: điểm điều tra có gate = id, và thiết bị được hiệu chỉnh
+export function unlocksOf(c, id) {
+  const spots = c.actions.filter((a) => a.gate === id && !a.via);
+  const devs = Object.values(c.devices || {}).filter((d) => d.by === id);
+  return { spots, devs };
+}
 
 // Kết nối được viết sẵn cho cặp hồ sơ này trong dữ liệu vụ, hoặc null
 export function linkFor(c, a, b) {
@@ -147,22 +256,33 @@ const overlaps = (a, b) => minutesOf(a.from) < minutesOf(b.to) && minutesOf(b.fr
 const covers = (outer, inner) =>
   minutesOf(outer.from) <= minutesOf(inner.from) && minutesOf(outer.to) >= minutesOf(inner.to);
 
+// Cộng (hoặc trừ) số phút vào một mốc "HH:MM", quay vòng trong ngày
+const shiftTime = (hhmm, mins) => {
+  const m = (((minutesOf(hhmm) + mins) % (24 * 60)) + 24 * 60) % (24 * 60);
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+};
+
 // Mốc đã ghi: các khoảng giờ từ hồ sơ đã thu, theo thứ tự thời gian.
 // Mốc chỉ gắn người khi mọi hồ sơ trong "needs" đã thu; trước đó người là null và pending là true.
+// Mốc có "dev" lấy giờ từ một thiết bị lệch giờ (c.devices): giữ nguyên giờ máy cho tới khi kết luận "by" của thiết bị được
+// rút ra, sau đó cộng độ lệch "off". Mọi so sánh ngoại phạm đều dùng giờ đã hiệu chỉnh nếu có.
 export function timelineEvents(game, c) {
   const out = [];
   c.actions.forEach((a) => {
     if (!game.done[a.id]) return;
     (a.spans || []).forEach((s) => {
       const known = (s.needs || []).every((id) => game.done[id]);
+      const dev = s.dev && c.devices ? c.devices[s.dev] : null;
+      const fixed = !!dev && !!game.done[dev.by];
       out.push({
         clue: a.id,
         title: a.title,
-        from: s.from,
-        to: s.to,
+        from: fixed ? shiftTime(s.from, dev.off) : s.from,
+        to: fixed ? shiftTime(s.to, dev.off) : s.to,
         at: s.at,
         who: known ? s.who || null : null,
-        pending: !known && !!s.who
+        pending: !known && !!s.who,
+        dev: dev ? { name: dev.name, fixed, off: dev.off, rawFrom: s.from, rawTo: s.to } : null
       });
     });
   });
@@ -247,6 +367,29 @@ export function judge(c, culprit, picks) {
   return { right, steps, win: right && steps.every((s) => s.ok) };
 }
 
+// Những người bị kết tội trong vụ: nhiều người khi vụ có phiên xét xử nhiều vai ("verdict"), nếu không thì một người
+export const culpritIds = (c) => (c.verdict ? c.verdict.roles.map((r) => r.who) : [c.culprit]);
+
+// Vụ có phiên xét xử nhiều người (chủ mưu, kẻ ra tay, đồng phạm)
+export const hasVerdict = (c) => !!c.verdict;
+
+// Đánh giá phiên xét xử nhiều người. picks: { who: {vai: id người}, evid: {vai: id hồ sơ}, facts: {câu: id lựa chọn} }.
+// Mỗi vai cần đúng người và một hồ sơ chứng cứ thuộc "ids" của vai đó; mỗi câu dựng lại sự việc cần đúng lựa chọn.
+// Từng phần được chấm riêng để phản hồi cụ thể. Thắng khi mọi phần đều đúng.
+export function judgeVerdict(c, picks = {}) {
+  const who = picks.who || {}, evid = picks.evid || {}, facts = picks.facts || {};
+  const roles = c.verdict.roles.map((r) => {
+    const w = who[r.key] || null, e = evid[r.key] || null;
+    return { key: r.key, label: r.label, who: w, ev: e, whoOk: w === r.who, evOk: !!e && r.ids.includes(e), hint: r.hint };
+  });
+  const fs = c.verdict.facts.map((f) => {
+    const pick = facts[f.key] || null;
+    return { key: f.key, ask: f.ask, pick, ok: pick === f.right, hint: f.hint };
+  });
+  const right = roles.every((r) => r.whoOk);
+  return { right, roles, facts: fs, win: right && roles.every((r) => r.evOk) && fs.every((f) => f.ok) };
+}
+
 // Buộc tội sai: mất một mạng, và hồ sơ đóng khi hết mạng
 export function loseLife(game) {
   const lives = game.lives - 1;
@@ -258,9 +401,9 @@ export function starsFor(wrong) {
   return wrong === 0 ? 3 : wrong === 1 ? 2 : 1;
 }
 
-// Điểm điều tra còn làm được ở địa điểm này: chưa làm và chưa mất
+// Điểm điều tra còn làm được ở địa điểm này: chưa làm, chưa mất, và đã mở khóa
 export function remainingAt(game, c, loc) {
-  return loc.hs.filter(([id]) => !game.done[id] && !isGone(game, c, id));
+  return loc.hs.filter(([id]) => !game.done[id] && !isGone(game, c, id) && !gated(game, c, id));
 }
 
 // Tiến độ lưu: số sao tốt nhất của mỗi vụ. Mọi vụ đều mở từ đầu; unlocked chỉ giữ để tương thích bản lưu cũ

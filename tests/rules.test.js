@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CASES } from "../src/data/cases.js";
+import { CASES, REGIONS, casesOf } from "../src/data/cases.js";
 import {
   newGame, performAct, isOpen, cycleMark, cycleMatrix, judge, loseLife,
   starsFor, recordWin, emptySave, MAX_LIVES, pickClue, checkPair, linksOf, pairKey,
@@ -121,10 +121,23 @@ test("dữ liệu vụ án nhất quán: điểm điều tra trỏ tới hành �
       }
     }
     assert.deepEqual([...placed].sort(), [...ids].sort(), `${c.id}: mỗi hành động đúng một lần`);
-    assert.deepEqual([...c.chain.map((s) => s.key)].sort(), ["means", "motive", "opportunity"], `${c.id}: chuỗi có đủ ba bước, mỗi bước một lần`);
-    for (const st of c.chain) {
-      assert.ok(st.ids.length > 0 && st.ids.every((k) => all.includes(k)), `${c.id}/${st.key}: hồ sơ của bước phải tồn tại`);
-      assert.ok(st.label && st.ask && st.hint, `${c.id}/${st.key}: thiếu nhãn, câu hỏi hoặc gợi ý`);
+    if (c.verdict) {
+      assert.equal(c.chain, undefined, `${c.id}: vụ nhiều người dùng verdict, không dùng chain`);
+      for (const r of c.verdict.roles) {
+        assert.ok(c.suspects.some((x) => x.id === r.who), `${c.id}/${r.key}: ${r.who} không phải nghi phạm`);
+        assert.ok(r.ids.length > 0 && r.ids.every((k) => all.includes(k)), `${c.id}/${r.key}: hồ sơ của vai phải tồn tại`);
+        assert.ok(r.label && r.ask && r.hint, `${c.id}/${r.key}: thiếu nhãn, câu hỏi hoặc gợi ý`);
+      }
+      for (const f of c.verdict.facts) {
+        assert.ok(f.options.some((o) => o.id === f.right), `${c.id}/${f.key}: đáp án phải nằm trong lựa chọn`);
+        assert.ok(f.ask && f.hint, `${c.id}/${f.key}: thiếu câu hỏi hoặc gợi ý`);
+      }
+    } else {
+      assert.deepEqual([...c.chain.map((s) => s.key)].sort(), ["means", "motive", "opportunity"], `${c.id}: chuỗi có đủ ba bước, mỗi bước một lần`);
+      for (const st of c.chain) {
+        assert.ok(st.ids.length > 0 && st.ids.every((k) => all.includes(k)), `${c.id}/${st.key}: hồ sơ của bước phải tồn tại`);
+        assert.ok(st.label && st.ask && st.hint, `${c.id}/${st.key}: thiếu nhãn, câu hỏi hoặc gợi ý`);
+      }
     }
   }
 });
@@ -237,7 +250,7 @@ test("dữ liệu đưa chứng cứ trỏ tới người đã có lời khai v�
         reveals.add(r.reveal);
       }
     }
-    const viaActs = c.actions.filter((a) => a.via).map((a) => a.id);
+    const viaActs = c.actions.filter((a) => a.via === "confront").map((a) => a.id);
     assert.deepEqual([...reveals].sort(), viaActs.sort(), `${c.id}: mọi lời khai mở bằng đưa chứng cứ đều có phản ứng`);
   }
 });
@@ -350,11 +363,19 @@ test("vụ 5: chỉ chuỗi chứng minh đúng mới buộc tội được Kim,
   assert.equal(judge(c5, "kim", { ...good, opportunity: "ve_tau" }).win, false, "vé tàu của Quang không chứng minh cơ hội của Kim");
 });
 
-test("mọi vụ đều mở từ đầu: menu không khóa vụ nào, kể cả khi chưa thắng vụ trước", () => {
-  const html = menuHTML(emptySave());
-  assert.equal((html.match(/data-action="start"/g) || []).length, CASES.length, "mọi thẻ vụ đều bấm được");
-  assert.equal(html.includes("locked"), false, "không còn lớp khóa");
-  assert.equal(html.includes("disabled"), false, "không còn nút bị vô hiệu");
+test("mọi vụ đều mở từ đầu: menu của mỗi vùng không khóa vụ nào, kể cả khi chưa thắng vụ trước", () => {
+  let total = 0;
+  for (const r of REGIONS) {
+    const html = menuHTML(emptySave(), r.id);
+    const n = casesOf(r.id).length;
+    total += n;
+    assert.equal((html.match(/data-action="start"/g) || []).length, n, `${r.id}: mọi thẻ vụ của vùng đều bấm được`);
+    assert.equal(html.includes("locked"), false, "không còn lớp khóa");
+    assert.equal(html.includes("disabled"), false, "không còn nút bị vô hiệu");
+    assert.equal((html.match(/data-action="region"/g) || []).length, REGIONS.length, "có nút chọn mọi vùng");
+  }
+  assert.equal(total, CASES.length, "mỗi vụ thuộc đúng một vùng");
+  assert.ok(CASES.every((c) => REGIONS.some((r) => r.id === c.region)), "mọi vụ có vùng hợp lệ");
 });
 
 test("dữ liệu dòng thời gian nhất quán: người, hồ sơ điều kiện và khoảng giờ đều hợp lệ", () => {
@@ -434,6 +455,7 @@ test("diễn biến: báo đúng một lần theo thứ tự, và qua nửa đê
 
 test("mọi vụ vẫn có lời giải đi được khi tính cả hạn của hồ sơ và việc nghi phạm rời đi", () => {
   CASES.forEach((c, ci) => {
+    if (!c.chain) return; // vụ nhiều người có kiểm thử lời giải riêng trong tests/sg.test.js
     const acts = c.actions.filter((a) => !a.via);
     const stateOf = (mask) => {
       const done = {};
@@ -487,6 +509,9 @@ test("dữ liệu đồng hồ và diễn biến nhất quán: giờ đúng dạ
         const a = c.actions.find((x) => x.id === w.id);
         assert.ok(a && !a.via, `${c.id}: ${w.id} không phải hồ sơ đặt trên bản đồ`);
         goneIds.push(w.id);
+      } else if (w.kind === "arrive") {
+        const a = c.actions.find((x) => x.id === w.id);
+        assert.ok(a && !a.via, `${c.id}: ${w.id} không phải hồ sơ đặt trên bản đồ`);
       } else {
         assert.equal(w.kind, "leave", `${c.id}: loại diễn biến lạ ${w.kind}`);
         assert.ok(c.suspects.some((s) => s.id === w.id), `${c.id}: ${w.id} không phải nghi phạm`);

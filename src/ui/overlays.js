@@ -1,11 +1,14 @@
-/* Lớp phủ: chuyển cảnh, thông báo và hộp thoại kiểu hồ sơ giấy. */
+/* Lớp phủ: chuyển cảnh điện ảnh, thông báo, lời khai cận cảnh và hộp thoại kiểu hồ sơ giấy. */
 import gsap from "gsap";
 import { $, icons } from "./dom.js";
+import { flicker } from "../render/world.js";
 
 const REDUCED = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HAS_GSAP = typeof gsap !== "undefined";
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 export const dur = (s) => (REDUCED ? 0 : s);
+const fancy = () => HAS_GSAP && !REDUCED;
+const tween = (target, vars) => new Promise((res) => gsap.to(target, { ...vars, onComplete: res }));
 
 // Hoạt ảnh một phần tử: GSAP nếu có, nếu không thì dùng CSS transition
 function anim(el, to, seconds) {
@@ -21,20 +24,100 @@ function anim(el, to, seconds) {
   });
 }
 
-// Màn đen hiện tên địa điểm, đổi cảnh ở giữa, rồi mở lại
-export async function veil(kicker, title, sub, swap) {
+/* ---------- Máy quay: đẩy vào, rung, hai thanh đen ---------- */
+
+// Đẩy cảnh lại gần một điểm trên màn hình (người đang nói, cánh cửa sắp bước qua)
+export function pushIn(x, y, scale = 1.06, seconds = 0.9) {
+  if (!fancy()) return;
+  gsap.to($("scene"), { scale, transformOrigin: `${x}px ${y}px`, duration: seconds, ease: "power2.out", overwrite: "auto" });
+}
+
+export function pushOut(seconds = 0.6) {
+  if (!HAS_GSAP) return;
+  gsap.to($("scene"), { scale: 1, duration: dur(seconds), ease: "power2.inOut", overwrite: "auto", clearProps: "transform,transformOrigin" });
+}
+
+// Rung nhẹ như có tiếng động mạnh
+export function shake(power = 1) {
+  if (!fancy()) return;
+  const k = 7 * power;
+  gsap.to($("scene"), {
+    keyframes: [
+      { x: -k, y: k * 0.4, duration: 0.05 }, { x: k * 0.9, y: -k * 0.5, duration: 0.06 },
+      { x: -k * 0.6, y: k * 0.3, duration: 0.06 }, { x: k * 0.3, y: -k * 0.2, duration: 0.07 },
+      { x: 0, y: 0, duration: 0.1 }
+    ],
+    overwrite: "auto"
+  });
+}
+
+// Hai thanh đen kiểu phim màn ảnh rộng
+export function bars(on, seconds = 0.45) {
+  if (!HAS_GSAP) return Promise.resolve();
+  const els = document.querySelectorAll("#bars i");
+  return tween(els, { height: on ? "10.5vh" : "0vh", duration: dur(seconds), ease: on ? "power2.out" : "power2.inOut", overwrite: "auto" });
+}
+
+/* ---------- Chuyển cảnh ---------- */
+
+// Mống mắt khép lại vào một điểm (cánh cửa vừa bước qua), hiện tên nơi đến, đổi cảnh rồi mở ra từ giữa màn hình
+export async function veil(kicker, title, sub, swap, origin) {
   const cur = $("curtain"), card = $("card");
+  hideTestimony();
   card.querySelector(".k").textContent = kicker;
   card.querySelector(".t").textContent = title;
   card.querySelector(".s").textContent = sub;
   cur.classList.add("on");
-  await anim(cur, { opacity: 1 }, dur(0.35));
-  await anim(card, { opacity: 1, y: 0 }, dur(0.4));
-  await wait(REDUCED ? 120 : 650);
+
+  if (!fancy()) {
+    // Giảm chuyển động hoặc không có GSAP: màn đen mờ dần như trước
+    cur.style.setProperty("--r", "-90px"); // âm: màu đen phủ kín, không còn lỗ mống mắt
+    cur.style.opacity = "0";
+    await anim(cur, { opacity: 1 }, dur(0.35));
+    await anim(card, { opacity: 1, y: 0 }, dur(0.4));
+    await wait(REDUCED ? 120 : 650);
+    if (swap) swap();
+    await anim(card, { opacity: 0, y: -6 }, dur(0.25));
+    await anim(cur, { opacity: 0 }, dur(0.4));
+    cur.classList.remove("on");
+    return;
+  }
+
+  // Cửa nằm ngoài khung nhìn (đang xem phần khác của thế giới) thì mống mắt khép về mép màn hình gần nhất
+  const o = origin
+    ? { x: Math.min(innerWidth, Math.max(0, origin.x)), y: Math.min(innerHeight, Math.max(0, origin.y)) }
+    : { x: innerWidth / 2, y: innerHeight / 2 };
+  const R = Math.hypot(innerWidth, innerHeight) + 90; // đủ lớn để phủ cả màn hình kể cả mép mờ
+  const iris = { r: R };
+  const paint = () => cur.style.setProperty("--r", `${iris.r.toFixed(1)}px`);
+  cur.style.opacity = "1";
+  cur.style.setProperty("--cx", `${o.x}px`);
+  cur.style.setProperty("--cy", `${o.y}px`);
+  paint();
+
+  flicker(0.8);
+  bars(true, 0.4);
+  pushIn(o.x, o.y, 1.09, 0.7);
+  await tween(iris, { r: -90, duration: 0.65, ease: "power2.in", onUpdate: paint });
+
+  // Màn đen hoàn toàn: đổi cảnh dưới màn, kèm dòng chữ tên nơi đến
+  gsap.set(card, { opacity: 0, y: 8 });
+  gsap.set(card.querySelector(".t"), { letterSpacing: "0.22em" });
+  gsap.to(card, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
+  gsap.to(card.querySelector(".t"), { letterSpacing: "0.02em", duration: 1.1, ease: "power2.out" });
+  await wait(780);
   if (swap) swap();
-  await anim(card, { opacity: 0, y: -6 }, dur(0.25));
-  await anim(cur, { opacity: 0 }, dur(0.4));
+  gsap.set($("scene"), { clearProps: "transform,transformOrigin" });
+  await anim(card, { opacity: 0, y: -6 }, 0.25);
+
+  // Mở ra từ giữa màn hình, đèn chập chờn như vừa bước vào phòng lạ
+  cur.style.setProperty("--cx", `${innerWidth / 2}px`);
+  cur.style.setProperty("--cy", `${innerHeight * 0.48}px`);
+  flicker(0.5);
+  bars(false, 0.6);
+  await tween(iris, { r: R, duration: 0.85, ease: "power2.out", onUpdate: paint });
   cur.classList.remove("on");
+  cur.style.opacity = "0";
 }
 
 let toastTimer = null;
@@ -46,24 +129,99 @@ export function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
+/* ---------- Hộp thoại ---------- */
+
 export function sheetOpen() {
   return !$("modal").classList.contains("hidden");
 }
 
-export function showSheet(html) {
+// opts.cinema: tin quan trọng, thêm hai thanh đen, rung và đèn chập chờn
+export function showSheet(html, opts = {}) {
   $("toast").classList.remove("show");
+  hideTestimony();
   const m = $("modal");
   m.innerHTML = `<div class="sheet">${html}</div>`;
   icons(m);
   m.classList.remove("hidden");
   const b = m.querySelector("button");
-  if (b) b.focus();
+  // Giữ hộp thoại ở đầu trang: focus vào nút cuối của một hộp dài sẽ cuộn xuống tận đáy
+  if (b) b.focus({ preventScroll: true });
+  const sheet = m.querySelector(".sheet");
+  sheet.scrollTop = 0;
+  if (fancy()) {
+    // Tờ giấy rơi xuống mặt bàn rồi nằm yên
+    gsap.fromTo(sheet, { y: -46, rotate: -1.8, opacity: 0, scale: 0.97 }, { y: 0, rotate: 0, opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.5)", clearProps: "transform" });
+    gsap.fromTo(m, { backgroundColor: "rgba(6,4,3,0)" }, { backgroundColor: "rgba(6,4,3,0.72)", duration: 0.35, clearProps: "backgroundColor" });
+    if (opts.cinema) {
+      shake(1);
+      flicker(1);
+      bars(true, 0.4);
+    }
+  }
 }
 
 export function closeSheet() {
   const m = $("modal");
   m.classList.add("hidden");
   m.innerHTML = "";
+  if (HAS_GSAP) bars(false, 0.35);
+}
+
+/* ---------- Lời khai cận cảnh ---------- */
+
+let tmTimer = null;
+
+// Thẻ lời khai dưới màn hình: chữ hiện dần từng từ, cảnh đẩy lại gần người đang nói. Không chặn thao tác khác
+export function showTestimony(html, focus) {
+  const el = $("testimony");
+  clearTimeout(tmTimer);
+  el.innerHTML = html;
+  icons(el);
+  el.classList.add("on");
+  if (fancy()) {
+    const words = el.querySelectorAll(".w");
+    gsap.fromTo(el.firstElementChild, { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" });
+    gsap.from(words, { opacity: 0, y: 5, filter: "blur(3px)", duration: 0.35, stagger: Math.min(0.045, 2.4 / Math.max(1, words.length)), delay: 0.25, ease: "power2.out", clearProps: "filter" });
+    if (focus) pushIn(focus.x, focus.y, 1.05, 1.1);
+  }
+  tmTimer = setTimeout(hideTestimony, 14000);
+}
+
+export function hideTestimony() {
+  const el = $("testimony");
+  if (!el.classList.contains("on")) return;
+  clearTimeout(tmTimer);
+  el.classList.remove("on");
+  el.innerHTML = "";
+  pushOut(0.5);
+}
+
+/* ---------- Hiệu ứng của điểm điều tra ---------- */
+
+// Hồ sơ vừa thu bay vào Sổ tay theo một đường cong, rồi nút Sổ tay nảy lên
+export function flyToNotebook(from) {
+  const target = document.querySelector('[data-action="nb-toggle"]');
+  if (!fancy() || !from || !target) return;
+  const t = target.getBoundingClientRect();
+  const el = document.createElement("span");
+  el.className = "fly";
+  el.innerHTML = '<i class="fa-solid fa-folder-open"></i>';
+  icons(el);
+  el.style.left = `${from.left + from.width / 2}px`;
+  el.style.top = `${from.top + from.height / 2}px`;
+  document.body.appendChild(el);
+  const dx = t.left + t.width / 2 - (from.left + from.width / 2);
+  const dy = t.top + t.height / 2 - (from.top + from.height / 2);
+  const d = 0.85;
+  gsap.fromTo(el, { scale: 1.2, rotate: -8 }, { scale: 0.35, rotate: 300, duration: d, ease: "power2.in" });
+  gsap.to(el, { x: dx, duration: d, ease: "power1.inOut" });
+  gsap.to(el, {
+    y: dy, duration: d, ease: "power3.in",
+    onComplete: () => {
+      el.remove();
+      gsap.fromTo(target, { scale: 1.16 }, { scale: 1, duration: 0.5, ease: "elastic.out(1.2, 0.5)", clearProps: "transform" });
+    }
+  });
 }
 
 // Hiệu ứng xuất hiện của điểm điều tra và cửa khi vào cảnh hoặc đổi địa điểm

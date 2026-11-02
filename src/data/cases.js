@@ -5,16 +5,29 @@
    - Mỗi hành động thuộc đúng một địa điểm.
    ===================================================================== */
 
+import { SG_CASES } from "./sg.js";
+
 /* Phân loại hồ sơ: màu nhấn và biểu tượng tương ứng */
 export const TYPES = {
   "Lời khai":  { cls: "loi", icon: "fa-comments" },
   "Vật chứng": { cls: "vat", icon: "fa-magnifying-glass" },
   "Camera":    { cls: "cam", icon: "fa-video" },
   "Hồ sơ":     { cls: "ho",  icon: "fa-file-lines" },
-  "Biên bản":  { cls: "bb",  icon: "fa-file-circle-check" }
+  "Biên bản":  { cls: "bb",  icon: "fa-file-circle-check" },
+  "Kết luận":  { cls: "kl",  icon: "fa-lightbulb" }
 };
 
-export const CASES = [
+/* Vùng phá án: mỗi vụ thuộc một vùng (trường "region"). "scene" là cảnh nền của menu khi chọn vùng đó. */
+export const REGIONS = [
+  { id: "hn", name: "Phố cổ Hà Nội", short: "Phố cổ", icon: "fa-landmark", scene: "menu",
+    tagline: "Vụ án phố cổ · lắng nghe, kiểm chứng, chỉ ra đúng một kẻ thủ ác",
+    blurb: "Ngõ hẹp, đèn lồng, tiệm đồ cổ. Mỗi vụ có một kẻ thủ ác." },
+  { id: "sg", name: "Sài Gòn", short: "Sài Gòn", icon: "fa-city", scene: "menu_sg",
+    tagline: "Vụ án Sài Gòn · đồng hồ lệch, ngoại phạm vòng tròn, nhiều kẻ liên đới",
+    blurb: "Triều cường, hầm xe, camera. Kẻ thủ ác không còn đơn độc, và các con số có thể nói dối." }
+];
+
+const HANOI = [
 {
   id: "c1", no: 1, title: "Hộp Trầm Hương", place: "Tiệm đồ cổ Hoa Sen · phố Hàng Bạc",
   level: "★★ Dễ", budget: 12,
@@ -156,7 +169,7 @@ export const CASES = [
     { id: "nga", name: "Nga", role: "Nhà sưu tầm · 50 tuổi", bio: "Từng trả giá cao nhất cho bức tranh nhưng bị từ chối.",
       look: { skin: "#f5d6bc", hair: "bun", hc: "#5a3a2a", top: "#6c3483", acc: "none" } },
     { id: "phong", name: "Phong", role: "Họa sĩ trẻ · 28 tuổi", bio: "Tranh của anh bị loại khỏi triển lãm đêm nay.",
-      look: { skin: "#e8bf98", hair: "long", hc: "#111", top: "#1b1b1b", acc: "none" } },
+      look: { skin: "#e8bf98", hair: "long", hc: "#111", top: "#1b1b1b", acc: "none", sex: "m" } },
     { id: "tuan", name: "Tuấn", role: "Môi giới nghệ thuật · 38 tuổi", bio: "Được hoa hồng nếu bán được tranh đêm nay.",
       look: { skin: "#d9a77c", hair: "short", hc: "#2b1d14", top: "#6b7a2e", acc: "none" } },
     { id: "thao", name: "Thảo", role: "Bảo vệ · 30 tuổi", bio: "Đứng ở cổng, soi thẻ mời khách.",
@@ -273,7 +286,7 @@ export const CASES = [
     { id: "minh", name: "Minh", role: "Cháu nội · 20 tuổi", bio: "Sinh viên ở Hà Nội, mới về quê hai hôm trước.",
       look: { skin: "#f0c9a0", hair: "short", hc: "#3b2a1b", top: "#f9a825", acc: "none" } },
     { id: "ngoc", name: "Ngọc", role: "Người giúp việc · 45 tuổi", bio: "Làm trong nhà ông Tư gần 15 năm.",
-      look: { skin: "#dba77e", hair: "hat", hc: "#8d6e63", top: "#546e7a", acc: "none" } }
+      look: { skin: "#dba77e", hair: "hat", hc: "#8d6e63", top: "#546e7a", acc: "none", sex: "f" } }
   ],
   locations: [
     { id: "banquet", name: "Nhà ông Tư · phòng khách", time: "22:00", scene: "banquet", hs: [
@@ -706,3 +719,8 @@ export const CASES = [
   explanation: "<p><b>Thời điểm chết:</b> sổ uống thuốc ghi ông Hiển còn sống lúc 21h00, và biên bản ước tính ông chết từ 21h00 đến 21h30.</p><p><b>Ai đã vào cổng hông?</b> Camera ghi một chiếc xe máy xanh vào cổng hông lúc 20h48 và rời đi lúc 21h24. Biển số đuôi 27 đứng tên Kim. Sổ giao chìa cho thấy cổng hông chỉ có hai chìa, của ông Hiển và của Kim.</p><p><b>Lời khai của Kim sai:</b> cô khai ở nhà Đống Đa cả tối và không quay lại hiệu. Nhưng chị Ngân nhớ cô mua trà ở quán lúc 20h45, và khi bị đưa camera, cô thừa nhận đã vào sân sau rồi nói đã về ngay. Cô không nói gì về khoảng sau 21h. Cô cũng nói xe có thể đã bị người khác mượn, nhưng chiếc chìa móc đồng trong túi vải là chìa của cô.</p><p><b>Vì sao là Kim:</b></p><p>— <b>Động cơ:</b> sổ nhập ghi Kim ký nhận lô dược liệu pha tạp. Ông Hiển đã đánh dấu lô này, và soạn thư tố cáo gửi Sở Y tế lúc 8h sáng hôm sau.</p><p>— <b>Phương tiện:</b> tủ dụng cụ có hai chìa, ổ khóa không bị cạy, và chày đồng đã biến mất. Túi vải trong thùng rác sân sau có chày đồng quấn khăn cùng một chiếc chìa móc đồng khớp ổ tủ. Sổ giao chìa ghi chìa móc đồng là của Kim, người đã khai chìa đó “vẫn nằm trong ngăn kéo quầy”.</p><p><b>Loại trừ những người khác:</b> Thắng ăn tối ở Hàng Buồm từ 19h55 đến 22h30, theo hóa đơn. Hân cầm vòng ở Hàng Bạc từ 20h40 đến 21h30, và khai dối chuyện ở nhà. Tiến ngồi bàn ba từ 20h30 đến 21h35, chị Ngân trông quán từ 20h đến 22h, theo sổ bàn quán. Ông Quang đứng ở quầy vé ga từ 20h40 đến 21h45, và ổ khóa tủ không hề bị đụng đến. Kim là người duy nhất không có chứng cứ nào cho khoảng 21h00 đến 21h30 ngoài lời khai đã bị bác.</p>"
 }
 ];
+
+// Danh sách phẳng của mọi vụ. Chỉ số trong danh sách này là chỉ số vụ dùng khắp trò chơi và trong bản lưu ván đang chơi
+export const CASES = [...HANOI.map((c) => ({ region: "hn", ...c })), ...SG_CASES];
+
+export const casesOf = (region) => CASES.filter((c) => c.region === region);

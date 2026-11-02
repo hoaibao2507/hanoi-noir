@@ -1,14 +1,14 @@
 {
   "name": "hanoi-noir",
   "version": "2.0.0",
-  "description": "Trò chơi điều tra vụ án phố cổ Hà Nội",
+  "description": "Trò chơi điều tra vụ án phố cổ Hà Nội và Sài Gòn",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/rules.test.js tests/save.test.js"
+    "test": "node --test tests/rules.test.js tests/save.test.js tests/sg.test.js tests/render.test.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",

@@ -1,4 +1,5 @@
 import { WORLD_W, COMP_W, OX } from "../world/layout.js";
+import { figure, portrait } from "./people.js";
 /* =====================================================================
    HANOI NOIR · Minh họa SVG
    Toàn bộ hình ảnh vẽ bằng SVG (không dùng ảnh bitmap).
@@ -116,37 +117,6 @@ const ART = (() => {
       glow(k, x, y - 6, 42, "#ffd27a", 0.85);
   }
 
-  // Người (đứng hoặc ngồi) vẽ đơn giản: đầu, tóc, thân áo, chân quần
-  function faceD(x, y, r) {
-    return `M${x - r * 0.82} ${y - r * 0.15} C${x - r * 0.9} ${y - r * 1.05} ${x + r * 0.9} ${y - r * 1.05} ${x + r * 0.82} ${y - r * 0.15} C${x + r * 0.8} ${y + r * 0.8} ${x + r * 0.42} ${y + r * 1.12} ${x} ${y + r * 1.12} C${x - r * 0.42} ${y + r * 1.12} ${x - r * 0.8} ${y + r * 0.8} ${x - r * 0.82} ${y - r * 0.15} Z`;
-  }
-  function capD(x, y, r) {
-    return `M${x - r * 0.9} ${y - r * 0.1} C${x - r * 1.0} ${y - r * 1.3} ${x + r * 1.0} ${y - r * 1.3} ${x + r * 0.9} ${y - r * 0.1} C${x + r * 0.6} ${y - r * 0.55} ${x - r * 0.5} ${y - r * 0.6} ${x - r * 0.9} ${y - r * 0.1} Z`;
-  }
-  function figure(x, headY, s = 1, o = {}) {
-    const R = 22 * s, cy = headY + R, sy = headY + R * 2.35, hip = sy + R * 3.6, feet = headY + R * 10.4;
-    const top = o.top || "#4f6b3a", skin = o.skin || "#dca57a", hc = o.hc || "#1e1712", pants = o.pants || "#2b2f3a";
-    let g = "";
-    if (!o.seated) {
-      g += path(`M${x - 11 * s} ${hip} L${x - 15 * s} ${feet} L${x - 3 * s} ${feet} L${x} ${hip} Z M${x + 2 * s} ${hip} L${x + 6 * s} ${feet} L${x + 16 * s} ${feet} L${x + 12 * s} ${hip} Z`, pants);
-    }
-    g += path(`M${x - R * 1.15} ${sy} Q${x} ${sy - R * 0.4} ${x + R * 1.15} ${sy} Q${x + R * 1.5} ${sy + R * 1.6} ${x + R * 1.25} ${hip + R * 0.3} L${x - R * 1.25} ${hip + R * 0.3} Q${x - R * 1.5} ${sy + R * 1.6} ${x - R * 1.15} ${sy} Z`, top);
-    g += rect(x - R * 0.3, cy + R * 0.6, R * 0.6, R * 1.1, shade(skin, -0.18));
-    if (o.hair === "long") g += path(`M${x - R * 1.05} ${cy} Q${x - R * 1.25} ${cy + R * 2.2} ${x - R * 0.9} ${cy + R * 2.7} L${x + R * 0.9} ${cy + R * 2.7} Q${x + R * 1.25} ${cy + R * 2.2} ${x + R * 1.05} ${cy} Z`, hc);
-    if (o.hair === "bun") g += circle(x, headY - R * 0.1, R * 0.42, hc);
-    if (o.scarf) g += path(`M${x - R * 0.8} ${sy + R * 0.1} Q${x} ${sy + R * 0.9} ${x + R * 0.8} ${sy + R * 0.1} L${x + R * 0.85} ${sy + R * 0.6} Q${x} ${sy + R * 1.5} ${x - R * 0.85} ${sy + R * 0.6} Z`, o.scarf);
-    g += path(faceD(x, cy, R), skin);
-    if (o.hair === "hat") {
-      g += path(`M${x - R * 0.95} ${cy - R * 0.2} Q${x - R * 0.9} ${cy - R * 1.25} ${x} ${cy - R * 1.25} Q${x + R * 0.9} ${cy - R * 1.25} ${x + R * 0.95} ${cy - R * 0.2} Z`, hc);
-      g += path(`M${x - R * 1.35} ${cy - R * 0.25} Q${x} ${cy - R * 0.7} ${x + R * 1.35} ${cy - R * 0.25} Q${x} ${cy - R * 0.05} ${x - R * 1.35} ${cy - R * 0.25} Z`, shade(hc, 0.12));
-    } else if (o.hair !== "bald") {
-      g += path(capD(x, cy, R), hc);
-    }
-    g += circle(x - R * 0.35, cy + R * 0.05, R * 0.08, "#241a12") + circle(x + R * 0.35, cy + R * 0.05, R * 0.08, "#241a12");
-    if (o.tie) g += path(`M${x - R * 0.12} ${sy + R * 0.2} L${x + R * 0.12} ${sy + R * 0.2} L${x + R * 0.2} ${sy + R * 1.6} L${x} ${sy + R * 1.9} L${x - R * 0.2} ${sy + R * 1.6} Z`, o.tie);
-    return g;
-  }
-
   /* ---------- Các cảnh ---------- */
 
   // Tiệm đồ cổ Hoa Sen: kệ bình gốm, tủ trưng bày có ô trống, quầy thu ngân
@@ -258,8 +228,8 @@ const ART = (() => {
 
     // Khách ngồi sau bàn ăn (vẽ trước bàn)
     b += glow(k, 800, 300, 360, "#ffb05a", 0.18);
-    b += figure(330, 390, 1.05, { top: "#7a3e8f", hair: "bun", hc: "#2b2b2b", skin: "#f0c9a0", seated: true });
-    b += figure(1060, 370, 1, { top: "#4f6b3a", hair: "short", hc: "#3d2c20", skin: "#d9a77c", seated: true });
+    b += figure(330, 390, 1.05, { top: "#7a3e8f", hair: "bun", hc: "#2b2b2b", skin: "#f0c9a0", seated: true, glasses: true });
+    b += figure(1060, 370, 1, { top: "#4f6b3a", hair: "short", hc: "#3d2c20", skin: "#d9a77c", seated: true, mustache: true });
     b += figure(1210, 380, 0.95, { top: "#2f5d8a", hair: "long", hc: "#2a1b10", skin: "#e3b48b", seated: true });
 
     // Bàn ăn gia đình với bát đĩa
@@ -477,7 +447,7 @@ const ART = (() => {
     // Khách: Nga bên tranh, Tuấn sau buffet, Phong cạnh cửa
     b += figure(560, 430, 1.05, { top: "#6c3483", hair: "bun", hc: "#5a3a2a", skin: "#f5d6bc", pants: "#3a2440" });
     b += figure(1110, 340, 1, { top: "#6b7a2e", hair: "short", hc: "#2b1d14", skin: "#d9a77c" });
-    b += figure(300, 370, 1, { top: "#1b1b1b", hair: "long", hc: "#111", skin: "#e8bf98", pants: "#111" });
+    b += figure(300, 370, 1, { top: "#1b1b1b", hair: "long", hc: "#111", skin: "#e8bf98", pants: "#111", sex: "m" });
 
     // Sàn gỗ parquet và phản chiếu đèn
     b += rect(0, 660, 1600, 240, `url(#${k}-floor)`);
@@ -535,7 +505,7 @@ const ART = (() => {
     b += rect(1180, 648, 80, 8, "#5aa6d6", 'rx="3"');
 
     // Người hút thuốc trước cửa hông (lưng quay ra)
-    b += figure(1040, 420, 1, { top: "#1b1b1b", hair: "long", hc: "#111", skin: "#e8bf98", pants: "#111" });
+    b += figure(1040, 420, 1, { top: "#1b1b1b", hair: "long", hc: "#111", skin: "#e8bf98", pants: "#111", sex: "m" });
     b += glow(k, 1090, 470, 14, "#ff9a3c", 0.9) + circle(1090, 470, 3, "#ff9a3c");
 
     // Camera an ninh trên tường hẻm (điểm điều tra)
@@ -663,11 +633,11 @@ const ART = (() => {
 
     // Sáu người trong nhà: hàng sau và hàng trước
     b += figure(330, 340, 1, { top: "#37474f", hair: "short", hc: "#222", skin: "#f0c9a0", seated: true, tie: "#b71c1c" });
-    b += figure(560, 290, 0.95, { top: "#ad1457", hair: "long", hc: "#2a1b10", skin: "#f3d1ae", seated: true });
-    b += figure(800, 240, 1, { top: "#5d4037", hair: "bald", hc: "#bbb", skin: "#e2b48a", seated: true });
+    b += figure(560, 290, 0.95, { top: "#ad1457", hair: "long", hc: "#2a1b10", skin: "#f3d1ae", seated: true, glasses: true });
+    b += figure(800, 240, 1, { top: "#5d4037", hair: "bald", hc: "#bbb", skin: "#e2b48a", seated: true, mustache: true });
     b += figure(1040, 290, 0.95, { top: "#00695c", hair: "bun", hc: "#1a1a1a", skin: "#f5d2b3", seated: true });
     b += figure(520, 530, 1.25, { top: "#f9a825", hair: "short", hc: "#3b2a1b", skin: "#f0c9a0", seated: true });
-    b += figure(1080, 530, 1.25, { top: "#546e7a", hair: "hat", hc: "#8d6e63", skin: "#dba77e", seated: true });
+    b += figure(1080, 530, 1.25, { top: "#546e7a", hair: "hat", hc: "#8d6e63", skin: "#dba77e", seated: true, sex: "f" });
 
     // Sàn gỗ
     b += rect(0, 760, 1600, 140, `url(#${k}-floor)`);
@@ -747,6 +717,47 @@ const ART = (() => {
         circle(150, 96, 9, "#e0b98e") + rect(139, 106, 22, 40, "#1f3a5f", 'rx="4"') +
         rect(139, 146, 8, 26, "#222") + rect(153, 146, 8, 26, "#222");
     }
+    if (kind === "cam_sg_lobby") {
+      return rect(0, 0, 320, 190, "#10181c") +
+        rect(0, 120, 320, 70, "#2a3236") + line(0, 150, 320, 150, "#3a4448", 2, 'opacity=".5"') +
+        rect(20, 30, 90, 90, "#c3ccd0") + line(65, 30, 65, 120, "#5a666a", 2) + rect(44, 18, 42, 10, "#04080a") + rect(52, 20, 14, 6, "#ff7a45") +
+        rect(120, 30, 90, 90, "#b4bec2") + line(165, 30, 165, 120, "#5a666a", 2) +
+        rect(250, 30, 70, 100, "#06080a") + rect(256, 38, 58, 8, "#14b860", 'opacity=".8"') +
+        circle(70, 96, 9, "#f3d1ae") + rect(60, 106, 20, 38, "#b5446e", 'rx="4"') + rect(61, 142, 7, 20, "#222") + rect(72, 142, 7, 20, "#222") +
+        glow(k, 160, 20, 70, "#dff3ff", 0.28);
+    }
+    if (kind === "cam_sg_garage") {
+      return rect(0, 0, 320, 190, "#0a1014") + rect(0, 0, 320, 40, "#12181e") +
+        rect(30, 40, 26, 100, "#2d363d") + rect(250, 40, 30, 100, "#2d363d") +
+        rect(0, 110, 320, 80, "#0f2a34") + line(0, 130, 320, 130, "#a8e0f0", 1, 'opacity=".2"') +
+        rect(110, 44, 70, 76, "#1a222a") + rect(116, 50, 28, 70, "#8d9aa3") + rect(146, 50, 28, 70, "#6c7a84") +
+        circle(150, 96, 8, "#e0b98e") + rect(139, 104, 22, 40, "#6b7a2e", 'rx="4"') + rect(140, 142, 8, 22, "#222") + rect(152, 142, 8, 22, "#222") +
+        glow(k, 160, 18, 80, "#dff3ff", 0.28);
+    }
+    if (kind === "cam_sg_sec") {
+      return rect(0, 0, 320, 190, "#0e1614") +
+        rect(20, 16, 280, 60, "#06090b") + [0, 1, 2, 3].map((i) => rect(28 + i * 68, 22, 60, 48, "#16313a")).join("") +
+        rect(40, 118, 240, 18, "#6a4a30") + rect(60, 136, 200, 54, "#2b1d10") +
+        circle(120, 96, 9, "#d9a77c") + rect(108, 106, 24, 34, "#2c5d86", 'rx="4"') + rect(104, 98, 32, 8, "#2c5d86", 'rx="3"') +
+        rect(176, 96, 70, 22, "#04080a", 'rx="2"') + rect(182, 100, 40, 3, "#4fe0a0") + rect(182, 108, 54, 3, "#4fe0a0", 'opacity=".6"') +
+        glow(k, 160, 14, 90, "#dff3ff", 0.25);
+    }
+    if (kind === "cam_sg_cafe") {
+      let c = rect(0, 0, 320, 190, "#0b1020") + rect(0, 110, 320, 80, "#17213a") + rect(180, 20, 8, 110, "#2a2d36") +
+        glow(k, 184, 30, 40, "#ffd58a", 0.6) + rect(20, 40, 110, 70, "#1c1630") + rect(30, 50, 90, 14, "#e9b949", 'opacity=".5"') +
+        circle(236, 76, 8, "#e0b98e") + path("M222 84 Q236 80 252 86 L258 130 L218 130 Z", "#e9d73a") + rect(224, 128, 7, 22, "#222") + rect(240, 128, 7, 22, "#222") +
+        rect(190, 138, 90, 30, "#17213a", 'opacity=".7"') + `<g class="rain">`;
+      for (let i = 0; i < 30; i++) c += line((i * 41) % 320, (i * 57) % 170, ((i * 41) % 320) - 5, ((i * 57) % 170) + 14, "#8fb3d1", 1.2, 'opacity=".35"');
+      return c + `</g>`;
+    }
+    if (kind === "cam_sg_gala") {
+      return rect(0, 0, 320, 190, "#1a1020") + rect(70, 20, 180, 56, "#2a1a38") + rect(80, 28, 160, 40, "#3a2250") +
+        rect(150, 36, 20, 30, "#c8a24a") + circle(160, 32, 6, "#e0b98e") +
+        rect(0, 120, 320, 70, "#2a1e22") +
+        [[50, 120], [160, 130], [270, 120]].map(([x, y], i) => circle(x, y, 28, i === 1 ? "#4a2e3e" : "#3a2430") + circle(x - 16, y - 18, 6, i === 1 ? "#f0e0c8" : "#6a4a5a") + circle(x + 18, y - 14, 6, "#6a4a5a")).join("") +
+        circle(160, 130, 20, "#4a2e3e") + rect(150, 100, 20, 8, "none", 'stroke="#ffd27a" stroke-dasharray="3 3"') +
+        glow(k, 160, 40, 80, "#ffd27a", 0.3);
+    }
     // cam_rain
     let s = rect(0, 0, 320, 190, "#0b1118") + rect(0, 118, 320, 72, "#1a2028") + rect(40, 40, 70, 78, "#3d2c1a", 'opacity=".8"');
     s += glow(k, 200, 96, 34, "#ffe2a0", 0.6) + circle(200, 96, 10, "#ffe2a0", 'opacity=".5"');
@@ -794,7 +805,53 @@ const ART = (() => {
       `<text x="310" y="182" text-anchor="end" font-family="monospace" font-size="10" fill="#9fb3c8">${esc(o.cam)}</text>` +
       `</svg></div>`;
   }
-  const CAM_KINDS = { cam_moto: 1, cam_suv: 1, cam_corridor: 1, cam_rain: 1 };
+  const CAM_KINDS = {
+    cam_moto: 1, cam_suv: 1, cam_corridor: 1, cam_rain: 1,
+    cam_sg_lobby: 1, cam_sg_garage: 1, cam_sg_sec: 1, cam_sg_cafe: 1, cam_sg_gala: 1
+  };
+
+  // Biểu đồ thủy triều trong ngày: hai đỉnh, mức báo động và khoảng đường ngập
+  function tideView() {
+    const X = (h) => 28 + (h / 24) * 270, Y = (m) => 150 - ((m - 0.2) / 1.6) * 110;
+    const pts = [[1.17, 0.3], [7.58, 1.35], [13.33, 0.45], [19.33, 1.72], [24, 0.9]];
+    let d = `M${X(0)} ${Y(0.8)}`;
+    pts.forEach(([h, m], i) => {
+      const [ph, pm] = i ? pts[i - 1] : [0, 0.8];
+      const mid = (ph + h) / 2;
+      d += ` C${X(mid)} ${Y(pm)} ${X(mid)} ${Y(m)} ${X(h)} ${Y(m)}`;
+    });
+    return `<svg viewBox="0 0 320 190" role="img" aria-label="Biểu đồ thủy triều hôm nay: đỉnh 1,72 m lúc 19 giờ 20">` +
+      `<rect width="320" height="190" fill="#0e1a2c"/>` +
+      `<rect x="${X(18.67)}" y="30" width="${X(21.5) - X(18.67)}" height="122" fill="#ff4fa3" opacity=".12"/>` +
+      `<line x1="28" y1="${Y(1.6)}" x2="298" y2="${Y(1.6)}" stroke="#ff4fa3" stroke-width="1.4" stroke-dasharray="5 4"/>` +
+      `<text x="30" y="${Y(1.6) - 4}" font-family="monospace" font-size="9" fill="#ff8ac0">báo động 3 · 1,60 m</text>` +
+      `<line x1="28" y1="150" x2="298" y2="150" stroke="#4a6a8a" stroke-width="1.5"/>` +
+      [0, 6, 12, 18, 24].map((h) => `<text x="${X(h)}" y="164" text-anchor="middle" font-family="monospace" font-size="9" fill="#9fb3c8">${String(h).padStart(2, "0")}h</text>`).join("") +
+      `<path d="${d}" fill="none" stroke="#4fd6c6" stroke-width="3"/>` +
+      `<circle cx="${X(7.58)}" cy="${Y(1.35)}" r="4" fill="#ffd27a"/><text x="${X(7.58)}" y="${Y(1.35) - 8}" text-anchor="middle" font-family="monospace" font-size="9" fill="#ffd27a">07:35 · 1,35 m</text>` +
+      `<circle cx="${X(19.33)}" cy="${Y(1.72)}" r="4" fill="#ffd27a"/><text x="${X(19.33) - 4}" y="${Y(1.72) - 8}" text-anchor="middle" font-family="monospace" font-size="9" fill="#ffd27a">19:20 · 1,72 m</text>` +
+      `<text x="160" y="182" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#cfe8ff">Thủy triều hôm nay · đường ngập 18:40–21:30</text>` +
+      `</svg>`;
+  }
+
+  // Hai đồng hồ: cùng một sự kiện, camera chậm 17 phút so với giờ thật
+  function skewView() {
+    const clock = (cx, cy, label, hh, mm, col) => {
+      const ah = ((hh % 12) + mm / 60) * 30, am = mm * 6;
+      const pt = (deg, r) => `${cx + r * Math.sin((deg * Math.PI) / 180)} ${cy - r * Math.cos((deg * Math.PI) / 180)}`;
+      let s = `<circle cx="${cx}" cy="${cy}" r="46" fill="#f5efe0" stroke="${col}" stroke-width="5"/>`;
+      for (let i = 0; i < 12; i++) s += `<line x1="${pt(i * 30, 38).split(" ")[0]}" y1="${pt(i * 30, 38).split(" ")[1]}" x2="${pt(i * 30, 43).split(" ")[0]}" y2="${pt(i * 30, 43).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2"/>`;
+      s += `<line x1="${cx}" y1="${cy}" x2="${pt(ah, 24).split(" ")[0]}" y2="${pt(ah, 24).split(" ")[1]}" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>`;
+      s += `<line x1="${cx}" y1="${cy}" x2="${pt(am, 36).split(" ")[0]}" y2="${pt(am, 36).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2.6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="#2b2b2b"/>`;
+      return s + `<text x="${cx}" y="${cy + 66}" text-anchor="middle" font-family="monospace" font-size="11" fill="#e8eef4">${label}</text>`;
+    };
+    return `<svg viewBox="0 0 320 190" role="img" aria-label="Hai đồng hồ lệch nhau 17 phút: camera 18 giờ 03, giờ thật 18 giờ 20">` +
+      `<rect width="320" height="190" fill="#14202e"/>` + clock(70, 78, "CAMERA 18:03", 6, 3, "#3b6fa0") + clock(250, 78, "GIỜ THẬT 18:20", 6, 20, "#c9a227") +
+      `<path d="M126 78 L194 78" stroke="#ff4fa3" stroke-width="3" stroke-dasharray="6 4"/><path d="M188 70 L198 78 L188 86" fill="none" stroke="#ff4fa3" stroke-width="3"/>` +
+      `<text x="160" y="68" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="700" fill="#ff8ac0">+17 phút</text>` +
+      `<text x="160" y="182" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#cfe8ff">giờ thật = giờ máy + 17 phút</text>` +
+      `</svg>`;
+  }
 
   // Tủ kính có ổ khóa: chứng minh tủ không bị phá
   function lockView() {
@@ -828,58 +885,6 @@ const ART = (() => {
       `</svg>`;
   }
 
-  /* ---------- Chân dung nghi phạm (khung 120 × 140) ---------- */
-  function portrait(look, id) {
-    const { skin: sk, hair, hc, top, acc, ac } = look;
-    const g = `pt${id}`;
-    const skD = shade(sk, -0.16), skL = shade(sk, 0.1);
-    const back = hair === "long"
-      ? `<path d="M28 58 C18 16 102 16 92 58 L100 124 C80 132 40 132 20 124 Z" fill="${hc}"/>` : "";
-    const hairFront = {
-      short: `<path d="M32 52 C26 24 44 16 60 16 C78 16 94 24 88 52 C84 40 76 34 60 34 C46 34 38 40 32 52 Z" fill="${hc}"/>`,
-      long: `<path d="M34 52 C30 26 46 20 60 20 C76 20 90 26 86 52 C78 40 70 36 60 38 C50 36 40 40 34 52 Z" fill="${hc}"/>`,
-      bun: `<circle cx="60" cy="14" r="10" fill="${hc}"/><path d="M32 52 C26 26 44 22 60 22 C76 22 94 26 88 52 C82 40 74 34 60 34 C46 34 38 40 32 52 Z" fill="${hc}"/>`,
-      bald: `<path d="M38 44 C44 34 76 34 82 44 C74 38 46 38 38 44 Z" fill="${hc}" opacity=".7"/>`,
-      hat: `<path d="M34 42 C34 18 46 12 60 12 C74 12 86 18 86 42 Z" fill="${hc}"/><path d="M24 42 Q60 34 96 42 Q96 48 60 49 Q24 48 24 42 Z" fill="${shade(hc, 0.12)}"/>`
-    }[hair] || "";
-    const accessory = {
-      glasses: `<rect x="42" y="54" width="17" height="12" rx="5" fill="rgba(255,255,255,.08)" stroke="#2a2a2a" stroke-width="1.6"/>` +
-        `<rect x="61" y="54" width="17" height="12" rx="5" fill="rgba(255,255,255,.08)" stroke="#2a2a2a" stroke-width="1.6"/>` +
-        `<path d="M59 59 Q60 57 61 59" stroke="#2a2a2a" fill="none" stroke-width="1.5"/>`,
-      mustache: `<path d="M50 74 Q55 70 60 72 Q65 70 70 74 Q65 78 60 76 Q55 78 50 74 Z" fill="#3b2a1b"/>`,
-      scarf: `<path d="M38 96 Q60 108 82 96 L84 106 Q60 120 36 106 Z" fill="${ac}"/>`,
-      tie: `<path d="M55 97 L65 97 L67 116 L60 123 L53 116 Z" fill="${ac}"/><path d="M56 94 L64 94 L65 99 L55 99 Z" fill="${shade(ac || "#b71c1c", -0.2)}"/>`,
-      none: ""
-    }[acc] || "";
-    return `<svg class="portrait" viewBox="0 0 120 140" role="img" aria-label="Chân dung">` +
-      `<defs>` +
-      `<linearGradient id="${g}-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a1d"/><stop offset="1" stop-color="#15100b"/></linearGradient>` +
-      `<linearGradient id="${g}-sk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${skL}"/><stop offset=".6" stop-color="${sk}"/><stop offset="1" stop-color="${skD}"/></linearGradient>` +
-      `<linearGradient id="${g}-top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(top, 0.14)}"/><stop offset="1" stop-color="${shade(top, -0.35)}"/></linearGradient>` +
-      `</defs>` +
-      `<rect width="120" height="140" fill="url(#${g}-bg)"/>` +
-      `<circle cx="60" cy="48" r="60" fill="#ffd98e" opacity=".07"/>` +
-      back +
-      `<path d="M8 140 C8 106 34 96 60 96 C86 96 112 106 112 140 Z" fill="url(#${g}-top)"/>` +
-      `<path d="M49 84 L49 102 Q60 110 71 102 L71 84 Z" fill="${skD}"/>` +
-      `<path d="M36 62 Q28 60 29 70 Q30 80 38 78 Z" fill="${sk}"/>` +
-      `<path d="M84 62 Q92 60 91 70 Q90 80 82 78 Z" fill="${sk}"/>` +
-      `<path d="M36 52 C36 34 46 26 60 26 C74 26 84 34 84 52 C84 70 76 84 60 86 C44 84 36 70 36 52 Z" fill="url(#${g}-sk)"/>` +
-      `<path d="M76 56 C82 66 80 80 64 84 C74 78 80 68 76 56 Z" fill="${skD}" opacity=".3"/>` +
-      hairFront +
-      `<path d="M44 60 Q51 54 58 60 Q51 64 44 60 Z" fill="#fff" opacity=".92"/>` +
-      `<path d="M62 60 Q69 54 76 60 Q69 64 62 60 Z" fill="#fff" opacity=".92"/>` +
-      `<circle cx="51" cy="60" r="2.8" fill="#2b1d14"/><circle cx="69" cy="60" r="2.8" fill="#2b1d14"/>` +
-      `<circle cx="52" cy="59" r=".8" fill="#fff"/><circle cx="70" cy="59" r=".8" fill="#fff"/>` +
-      `<path d="M43 56 Q51 49 59 56 M61 56 Q69 49 77 56" stroke="#2b1d14" stroke-width="1.4" fill="none" stroke-linecap="round"/>` +
-      `<path d="M44 49 Q51 45 58 48 M62 48 Q69 45 76 49" stroke="${hc}" stroke-width="2.2" fill="none" stroke-linecap="round"/>` +
-      `<path d="M60 62 Q58 68 61 70 Q63 71 65 69" stroke="${skD}" stroke-width="1.5" fill="none" stroke-linecap="round"/>` +
-      `<path d="M53 77 Q60 73 67 77 Q60 81 53 77 Z" fill="#a4483f"/>` +
-      `<circle cx="42" cy="70" r="4.5" fill="#ff8a7a" opacity=".22"/><circle cx="78" cy="70" r="4.5" fill="#ff8a7a" opacity=".22"/>` +
-      accessory +
-      `</svg>`;
-  }
-
   /* ---------- Thế giới panorama: khung cảnh gốc ở giữa, hai bên là phòng hoặc phố nối tiếp ---------- */
   // Phong cách hai bên theo từng cảnh: "room" là căn phòng, "street" là dãy nhà phố
   const FLANK = {
@@ -895,7 +900,13 @@ const ART = (() => {
     notary:     { kind: "room", wall: "#e6dcc4", floor: "#6e4a2c", trim: "#5a3d22", lamp: "#fff1d0" },
     stair:      { kind: "room", wall: "#243039", floor: "#2a3038", trim: "#141a22", lamp: "#ffe2a0" },
     pharmacy:   { kind: "room", wall: "#4a2c18", floor: "#6b4a2b", trim: "#2a160a", lamp: "#ffcf7a" },
-    lab:        { kind: "room", wall: "#2c3d35", floor: "#3a4a42", trim: "#121c17", lamp: "#dff3ff" }
+    lab:        { kind: "room", wall: "#2c3d35", floor: "#3a4a42", trim: "#121c17", lamp: "#dff3ff" },
+    sg_lobby:     { kind: "room", wall: "#26343a", floor: "#59656a", trim: "#0e1518", lamp: "#fff1d0" },
+    sg_secroom:   { kind: "room", wall: "#26352f", floor: "#2b3733", trim: "#0c1210", lamp: "#dff3ff" },
+    sg_garage:    { kind: "room", wall: "#222b32", floor: "#10242c", trim: "#0c1014", lamp: "#dff3ff" },
+    sg_penthouse: { kind: "room", wall: "#2a2530", floor: "#3a281c", trim: "#14111a", lamp: "#ffd27a" },
+    sg_street:    { kind: "sgstreet" },
+    sg_lab:       { kind: "room", wall: "#1c2a40", floor: "#1d2736", trim: "#070b12", lamp: "#cfe8ff" }
   };
 
   // Gradient dùng chung cho hai bên của một cảnh (tiền tố k là tiền tố cảnh + "-w")
@@ -951,6 +962,21 @@ const ART = (() => {
     return s;
   }
 
+  // Một bên là phố Sài Gòn ngập nước: nhà phố có neon, dây điện và mặt đường phản chiếu (tọa độ thế giới)
+  function sgStreetSide(k, x0, doors) {
+    const left = x0 === 0;
+    let s = rect(x0, 0, 400, 900, `url(#${k}-fsky)`);
+    const houses = left
+      ? [[-20, 740, 210, 600, 0, "#ff4fa3"], [190, 680, 200, 450, 1, "#ffb347"]]
+      : [[2000, 740, 200, 590, 2, "#3fd6c6"], [2200, 680, 200, 450, 0, "#ff4fa3"]];
+    houses.forEach(([x, base, w, h, seed, neon]) => {
+      s += sgHouse(k, x, base, w, h, { wall: seed % 2 ? "#3a3a58" : "#4a3346", seed, neon });
+    });
+    s += wires(130, 3) + rect(x0, 720, 400, 180, `url(#${k}-fstreet)`);
+    doors.forEach((d) => { s += streetDoor(d.x); });
+    return s;
+  }
+
   // Đặt khung cảnh gốc (1600 đơn vị) vào giữa thế giới 2400, hai bên dựng theo phong cách của cảnh
   function widen(key, svg, doors = []) {
     const m = svg.match(/^(<svg[^>]*>)<defs>([\s\S]*?)<\/defs>([\s\S]*)<\/svg>$/);
@@ -960,8 +986,9 @@ const ART = (() => {
     const k = `${key}-w`;
     const left = doors.filter((d) => d.side === "left");
     const right = doors.filter((d) => d.side === "right");
-    const sideL = f.kind === "street" ? streetSide(k, 0, left) : roomSide(k, f, 0, left);
-    const sideR = f.kind === "street" ? streetSide(k, WORLD_W - 400, right) : roomSide(k, f, WORLD_W - 400, right);
+    const side = f.kind === "sgstreet" ? sgStreetSide : f.kind === "street" ? streetSide : null;
+    const sideL = side ? side(k, 0, left) : roomSide(k, f, 0, left);
+    const sideR = side ? side(k, WORLD_W - 400, right) : roomSide(k, f, WORLD_W - 400, right);
     const seam = rect(OX, 0, 60, 900, `url(#${k}-seamL)`) + rect(OX + COMP_W - 60, 0, 60, 900, `url(#${k}-seamR)`);
     return open.replace(`viewBox="0 0 ${COMP_W} 900"`, `viewBox="0 0 ${WORLD_W} 900"`) +
       `<defs>${defs}${blurs(k)}${flankDefs(k, f)}</defs>` +
@@ -1011,7 +1038,7 @@ const ART = (() => {
     b += rect(1386, 376, 138, 330, `url(#${k}-glass)`);
     b += path("M1400 380 L1450 380 L1400 520 Z", "#ffffff", 'opacity=".08"');
     b += txt(1455, 352, "CỬA CHÍNH", 13, "#f7d68a", 'text-anchor="middle" letter-spacing="2"');
-    b += figure(1240, 430, 1, { top: "#4f6b3a", hair: "hat", hc: "#6b4a2b", skin: "#c98f63", pants: "#23262d" });
+    b += figure(1240, 430, 1, { top: "#4f6b3a", hair: "hat", hc: "#6b4a2b", skin: "#c98f63", pants: "#23262d", mustache: true });
     b += rect(1200, 580, 60, 46, "#5a3a22", 'rx="5"') + rect(1218, 570, 24, 12, "none", 'rx="4" stroke="#2b1d12" stroke-width="3"');
 
     // Sàn gỗ và ánh đèn
@@ -1089,7 +1116,7 @@ const ART = (() => {
     b += haze(k, 800, 420, 420, "#ffcf7a", 0.12);
 
     // Chủ hiệu đứng sau quầy (vẽ trước quầy để quầy che phần thân)
-    b += figure(560, 330, 1, { top: "#e8f0ec", hair: "bun", hc: "#1f1a17", skin: "#e8c4a0", pants: "#2b2f3a" });
+    b += figure(560, 330, 1, { top: "#e8f0ec", hair: "bun", hc: "#1f1a17", skin: "#e8c4a0", pants: "#2b2f3a", glasses: true });
 
     // Quầy gỗ có cân tiểu ly và hai bình sứ
     b += rect(280, 540, 1040, 26, "#c08a50", 'rx="4"');
@@ -1155,23 +1182,427 @@ const ART = (() => {
     return frame("Phòng bào chế sau nhà", defs, b);
   }
 
+  /* =====================================================================
+     Vùng Sài Gòn: nhà phố nhiều dây điện, neon, nước triều, hầm xe ngập
+     ===================================================================== */
+
+  // Nhà phố Sài Gòn: mặt đứng hẹp, mái bằng có bồn nước, chuồng cọp, cửa cuốn tầng trệt và biển neon tùy chọn
+  function sgHouse(k, x, base, w, h, o = {}) {
+    const top = base - h, wall = o.wall || "#4a3d5c", lit = o.lit || "#ffd27a", seed = o.seed || 0;
+    const floors = Math.max(2, Math.round((h - 150) / 105)), fh = (h - 150) / floors;
+    const ww = w * 0.72, wx = x + w * 0.14;
+    let s = rect(x, top, w, h, wall) + rect(x - 6, top - 8, w + 12, 14, shade(wall, -0.4));
+    s += rect(x + w * 0.18, top - 40, 42, 32, "#2f3d4f", 'rx="8"') + rect(x + w * 0.18 + 8, top - 48, 26, 9, "#222e3c", 'rx="4"');
+    for (let f = 0; f < floors; f++) {
+      const wy = top + 24 + f * fh, on = (f + seed) % 3 !== 1;
+      s += rect(wx, wy, ww, fh * 0.56, on ? lit : "#171020", on ? 'opacity=".85"' : "");
+      for (let g = 1; g < 5; g++) s += line(wx + (ww * g) / 5, wy, wx + (ww * g) / 5, wy + fh * 0.56, "#0d0912", 2.2);
+      s += line(wx, wy + fh * 0.28, wx + ww, wy + fh * 0.28, "#0d0912", 2.2) + rect(x + w * 0.08, wy + fh * 0.56, w * 0.84, 5, "#0d0912");
+    }
+    s += rect(x + w * 0.08, base - 130, w * 0.84, 130, "#120d19");
+    for (let i = 0; i < 8; i++) s += line(x + w * 0.08, base - 122 + i * 15, x + w * 0.92, base - 122 + i * 15, "#271f33", 2);
+    if (o.neon) s += rect(x + w * 0.1, base - 186, w * 0.8, 40, o.neon, 'rx="6" opacity=".9"') + glow(k, x + w / 2, base - 166, w * 0.55, o.neon, 0.45);
+    return s;
+  }
+
+  // Dây điện chằng chịt giữa các cột: vài đường cong mảnh
+  function wires(y0, n = 4) {
+    let s = "";
+    for (let i = 0; i < n; i++) {
+      const y = y0 + i * 22;
+      s += path(`M-20 ${y} Q400 ${y + 70 + i * 6} 800 ${y + 10} T1620 ${y + 40}`, "none", `stroke="#05070c" stroke-width="${(2.2 - i * 0.3).toFixed(1)}" opacity=".9"`);
+    }
+    return s;
+  }
+
+  // Một cái ô tô nhìn ngang: thân, kính, bánh, đèn
+  function sgCar(x, y, w, col, o = {}) {
+    const h = w * 0.34;
+    let s = path(`M${x} ${y} L${x + w * 0.06} ${y - h * 0.5} Q${x + w * 0.2} ${y - h * 0.62} ${x + w * 0.34} ${y - h * 0.9} L${x + w * 0.68} ${y - h * 0.9} Q${x + w * 0.84} ${y - h * 0.62} ${x + w * 0.94} ${y - h * 0.42} L${x + w} ${y} Z`, col);
+    s += path(`M${x + w * 0.3} ${y - h * 0.5} L${x + w * 0.4} ${y - h * 0.82} L${x + w * 0.66} ${y - h * 0.82} L${x + w * 0.78} ${y - h * 0.5} Z`, o.glass || "#1a2a3c", 'opacity=".9"');
+    s += circle(x + w * 0.22, y, w * 0.075, "#0a0a0d") + circle(x + w * 0.78, y, w * 0.075, "#0a0a0d");
+    s += circle(x + w * 0.96, y - h * 0.3, w * 0.022, "#fff3c8");
+    return s;
+  }
+
+  // Sảnh chung cư Sao Mai: thang máy inox, quầy lễ tân, hành lang thang bộ tối ở bên phải, cửa kính nhìn ra phố ngập
+  function sgLobby() {
+    const k = "sglb";
+    const defs = blurs(k) +
+      lin(`${k}-wall`, [[0, "#26343a"], [1, "#101a1f"]]) +
+      lin(`${k}-floor`, [[0, "#8f9ba0"], [1, "#222a2e"]]) +
+      lin(`${k}-lift`, [[0, "#cfd8db"], [0.5, "#8a969a"], [1, "#bcc7ca"]], 0, 0, 1, 0) +
+      lin(`${k}-glass`, [[0, "#13203a"], [1, "#2b3b63"]]) +
+      lin(`${k}-desk`, [[0, "#6a4a30"], [1, "#2a1a0e"]]);
+    let b = rect(0, 0, 1600, 720, `url(#${k}-wall)`) + rect(0, 0, 1600, 40, "#0a1114");
+    for (let x = 120; x < 1600; x += 260) b += glow(k, x, 70, 90, "#fff1d0", 0.32) + circle(x, 64, 7, "#fff6dc");
+
+    // Cửa kính lớn nhìn ra phố ngập, neon hắt vào
+    b += rect(60, 220, 230, 500, "#0b1020") + rect(70, 230, 210, 480, `url(#${k}-glass)`);
+    b += path("M70 640 Q175 620 280 640 L280 710 L70 710 Z", "#1c2a4a");
+    for (let i = 0; i < 12; i++) b += line(90 + i * 16, 250 + (i % 4) * 30, 84 + i * 16, 280 + (i % 4) * 30, "#9fc3dd", 1.2, 'opacity=".4"');
+    b += glow(k, 190, 420, 80, "#ff4fa3", 0.35) + line(175, 230, 175, 710, "#0a0d14", 6);
+
+    // Khối thang máy: hai cửa inox, bảng chỉ tầng
+    b += rect(620, 250, 380, 470, "#0e1518") + rect(612, 236, 396, 22, "#1b272c");
+    [[640, "G"], [830, "27"]].forEach(([x, t]) => {
+      b += rect(x, 290, 160, 430, `url(#${k}-lift)`) + line(x + 80, 290, x + 80, 720, "#4a565a", 3);
+      b += rect(x + 50, 258, 60, 24, "#04080a", 'rx="3"') + txt(x + 80, 277, t, 17, "#ff7a45", 'text-anchor="middle"');
+    });
+    b += txt(810, 232, "THANG MÁY", 16, "#cfe3e8", 'text-anchor="middle" letter-spacing="3"');
+
+    // Quầy lễ tân và sổ khách
+    b += rect(1030, 600, 470, 130, `url(#${k}-desk)`) + rect(1020, 586, 490, 18, "#8a6a48", 'rx="3"');
+    b += rect(1086, 548, 90, 40, "#7b1e1e", 'rx="3"') + rect(1086, 548, 8, 40, "#4a0f0f") + line(1100, 560, 1170, 560, "#e9b949", 2, 'opacity=".6"');
+    b += rect(1290, 550, 70, 38, "#2e3a42", 'rx="4"') + rect(1296, 556, 58, 22, "#9fe0c8", 'rx="2" opacity=".7"');
+    b += rect(1050, 330, 330, 54, "#0b1417", 'rx="6"') + txt(1215, 366, "LỄ TÂN · SAO MAI RIVERSIDE", 20, "#d9ecef", 'text-anchor="middle" letter-spacing="2"');
+    b += circle(1240, 250, 40, "#f5efe0", 'stroke="#2e3a42" stroke-width="6"') + line(1240, 250, 1240, 222, "#222", 3) + line(1240, 250, 1262, 250, "#222", 3);
+
+    // Hành lang thang bộ tối bên phải
+    b += rect(1400, 300, 150, 420, "#07090c") + rect(1412, 312, 126, 26, "#14b860", 'rx="4"') + glow(k, 1475, 326, 60, "#32f08c", 0.4);
+    b += txt(1475, 331, "THANG BỘ", 15, "#04140a", 'text-anchor="middle" letter-spacing="2"');
+
+    // Camera mái vòm trên trần: điểm điều tra
+    b += circle(800, 196, 24, "#1b1f26") + circle(800, 196, 11, "#0b0e14") + circle(814, 186, 3, "#ff4d4d") + glow(k, 800, 196, 60, "#cfe3e8", 0.25);
+
+    // Thắm đứng bên áo mưa vàng chanh vắt trên bàn thấp; Trang ngồi trên sofa
+    b += rect(410, 590, 70, 60, "#3a2a20", 'rx="4"') + path("M404 590 Q440 560 486 588 L478 640 Q440 650 414 636 Z", "#e9d73a") + path("M430 580 Q452 560 470 586", "none", 'stroke="#fff6a0" stroke-width="3" opacity=".6"');
+    b += figure(330, 380, 1, { top: "#b5446e", hair: "long", hc: "#1f1a17", skin: "#f3d1ae" });
+    b += rect(470, 640, 230, 84, "#2b3441", 'rx="12"') + rect(470, 600, 230, 50, "#35404f", 'rx="12"');
+    b += figure(570, 450, 1, { top: "#d98c1f", hair: "bun", hc: "#3b2a1b", skin: "#f0c9a0", seated: true });
+    b += rect(470, 640, 230, 70, "#2b3441", 'rx="12"');
+
+    // Chậu cây
+    b += rect(1536, 640, 40, 80, "#2d2a28", 'rx="6"') + path("M1556 640 Q1520 560 1540 520 Q1560 570 1576 540 Q1590 600 1556 640 Z", "#2f7d4f");
+
+    // Sàn đá hoa, phản chiếu ánh đèn
+    b += rect(0, 720, 1600, 180, `url(#${k}-floor)`);
+    for (let i = -6; i <= 6; i++) b += line(800 + i * 90, 720, 800 + i * 260, 900, "#1a2024", 2, 'opacity=".5"');
+    b += rect(620, 724, 380, 8, "#fff", 'opacity=".05"') + haze(k, 800, 600, 380, "#cfe3e8", 0.1);
+    return frame("Sảnh chung cư Sao Mai", defs, b);
+  }
+
+  // Phòng bảo vệ: tường màn hình camera, bàn điều khiển, giá đầu ghi hình
+  function sgSecroom() {
+    const k = "sgsr";
+    const defs = blurs(k) +
+      lin(`${k}-wall`, [[0, "#26352f"], [1, "#0e1613"]]) +
+      lin(`${k}-floor`, [[0, "#3a4642"], [1, "#151c19"]]) +
+      lin(`${k}-desk`, [[0, "#7a5a3a"], [1, "#2c1d10"]]);
+    let b = rect(0, 0, 1600, 720, `url(#${k}-wall)`) + rect(0, 0, 1600, 36, "#080d0b");
+    b += rect(560, 38, 480, 12, "#dff3ff", 'rx="5"') + glow(k, 800, 50, 280, "#dff3ff", 0.25);
+
+    // Tường 6 màn hình camera
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 3; c++) {
+        const x = 470 + c * 212, y = 110 + r * 134, n = r * 3 + c;
+        b += rect(x, y, 200, 122, "#04090c", 'rx="4"') + rect(x + 6, y + 6, 188, 110, n === 4 ? "#18323a" : "#0e1d24");
+        b += rect(x + 6, y + 80, 188, 36, "#142a33") + circle(x + 50 + n * 12, y + 56, 8, "#2d4d57") + rect(x + 40 + n * 12, y + 62, 20, 34, "#2d4d57");
+        b += rect(x + 10, y + 10, 52, 12, "#000", 'opacity=".5"') + circle(x + 16, y + 16, 3, "#ff4d4d");
+      }
+    }
+    b += glow(k, 780, 240, 320, "#6fe0c8", 0.14);
+
+    // Màn hình điều khiển trên bàn: nhật ký ra vào
+    b += rect(760, 432, 220, 130, "#05090b", 'rx="6"') + rect(768, 440, 204, 112, "#0b2018");
+    for (let i = 0; i < 6; i++) b += rect(778, 450 + i * 16, 120 + (i * 37) % 70, 6, "#4fe0a0", 'opacity=".75"');
+    b += rect(850, 562, 24, 14, "#1a2420");
+
+    // Giá đầu ghi hình bên phải
+    b += rect(1060, 380, 240, 330, "#10181b", 'rx="6"') + rect(1070, 392, 220, 300, "#1b272b");
+    for (let i = 0; i < 4; i++) {
+      b += rect(1078, 400 + i * 72, 204, 60, "#0b1215", 'rx="4"');
+      for (let j = 0; j < 6; j++) b += circle(1094 + j * 16, 420 + i * 72, 3, j % 3 === 0 ? "#ff4d4d" : "#4fe08a");
+      b += rect(1190, 412 + i * 72, 80, 6, "#243138") + rect(1190, 426 + i * 72, 60, 6, "#243138");
+    }
+
+    // Camera treo tường: điểm điều tra
+    b += rect(1150, 232, 52, 28, "#262a30", 'rx="5"') + circle(1150, 246, 9, "#0a0c10") + circle(1154, 246, 4, "#3b6fa0", 'opacity=".8"') + circle(1190, 238, 3, "#ff4d4d");
+    b += path("M1202 246 L1240 232", "none", 'stroke="#262a30" stroke-width="8" stroke-linecap="round"');
+
+    // Hải ngồi sau bàn, bác Lành đứng cạnh, áo mưa xanh lá treo trên móc
+    b += figure(350, 380, 1, { top: "#2c5d86", hair: "hat", hc: "#2c5d86", skin: "#d9a77c", seated: true, mustache: true });
+    b += rect(220, 580, 760, 24, "#a67c52", 'rx="4"') + rect(236, 604, 730, 118, `url(#${k}-desk)`) + rect(236, 604, 730, 6, "#000", 'opacity=".25"');
+    b += rect(520, 556, 190, 22, "#10161a", 'rx="3"') + rect(280, 556, 70, 24, "#cfd8dc", 'rx="3"') + rect(1110, 560, 26, 20, "#e8e2d0", 'rx="3"');
+    b += path("M696 290 L760 280 L774 410 Q730 440 690 410 Z", "#3da05a") + circle(726, 286, 5, "#22262c");
+    b += path("M712 420 Q740 460 764 420", "none", 'stroke="#8fc3ff" stroke-width="3" opacity=".4"');
+    b += figure(600, 450, 1, { top: "#4f6b3a", hair: "bald", hc: "#bbb", skin: "#c98f63" });
+
+    b += rect(0, 720, 1600, 180, `url(#${k}-floor)`);
+    for (let i = -6; i <= 6; i++) b += line(800 + i * 90, 720, 800 + i * 260, 900, "#0b100e", 2, 'opacity=".5"');
+    b += path("M700 780 Q740 770 780 786 Q750 806 700 800 Z", "#7fb6e0", 'opacity=".25"');
+    return frame("Phòng bảo vệ", defs, b);
+  }
+
+  // Hầm B1 đang ngập: cột bê tông, nước phản chiếu, xe Mercedes, cửa thang bộ, vị trí thi thể được khoanh
+  function sgGarage() {
+    const k = "sggr";
+    const defs = blurs(k) +
+      lin(`${k}-ceil`, [[0, "#0a0d11"], [1, "#1c232b"]]) +
+      lin(`${k}-wall`, [[0, "#222b32"], [1, "#12181d"]]) +
+      lin(`${k}-water`, [[0, "#26414c"], [1, "#07161c"]]);
+    let b = rect(0, 0, 1600, 900, `url(#${k}-wall)`) + rect(0, 0, 1600, 190, `url(#${k}-ceil)`);
+    [160, 440, 760, 1080, 1360].forEach((x, i) => {
+      b += rect(x, 40, 250, 16, "#0c1014") + (i % 2 ? rect(x + 10, 44, 230, 8, "#dff3ff", 'rx="4" opacity=".9"') + glow(k, x + 125, 50, 140, "#dff3ff", 0.28) : rect(x + 10, 44, 230, 8, "#394650", 'rx="4"'));
+    });
+    for (let i = 0; i < 3; i++) b += rect(0, 100 + i * 22, 1600, 8, "#2b343c") + line(0, 104 + i * 22, 1600, 104 + i * 22, "#0b0f13", 2);
+
+    // Cột bê tông có đánh số ô và vạch đo nước
+    [[560, 190], [1210, 160]].forEach(([x, w], i) => {
+      b += rect(x, 190, w, 520, "#2d363d") + rect(x, 190, 10, 520, "#3c4750") + rect(x + w - 10, 190, 10, 520, "#1a2025");
+      b += rect(x + 12, 340, w - 24, 34, "#d8c43a", 'rx="2" opacity=".85"') + txt(x + w / 2, 366, i ? "B1-08" : "B1-07", 22, "#1c1a08", 'text-anchor="middle"');
+      for (let j = 0; j < 8; j++) b += line(x + w - 40, 520 + j * 24, x + w - 14, 520 + j * 24, "#e8e8e8", 2, 'opacity=".5"');
+    });
+
+    // Cửa thang bộ B1: cánh thép, biển EXIT, đầu đọc thẻ
+    b += rect(250, 330, 190, 340, "#111820") + rect(260, 340, 170, 330, "#6c7a84") + rect(262, 342, 166, 326, "#8794a0") + line(345, 342, 345, 668, "#4b5964", 3);
+    b += rect(268, 300, 154, 28, "#14b860", 'rx="4"') + glow(k, 345, 314, 80, "#32f08c", 0.35) + txt(345, 321, "THANG BỘ", 15, "#04140a", 'text-anchor="middle" letter-spacing="2"');
+    b += rect(446, 480, 22, 44, "#1c232b", 'rx="3"') + circle(457, 494, 4, "#ffb000") + rect(450, 504, 14, 10, "#394650");
+    b += rect(402, 500, 8, 40, "#d9d9d9", 'rx="3"');
+
+    // Camera trần: điểm điều tra
+    b += rect(990, 190, 40, 30, "#262a30", 'rx="5"') + circle(1000, 206, 8, "#0a0c10") + circle(1004, 206, 3, "#3b6fa0", 'opacity=".8"') + circle(1024, 196, 3, "#ff4d4d");
+
+    // Nước ngập sàn hầm, ánh đèn phản chiếu, gợn sóng
+    b += rect(0, 520, 1600, 380, `url(#${k}-water)`);
+    for (let i = 0; i < 22; i++) b += path(`M${(i * 211) % 1600} ${560 + ((i * 53) % 300)} q30 -8 60 0`, "none", 'stroke="#a8e0f0" stroke-width="2" opacity=".18"');
+    b += rect(180, 540, 180, 360, "#dff3ff", 'opacity=".05"') + rect(820, 540, 180, 360, "#dff3ff", 'opacity=".06"');
+    for (let x = 90; x < 1600; x += 260) b += line(x, 600, x - 70, 900, "#d8c43a", 3, 'opacity=".25"');
+
+    // Mercedes đen ở ô 07: thân ngập một phần
+    b += sgCar(880, 640, 440, "#14181d", { glass: "#27384a" }) + rect(880, 640, 440, 90, `url(#${k}-water)`, 'opacity=".78"');
+    b += glow(k, 1316, 614, 50, "#fff3c8", 0.5) + rect(1180, 566, 20, 8, "#2d3a44");
+
+    // Chắn bánh xe bê tông và vị trí thi thể được khoanh bằng băng vàng
+    b += rect(720, 668, 130, 24, "#6c7276", 'rx="2"') + rect(720, 668, 130, 6, "#9aa1a6");
+    b += path("M640 700 Q700 660 790 676 Q880 690 920 720 Q860 760 760 756 Q670 752 640 700 Z", "none", 'stroke="#f4d03a" stroke-width="4" stroke-dasharray="14 8"');
+    b += rect(760, 700, 18, 22, "#f4d03a", 'rx="2"') + txt(769, 717, "1", 14, "#222", 'text-anchor="middle"') + rect(860, 716, 18, 22, "#f4d03a", 'rx="2"') + txt(869, 733, "2", 14, "#222", 'text-anchor="middle"');
+    b += path("M560 770 Q580 756 604 768 Q586 780 560 770 Z", "#c4a24a");
+    b += glow(k, 770, 700, 120, "#f4d03a", 0.12) + haze(k, 800, 560, 420, "#dff3ff", 0.07);
+    return frame("Hầm B1 đang ngập", defs, b);
+  }
+
+  // Penthouse tầng 27: cửa kính toàn cảnh nhìn ra thành phố, sofa, bàn làm việc lớn và két sắt âm tường
+  function sgPenthouse() {
+    const k = "sgph";
+    const defs = blurs(k) +
+      lin(`${k}-sky`, [[0, "#0a0f24"], [1, "#3a2a56"]]) +
+      lin(`${k}-wall`, [[0, "#2a2530"], [1, "#14111a"]]) +
+      lin(`${k}-floor`, [[0, "#4a3426"], [1, "#150e09"]]) +
+      lin(`${k}-desk`, [[0, "#8a5e3a"], [1, "#2e1c0e"]]);
+    let b = rect(0, 0, 1600, 720, `url(#${k}-wall)`);
+
+    // Cửa kính toàn cảnh: thành phố về đêm và dòng sông
+    b += rect(60, 70, 1060, 560, "#05070f") + rect(70, 80, 1040, 540, `url(#${k}-sky)`);
+    for (let i = 0; i < 40; i++) b += circle(80 + ((i * 479) % 1020), 90 + ((i * 53) % 200), 1.3, "#fff1d0", 'opacity=".55"');
+    const tower = (x, w, h, col) => rect(x, 620 - h, w, h, col) + [0, 1, 2, 3, 4, 5, 6, 7].map((r) => rect(x + 6, 620 - h + 14 + r * 26, w - 12, 5, "#ffd27a", `opacity="${(0.15 + ((r * 37 + x) % 5) * 0.08).toFixed(2)}"`)).join("");
+    b += tower(120, 90, 190, "#16152a") + tower(230, 70, 260, "#1c1a36") + tower(320, 110, 170, "#14132a") + tower(780, 80, 220, "#1a1833") + tower(880, 100, 160, "#15142a");
+    b += path("M590 620 L610 190 L620 120 L630 190 L650 620 Z", "#221f40") + rect(612, 160, 16, 460, "#2d2a52", 'opacity=".6"');
+    b += glow(k, 620, 130, 50, "#ff4fa3", 0.5) + circle(620, 118, 4, "#ff7ab8");
+    b += path("M70 560 Q400 540 700 566 T1110 556 L1110 620 L70 620 Z", "#0d1a30") + line(70, 600, 1110, 596, "#4fd6c6", 2, 'opacity=".25"');
+    [350, 570, 800].forEach((x) => { b += rect(x, 90, 10, 530, "#0b0d16"); });
+    b += rect(70, 330, 1040, 10, "#0b0d16");
+    for (let i = 0; i < 14; i++) b += line(110 + i * 70, 100 + (i % 3) * 40, 100 + i * 70, 140 + (i % 3) * 40, "#9fc3dd", 1.2, 'opacity=".28"');
+
+    // Két sắt âm tường bên phải, bàn phím số: điểm điều tra
+    b += rect(1190, 260, 170, 200, "#1b1f27", 'rx="6"') + rect(1202, 272, 146, 176, "#3a4350", 'rx="4"') + rect(1210, 280, 130, 160, "#4b5666", 'rx="3"');
+    b += rect(1258, 320, 54, 70, "#10151b", 'rx="4"');
+    for (let i = 0; i < 9; i++) b += rect(1264 + (i % 3) * 16, 326 + Math.floor(i / 3) * 16, 11, 11, "#9fb3c8", 'rx="2"');
+    b += circle(1226, 360, 12, "#9aa3ad") + line(1226, 360, 1238, 350, "#2a3038", 3);
+    b += rect(1240, 238, 70, 16, "#1b1f27", 'rx="3"') + glow(k, 1275, 300, 70, "#ffd27a", 0.14);
+
+    // Sofa bên trái; Ngân đứng bên cửa kính, Vũ đứng cạnh sofa
+    b += rect(250, 640, 460, 82, "#33333f", 'rx="14"') + rect(250, 596, 460, 56, "#3d3d4b", 'rx="14"');
+    b += figure(330, 380, 1, { top: "#34495e", hair: "bun", hc: "#1a1410", skin: "#f5d6bc", glasses: true });
+    b += rect(318, 408, 26, 20, "none", 'rx="4"');
+    b += figure(600, 410, 1, { top: "#1f3a5f", hair: "short", hc: "#222", skin: "#e8bf98", tie: "#8e2c2c" });
+
+    // Bàn làm việc lớn: điện thoại, lịch để bàn, đèn bàn có mẩu giấy dưới chân
+    b += rect(780, 580, 500, 18, "#b88a5a", 'rx="4"') + rect(796, 598, 470, 130, `url(#${k}-desk)`) + rect(796, 598, 470, 6, "#000", 'opacity=".25"');
+    b += rect(812, 548, 56, 32, "#e9e9ee", 'rx="6"') + rect(818, 554, 44, 20, "#142a40", 'rx="3"') + line(840, 548, 840, 520, "#555", 2);
+    b += rect(940, 536, 96, 44, "#f3ead2", 'rx="3"') + rect(940, 536, 96, 10, "#a93226") + line(948, 556, 1028, 556, "#9a8a60", 2) + line(948, 566, 1010, 566, "#9a8a60", 2);
+    b += rect(1110, 568, 40, 12, "#2a2e36", 'rx="3"') + rect(1127, 490, 6, 80, "#2a2e36") + path("M1096 492 Q1130 456 1164 492 Z", "#d9c37a") + glow(k, 1130, 500, 80, "#ffd27a", 0.45);
+    b += rect(1114, 572, 32, 8, "#e9d73a", 'opacity=".9"');
+    b += rect(1200, 560, 70, 20, "#151a20", 'rx="3"');
+
+    // Ghế làm việc và thảm
+    b += rect(930, 640, 70, 80, "#1c1a22", 'rx="10"');
+    b += rect(280, 760, 520, 100, "#3a1e2c", 'opacity=".55"');
+
+    b += rect(0, 720, 1600, 180, `url(#${k}-floor)`);
+    for (let i = -6; i <= 6; i++) b += line(800 + i * 90, 720, 800 + i * 260, 900, "#0b0705", 2, 'opacity=".5"');
+    b += glow(k, 1130, 500, 160, "#ffd27a", 0.14) + haze(k, 640, 400, 460, "#4a3a90", 0.1);
+    return frame("Penthouse tầng 27", defs, b);
+  }
+
+  // Ngã tư Hoàng Diệu về đêm trong mưa: nhà phố, dây điện, quán cà phê vỉa hè ngập nước, cột điện có vạch đo
+  function sgStreet() {
+    const k = "sgst";
+    const defs = blurs(k) +
+      lin(`${k}-sky`, [[0, "#090d20"], [1, "#2d2552"]]) +
+      lin(`${k}-water`, [[0, "#26304f"], [1, "#0a0e1c"]]) +
+      lin(`${k}-fade`, [[0, "#05070d", 0], [1, "#05070d", 0.8]]);
+    let b = rect(0, 0, 1600, 900, `url(#${k}-sky)`);
+    for (let i = 0; i < 26; i++) b += circle((i * 463) % 1600, (i * 137) % 220, 1.4, "#fff3d6", 'opacity=".5"');
+    b += tubeSkyline();
+
+    // Hai dãy nhà phố hai bên, xa nhỏ gần lớn
+    b += sgHouse(k, 600, 560, 130, 250, { wall: "#2c2a48", seed: 1, neon: "#3fd6c6" }) + sgHouse(k, 740, 560, 120, 220, { wall: "#33284a", seed: 2 }) + sgHouse(k, 870, 560, 140, 270, { wall: "#2a3050", seed: 0, neon: "#ff4fa3" });
+    b += sgHouse(k, -30, 740, 240, 600, { wall: "#4a3346", seed: 0, neon: "#ff4fa3" }) + sgHouse(k, 220, 680, 190, 450, { wall: "#3a3a58", seed: 1, neon: "#ffb347" });
+    b += sgHouse(k, 1390, 740, 240, 600, { wall: "#3c3a4c", seed: 1, neon: "#3fd6c6" }) + sgHouse(k, 1180, 680, 200, 460, { wall: "#4a3a58", seed: 2 });
+    b += wires(120, 4) + wires(190, 3);
+
+    // Quán cà phê vỉa hè bên trái-giữa: mái hiên, quầy, ghế nhựa chìm nước
+    b += rect(380, 400, 480, 300, "#161022") + rect(380, 380, 480, 26, "#8b2330") + rect(396, 406, 448, 8, "#e9b949", 'opacity=".5"');
+    b += rect(430, 340, 380, 40, "#14101e", 'rx="6"') + txt(620, 370, "CÀ PHÊ VỢT · GÓC NGÃ TƯ", 20, "#ffd9a0", 'text-anchor="middle" letter-spacing="2"') + glow(k, 620, 360, 180, "#ffb347", 0.3);
+    b += rect(400, 560, 440, 22, "#6a4a30") + rect(410, 582, 420, 120, "#2a1c12");
+    b += figure(560, 400, 1, { top: "#00838f", hair: "bun", hc: "#2a1b10", skin: "#dba77e" });
+    b += rect(400, 560, 440, 22, "#6a4a30") + rect(410, 582, 420, 120, "#2a1c12");
+    [[450, 1], [700, 2]].forEach(([x]) => { b += rect(x, 640, 40, 8, "#d94a4a") + rect(x + 6, 648, 28, 50, "#d94a4a"); });
+
+    // Camera quán gắn dưới mái hiên: điểm điều tra
+    b += rect(780, 290, 46, 26, "#262a30", 'rx="5"') + circle(780, 303, 8, "#0a0c10") + circle(784, 303, 4, "#3b6fa0", 'opacity=".8"') + circle(818, 296, 3, "#ff4d4d");
+    b += path("M826 303 L850 292", "none", 'stroke="#262a30" stroke-width="7" stroke-linecap="round"');
+
+    // Cột điện có vạch đo nước 35 cm, biển đường
+    b += rect(1086, 250, 14, 500, "#2a2d36") + rect(1070, 270, 46, 8, "#2a2d36") + rect(1030, 430, 130, 34, "#0f6b4f", 'rx="4"') + txt(1095, 453, "HOÀNG DIỆU", 14, "#e9f6ee", 'text-anchor="middle" letter-spacing="1"');
+    for (let i = 0; i < 6; i++) b += line(1100, 700 - i * 22, 1120, 700 - i * 22, "#ffd23a", 3, 'opacity=".9"');
+    b += glow(k, 1093, 270, 70, "#ffd58a", 0.35);
+
+    // Mặt đường ngập: nước phản chiếu neon, xe máy chìm nửa bánh
+    b += rect(0, 560, 1600, 340, `url(#${k}-water)`);
+    for (let i = 0; i < 18; i++) b += path(`M${(i * 173) % 1600} ${600 + ((i * 61) % 260)} q26 -7 52 0`, "none", 'stroke="#a8c8f0" stroke-width="2" opacity=".2"');
+    b += rect(560, 580, 60, 320, "#ff4fa3", 'opacity=".06"') + rect(1000, 580, 80, 320, "#3fd6c6", 'opacity=".06"');
+    [[300, 820], [980, 836]].forEach(([x, y]) => {
+      b += circle(x, y, 34, "#0b0b10") + circle(x + 90, y, 34, "#0b0b10") + path(`M${x - 10} ${y - 22} Q${x + 30} ${y - 70} ${x + 80} ${y - 40} L${x + 110} ${y - 46} L${x + 100} ${y - 12} Z`, "#3b4a63");
+      b += rect(x - 40, y + 4, 200, 60, `url(#${k}-water)`, 'opacity=".8"');
+    });
+
+    // Mưa
+    let rain_ = "";
+    for (let i = 0; i < 70; i++) {
+      const x = (i * 73) % 1600, y = (i * 131) % 900;
+      rain_ += line(x, y, x - 6, y + 20, "#9fc3dd", 1.2, `opacity=".35" style="animation-delay:-${((i * 0.13) % 1).toFixed(2)}s"`);
+    }
+    b += `<g class="rain">${rain_}</g>` + rect(0, 0, 1600, 900, `url(#${k}-fade)`, 'opacity=".5"');
+    return frame("Ngã tư Hoàng Diệu", defs, b);
+  }
+
+  // Dải nhà cao tầng xa mờ ở chân trời của các cảnh phố Sài Gòn
+  function tubeSkyline() {
+    let s = "";
+    [[40, 90, 160], [150, 70, 220], [260, 100, 140], [1180, 90, 200], [1290, 80, 250], [1390, 110, 170], [1500, 70, 210]].forEach(([x, w, h], i) => {
+      s += rect(x, 560 - h, w, h, "#15142c");
+      for (let r = 0; r < 6; r++) s += rect(x + 8, 560 - h + 14 + r * 22, w - 16, 4, "#ffd27a", `opacity="${(0.1 + ((r * 31 + i * 7) % 5) * 0.06).toFixed(2)}"`);
+    });
+    return s;
+  }
+
+  // Phòng giám định và dữ liệu: màn hình lớn, bảng bằng chứng, giá hồ sơ và bàn dài đặt các giấy tờ
+  function sgLab() {
+    const k = "sglab";
+    const defs = blurs(k) +
+      lin(`${k}-wall`, [[0, "#1c2a40"], [1, "#0b121e"]]) +
+      lin(`${k}-floor`, [[0, "#2a3648"], [1, "#0c121b"]]) +
+      lin(`${k}-table`, [[0, "#cfd8dc"], [1, "#6e7c86"]]);
+    let b = rect(0, 0, 1600, 720, `url(#${k}-wall)`) + rect(0, 0, 1600, 34, "#070b12");
+    b += rect(520, 40, 560, 12, "#cfe8ff", 'rx="5"') + glow(k, 800, 52, 300, "#cfe8ff", 0.2);
+
+    // Màn hình lớn trên tường: đường cong thủy triều
+    b += rect(470, 90, 660, 330, "#05080e", 'rx="8"') + rect(482, 102, 636, 306, "#0a1a2c");
+    for (let i = 0; i < 6; i++) b += line(500, 140 + i * 48, 1100, 140 + i * 48, "#1a3a5a", 1.5);
+    b += path("M500 360 C580 360 620 170 700 170 C780 170 820 340 880 340 C940 340 980 140 1040 140 C1070 140 1090 220 1100 260", "none", 'stroke="#4fd6c6" stroke-width="4"');
+    b += line(500, 196, 1100, 196, "#ff4fa3", 2, 'stroke-dasharray="8 6" opacity=".8"');
+    b += glow(k, 800, 250, 280, "#4fd6c6", 0.12);
+
+    // Bảng bằng chứng bên trái: ảnh ghim và dây đỏ
+    b += rect(70, 120, 340, 380, "#5a432c", 'rx="6"') + rect(82, 132, 316, 356, "#8a6a44");
+    [[110, 160], [230, 150], [320, 200], [130, 300], [260, 320]].forEach(([x, y], i) => {
+      b += rect(x, y, 70, 56, "#f3ead2", 'transform="rotate(' + (i * 7 - 12) + " " + x + " " + y + ')"') + circle(x + 35, y + 4, 4, "#c0392b");
+    });
+    b += path("M145 164 L265 154 L355 204 L165 304 L295 324", "none", 'stroke="#c0392b" stroke-width="2.2"');
+
+    // Giá hồ sơ và máy chủ bên phải
+    b += rect(1250, 110, 280, 370, "#10161f", 'rx="6"');
+    for (let i = 0; i < 5; i++) {
+      b += rect(1262, 122 + i * 70, 256, 58, "#1b2432", 'rx="4"');
+      for (let j = 0; j < 8; j++) b += circle(1280 + j * 14, 142 + i * 70, 3, j % 3 === 0 ? "#ff4d4d" : "#4fe08a");
+    }
+
+    // Bàn dài đặt giấy tờ, túi bằng chứng, laptop
+    b += rect(220, 600, 1180, 20, `url(#${k}-table)`, 'rx="4"') + rect(240, 620, 1140, 110, "#1a2432") + rect(240, 620, 1140, 6, "#000", 'opacity=".3"');
+    [[320, 580, -6], [520, 574, 4], [720, 580, -3], [900, 576, 5], [1090, 582, -5]].forEach(([x, y, r]) => {
+      b += rect(x, y, 120, 26, "#f3ead2", `transform="rotate(${r} ${x} ${y})"`) + line(x + 10, y + 8, x + 100, y + 8, "#9a8a60", 2, `transform="rotate(${r} ${x} ${y})"`);
+    });
+    b += rect(1180, 540, 120, 60, "#2e3a46", 'rx="6"') + rect(1190, 548, 100, 42, "#0e2a3a") + glow(k, 1240, 570, 70, "#4fd6c6", 0.2);
+    b += rect(280, 560, 44, 40, "#d9d9e0", 'rx="5" opacity=".75"') + rect(288, 540, 28, 24, "#fff", 'rx="3" opacity=".6"');
+
+    b += rect(0, 720, 1600, 180, `url(#${k}-floor)`);
+    for (let i = -6; i <= 6; i++) b += line(800 + i * 90, 720, 800 + i * 260, 900, "#06090e", 2, 'opacity=".5"');
+    b += haze(k, 800, 480, 420, "#cfe8ff", 0.08);
+    return frame("Phòng giám định và dữ liệu", defs, b);
+  }
+
+  // Sài Gòn về đêm: nền cho màn hình chọn vụ án của vùng này
+  function menuSg() {
+    const k = "menusg";
+    const defs = blurs(k) +
+      lin(`${k}-sky`, [[0, "#0a0d24"], [0.55, "#3a2255"], [1, "#c24a7a"]]) +
+      lin(`${k}-river`, [[0, "#3a2d5c"], [1, "#0a0c1c"]]) +
+      lin(`${k}-fade`, [[0, "#06050c", 0], [0.5, "#06050c", 0.3], [1, "#06050c", 0.86]]);
+    let b = rect(0, 0, 1600, 900, `url(#${k}-sky)`);
+    for (let i = 0; i < 46; i++) b += circle((i * 571) % 1600, (i * 97) % 300, i % 3 ? 1.1 : 1.8, "#fff1d0", 'opacity=".55"');
+    b += haze(k, 420, 200, 170, "#ffd0e6", 0.3) + circle(420, 200, 70, "#fbe4ef", 'opacity=".95"');
+
+    // Dải nhà cao tầng thấp phía xa
+    for (let i = 0; i < 26; i++) {
+      const x = i * 66 - 20, h = 90 + ((i * 53) % 150);
+      b += rect(x, 600 - h, 58, h, i % 2 ? "#26205a" : "#2e2670") + rect(x + 8, 600 - h + 12, 42, 4, "#ffd27a", 'opacity=".4"');
+    }
+    // Landmark 81: tháp thon cao ở bên phải
+    b += path("M1130 620 L1160 180 L1176 90 L1188 60 L1200 90 L1216 180 L1246 620 Z", "#352e7c") + path("M1188 60 L1188 20", "none", 'stroke="#241f52" stroke-width="5"');
+    for (let r = 0; r < 18; r++) b += rect(1166 + r * 0.6, 150 + r * 26, 44 - r * 1.2, 5, "#7be6ff", `opacity="${(0.25 + (r % 4) * 0.12).toFixed(2)}"`);
+    b += glow(k, 1188, 60, 60, "#ff4fa3", 0.6) + circle(1188, 22, 5, "#ff7ab8");
+    // Bitexco: tháp cánh buồm với sân bay trực thăng
+    b += path("M880 620 L892 330 Q925 250 962 300 L978 620 Z", "#3a3290") + path("M962 300 Q1000 310 1008 360 L1006 392 Q990 344 962 332 Z", "#4a42a8") + circle(1006, 346, 9, "#4fd6c6", 'opacity=".75"');
+    for (let r = 0; r < 10; r++) b += rect(902, 340 + r * 27, 56, 4, "#ffd27a", 'opacity=".45"');
+    b += glow(k, 1006, 346, 40, "#4fd6c6", 0.4);
+    // Cầu dây văng bắc qua sông
+    b += path("M0 640 Q300 600 800 612 T1600 600", "none", 'stroke="#0a0a18" stroke-width="10"');
+    [300, 560, 820].forEach((x) => { b += line(x, 612, x - 16, 470, "#0a0a18", 6) + path(`M${x - 140} 612 L${x - 16} 470 L${x + 140} 612`, "none", 'stroke="#0a0a18" stroke-width="2"'); });
+
+    // Dòng sông phản chiếu neon, thuyền nhỏ
+    b += rect(0, 560, 1600, 80, "#ff4fa3", 'opacity=".08"') + rect(0, 640, 1600, 260, `url(#${k}-river)`);
+    for (let i = 0; i < 46; i++) b += rect((i * 97) % 1600, 650 + ((i * 41) % 230), 40 + (i % 5) * 16, 3, i % 2 ? "#ff4fa3" : "#4fd6c6", 'opacity=".28"');
+    b += rect(1160, 650, 56, 250, "#7be6ff", 'opacity=".06"') + rect(900, 650, 70, 250, "#4fd6c6", 'opacity=".06"');
+    b += path("M600 760 Q640 740 700 760 L690 776 Q640 782 610 776 Z", "#13112a") + circle(670, 750, 4, "#ffb347");
+    b += rect(0, 0, 1600, 900, `url(#${k}-fade)`);
+    return frame("Sài Gòn về đêm", defs, b);
+  }
+
   /* ---------- Bảng đăng ký cảnh ---------- */
   const SCENES = {
     shop, altar,
     alley: () => alley(false),
     alley_rain: () => alley(true),
-    archive, gallery, gate, corridor, banquet, notary, stair, pharmacy, lab, menu
+    archive, gallery, gate, corridor, banquet, notary, stair, pharmacy, lab, menu,
+    sg_lobby: sgLobby, sg_secroom: sgSecroom, sg_garage: sgGarage, sg_penthouse: sgPenthouse, sg_street: sgStreet, sg_lab: sgLab, menu_sg: menuSg
   };
 
   return {
-    // Cảnh điều tra được mở rộng thành thế giới panorama có cửa; menu giữ khung gốc
-    scene: (key, doors = []) => (key === "menu" || !SCENES[key] ? SCENES.menu() : widen(key, SCENES[key](), doors)),
+    // Cảnh điều tra được mở rộng thành thế giới panorama có cửa; menu (của mỗi vùng) giữ khung gốc
+    scene: (key, doors = []) => {
+      if (key === "menu_sg") return SCENES.menu_sg();
+      return key === "menu" || !SCENES[key] ? SCENES.menu() : widen(key, SCENES[key](), doors);
+    },
     portrait,
     evidence(v) {
       if (v.k === "paper") return paper(v);
       if (v.k === "cam") return camView(v);
       if (v.k === "lock") return lockView();
       if (v.k === "box") return boxView();
+      if (v.k === "tide") return tideView();
+      if (v.k === "skew") return skewView();
       return "";
     }
   };

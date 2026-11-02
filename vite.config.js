@@ -6,6 +6,8 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 // Phaser có sẵn bản "core" (không có vật lý arcade, matter và tilemap) do chính nhà phát triển cung cấp.
 // Trỏ import "phaser" về bản này để giảm khoảng 140 KB gzip; API dùng trong dự án không đổi.
 const phaserCore = fileURLToPath(new URL("./node_modules/phaser/src/phaser-core.js", import.meta.url));
+// Bản core không có plugin ánh sáng (Phaser.GameObjects.LightsPlugin): nạp riêng để dùng ánh sáng thật cho nền cảnh
+const phaserLights = fileURLToPath(new URL("./node_modules/phaser/src/gameobjects/lights/LightsPlugin.js", import.meta.url));
 const spectorStub = fileURLToPath(new URL("./src/vendor/spector-stub.js", import.meta.url));
 
 // Các cờ build của Phaser (lấy từ cấu hình webpack chính thức của Phaser). Bản core dùng
@@ -35,6 +37,7 @@ export default defineConfig({
     alias: [
       { find: /^phaser$/, replacement: phaserCore },
       { find: /^phaser3spectorjs$/, replacement: spectorStub },
+      { find: /^phaser-lights$/, replacement: phaserLights },
     ],
   },
   // Bản core của Phaser là CommonJS và gán vào biến global; trình duyệt không có global nên đổi thành globalThis

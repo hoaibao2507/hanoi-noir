@@ -8,6 +8,7 @@ import { OX } from "../world/layout.js";
 
 export const AMBIENT = {
   alley_rain: { rain: true },
+  sg_street: { rain: true },
   altar: { smoke: [[800, 400]] }
 };
 
@@ -34,11 +35,17 @@ function softDot(size) {
   return c;
 }
 
+// Texture chấm sáng mờ dùng chung cho khói và quầng sáng; tạo một lần cho mỗi scene
+export function ensurePuff(scene) {
+  if (!scene.textures.exists("puff")) scene.textures.addCanvas("puff", softDot(128));
+}
+
 // Tạo các hiệu ứng trên một Phaser Scene. update() gọi mỗi khung hình với env gồm:
 // cur (con trỏ), W, H (kích thước khung nhìn), toScreen(wx, wy) và unit (px màn hình trên một đơn vị thế giới)
-export function createAmbience(scene) {
+// lit: đã có ánh sáng thật (render/lighting.js) nên không cần lớp ánh vàng phủ toàn khung nữa
+export function createAmbience(scene, lit = false) {
   if (REDUCED) return { setScene() {}, update() {} };
-  if (!scene.textures.exists("puff")) scene.textures.addCanvas("puff", softDot(128));
+  ensurePuff(scene);
 
   const warm = scene.add.graphics().setBlendMode("ADD").setDepth(4);
   const dust = scene.add.graphics().setBlendMode("ADD").setDepth(3);
@@ -172,7 +179,7 @@ export function createAmbience(scene) {
       puffs = [];
     },
     update(dt, t, env) {
-      warmLight(t, env.W, env.H);
+      if (!lit) warmLight(t, env.W, env.H);
       dustMotes(dt, env.cur, env.W, env.H);
       rainDrops(dt, env.W, env.H);
       smoke(dt, env);

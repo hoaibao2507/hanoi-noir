@@ -2,11 +2,11 @@
    Bộ điều khiển: nối trạng thái, luật chơi, sân khấu và giao diện.
    Mọi thay đổi đi qua store; render() đọc trạng thái và cập nhật từng vùng.
    ===================================================================== */
-import { CASES } from "./data/cases.js";
+import { CASES, REGIONS } from "./data/cases.js";
 import { ART } from "./art/art.js";
 import { createStore } from "./state/store.js";
 import * as R from "./game/rules.js";
-import { loadSave, storeSave, clearSave, loadRun, storeRun, clearRun } from "./game/save.js";
+import { loadSave, storeSave, clearSave, loadRun, storeRun, clearRun, loadRegion, storeRegion } from "./game/save.js";
 import { doorsFor } from "./world/doors.js";
 import { WORLD_W, OX, COMP_W } from "./world/layout.js";
 import * as stage from "./ui/stage.js";
@@ -14,13 +14,21 @@ import { onLampMove } from "./ui/cursor.js";
 import { lightSecrets } from "./ui/flashlight.js";
 import * as T from "./ui/templates.js";
 import * as O from "./ui/overlays.js";
+import { mountPinboard, syncPinboard, wiggle } from "./ui/pinboard.js";
 import { $, setHTML } from "./ui/dom.js";
 
 const MENU_W = 1600;
-const store = createStore({ screen: "menu", save: loadSave(), game: null, nb: false });
-// Lựa chọn trong phiên xét xử: thủ phạm và hồ sơ đã chọn cho từng bước. Giữ lại giữa các lần thử trong một vụ
-const emptyAccuse = () => ({ culprit: null, steps: {} });
+const regionIds = REGIONS.map((r) => r.id);
+const store = createStore({
+  screen: "menu", save: loadSave(), game: null, nb: false,
+  region: loadRegion(regionIds, regionIds[0])
+});
+// Lựa chọn trong phiên xét xử. Vụ một thủ phạm: người và hồ sơ cho từng bước (steps). Vụ nhiều người: người (who) và hồ sơ (evid)
+// theo từng vai, và đáp án các câu dựng lại sự việc (facts). Giữ lại giữa các lần thử trong một vụ
+const emptyAccuse = () => ({ culprit: null, steps: {}, who: {}, evid: {}, facts: {} });
 let accuse = emptyAccuse();
+// Bàn phím số đang mở: { id, code, msg } hoặc null
+let lockEntry = null;
 let worldKey = null;
 // Đồng hồ (theo phút) đã báo diễn biến tới đó; diễn biến nằm sau mốc này sẽ được báo khi tới
 let announced = 0;
@@ -43,12 +51,13 @@ function render() {
 
 function renderMenu(s) {
   const entering = worldKey !== "menu";
+  const region = REGIONS.find((r) => r.id === s.region) || REGIONS[0];
   stage.markScene("menu");
   syncWorld("menu", MENU_W, MENU_W / 2);
-  stage.setArt("menu", () => ART.scene("menu"), "menu");
+  stage.setArt(`menu:${region.id}`, () => ART.scene(region.scene), "menu");
   stage.setDoors("");
   stage.setHotspots("");
-  setHTML($("ui"), T.menuHTML(s.save));
+  setHTML($("ui"), T.menuHTML(s.save, region.id));
   $("notebook").classList.remove("is-open");
   if (entering) O.animateMenu();
 }
@@ -65,6 +74,7 @@ function renderCase(s) {
   const nb = $("nb-body"), y = nb.scrollTop;
   setHTML(nb, T.notebookHTML(g, c));
   nb.scrollTop = y;
+  syncPinboard(nb);
   $("notebook").classList.toggle("is-open", s.nb);
 }
 
@@ -86,8 +96,8 @@ async function startCase(i) {
   if (run && run.idx === i && resumeRun(run)) return O.toast(`Tiếp tục ${c.title}`);
   const g0 = { ...R.newGame(i, c), busy: true };
   announced = R.nowMinutes(g0, c);
-  store.set({ screen: "case", game: g0, nb: false });
-  await O.veil(`Vụ ${c.no}`, c.title, c.place, null);
+  store.set({ screen: "case", game: g0, nb: false, region: c.region });
+  await O.veil(`${T.regionOf(c).short} · Vụ ${c.no}`, c.title, c.place, null);
   setGame({ busy: false });
   O.showSheet(T.briefingHTML(c));
   O.animateEntrance();
@@ -98,26 +108,115 @@ async function goLoc(i) {
   if (!g || g.busy || i === g.loc) return;
   setGame({ busy: true });
   const L = CASES[g.idx].locations[i];
-  await O.veil("Di chuyển đến", L.name, L.time, () => setGame({ loc: i }));
+  // Mống mắt khép lại đúng vào cánh cửa vừa bấm
+  const door = document.querySelector(`.door[data-loc="${i}"]`);
+  const box = door && door.getBoundingClientRect();
+  const origin = box && { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  await O.veil("Di chuyển đến", L.name, L.time, () => setGame({ loc: i }), origin);
   setGame({ busy: false });
   O.animateEntrance();
 }
 
 function goMenu() {
   O.closeSheet();
+  O.hideTestimony();
   store.set({ screen: "menu", game: null, nb: false });
 }
 
 function act(id) {
   const g = game(), c = CASES[g.idx];
+  const a = c.actions.find((x) => x.id === id);
+  // Hồ sơ về muộn: hỏi có chờ không. Điểm có khóa: mở bàn phím số. Hai việc này không tự làm điểm điều tra
+  if (a && R.isPending(g, c, id)) return O.showSheet(T.waitHTML(g, c, a));
+  if (a && a.lock && R.isOpen(g, c, id)) return openLock(id);
+  // Lấy vị trí điểm điều tra trước khi cảnh được vẽ lại: hồ sơ sẽ bay từ đây vào Sổ tay
+  const chip = document.querySelector(`[data-id="${id}"].hs .hs-chip`);
+  const from = chip ? chip.getBoundingClientRect() : null;
   const next = R.performAct(g, c, id);
   if (next === g) return;
   store.set({ game: next });
   O.flashHotspot(id);
-  const title = c.actions.find((a) => a.id === id).title;
+  O.flyToNotebook(from);
+  const title = a.title;
   const news = freshNews(next, c);
-  if (news.length) return O.showSheet(T.newsHTML(news, `Đã ghi vào hồ sơ: ${title}`));
+  if (news.length) return O.showSheet(T.newsHTML(news, `Đã ghi vào hồ sơ: ${title}`), { cinema: true });
+  // Hỏi cung: lời khai hiện ngay dưới màn hình, cảnh đẩy lại gần người đang nói
+  if (a.visual && a.visual.k === "who" && a.text) {
+    const focus = from && { x: from.left + from.width / 2, y: from.top + from.height / 2 };
+    return O.showTestimony(T.testimonyHTML(c, a), focus);
+  }
   O.toast(`Đã ghi vào hồ sơ: ${title}`);
+}
+
+/* ---------- Chờ hồ sơ về muộn ---------- */
+function waitDo(id) {
+  const g = game(), c = CASES[g.idx];
+  const next = R.waitFor(g, c, id);
+  if (next === g) return O.toast("Không đủ giờ để chờ.");
+  store.set({ game: next });
+  const news = freshNews(next, c);
+  const lead = `Bạn đã chờ ${g.hours - next.hours} giờ. Giờ hiện tại: ${R.clockAt(next, c)}.`;
+  O.showSheet(T.newsHTML(news, lead), { cinema: true });
+}
+
+/* ---------- Khóa mã ---------- */
+function showLock(msg = "") {
+  const g = game(), c = CASES[g.idx], a = c.actions.find((x) => x.id === lockEntry.id);
+  lockEntry.msg = msg;
+  O.showSheet(T.lockHTML(c, a, lockEntry.code, g.lockTries[a.id] || 0, msg));
+}
+
+function openLock(id) {
+  lockEntry = { id, code: "", msg: "" };
+  showLock();
+}
+
+function lockKey(k) {
+  if (!lockEntry) return;
+  const g = game(), a = CASES[g.idx].actions.find((x) => x.id === lockEntry.id);
+  if (lockEntry.code.length >= a.lock.digits) return;
+  lockEntry.code += String(k);
+  showLock(lockEntry.msg);
+}
+
+function lockDel() {
+  if (!lockEntry) return;
+  lockEntry.code = lockEntry.code.slice(0, -1);
+  showLock(lockEntry.msg);
+}
+
+function lockGo() {
+  if (!lockEntry) return;
+  const g = game(), c = CASES[g.idx], id = lockEntry.id;
+  const a = c.actions.find((x) => x.id === id);
+  if (lockEntry.code.length !== a.lock.digits) return;
+  const r = R.attemptLock(g, c, id, lockEntry.code);
+  lockEntry.code = "";
+  if (r.status === "closed") return O.closeSheet();
+  store.set({ game: r.game });
+  if (r.status === "open") {
+    lockEntry = null;
+    O.closeSheet();
+    O.flashHotspot(id);
+    const news = freshNews(r.game, c);
+    if (news.length) return O.showSheet(T.newsHTML(news, `Khóa đã mở. Đã ghi vào hồ sơ: ${a.title}`), { cinema: true });
+    return O.toast(`Khóa đã mở. Đã ghi vào hồ sơ: ${a.title}`);
+  }
+  if (r.status === "wrong") return showLock(`Mã sai. Còn ${r.left} lần thử.`);
+  // Bị khóa: mất giờ, và đồng hồ có thể đã tới một mốc diễn biến
+  const news = freshNews(r.game, c);
+  lockEntry = null;
+  O.showSheet(T.newsHTML(news, `Thiết bị tự khóa vì nhập sai ${R.LOCK_TRIES} lần. Bạn mất ${R.LOCK_PENALTY} giờ chờ nó mở lại.`), { cinema: true });
+}
+
+/* ---------- Suy luận ---------- */
+function ddTry() {
+  const g = game(), c = CASES[g.idx];
+  const next = R.tryDeduce(g, c);
+  if (next === g) return;
+  store.set({ game: next });
+  const r = next.ddResult;
+  if (r && r.status === "new") O.showSheet(T.deduceResultHTML(c, r.gives));
 }
 
 function openAccuse() {
@@ -125,6 +224,12 @@ function openAccuse() {
   if (!g || g.busy) return;
   if (g.over) return O.toast("Hồ sơ đã đóng. Hãy điều tra lại vụ này.");
   O.showSheet(T.accuseHTML(g, CASES[g.idx], accuse));
+}
+
+// Phiên xét xử nhiều người: chọn người cho một vai, chứng cứ cho một vai, đáp án một câu dựng lại sự việc
+function vdPick(field, key, id) {
+  accuse[field][key] = accuse[field][key] === id ? null : id;
+  O.showSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
 }
 
 function pickCulprit(id) {
@@ -138,15 +243,28 @@ function pickStep(key, id) {
   O.showSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
 }
 
+function submitVerdict() {
+  const g = game(), c = CASES[g.idx];
+  const roles = c.verdict.roles;
+  if (roles.some((r) => !accuse.who[r.key])) return O.toast("Hãy chọn một người cho mỗi vai trước.");
+  const v = R.judgeVerdict(c, accuse);
+  if (v.win) return finish(true);
+  const next = R.loseLife(g);
+  store.set({ game: next });
+  if (next.over) return finish(false);
+  O.showSheet(T.wrongVerdictHTML(next.lives, v, c), { cinema: true });
+}
+
 function submitAccuse() {
   const g = game(), c = CASES[g.idx];
+  if (R.hasVerdict(c)) return submitVerdict();
   if (!accuse.culprit) return O.toast("Hãy chọn một nghi phạm trước.");
   const v = R.judge(c, accuse.culprit, accuse.steps);
   if (v.win) return finish(true);
   const next = R.loseLife(g);
   store.set({ game: next });
   if (next.over) return finish(false);
-  O.showSheet(T.wrongHTML(next.lives, v));
+  O.showSheet(T.wrongHTML(next.lives, v), { cinema: true });
 }
 
 function finish(win) {
@@ -156,9 +274,9 @@ function finish(win) {
     // Thắng thì hồ sơ đóng, nên ván này không còn gì để khôi phục
     store.set({ save, game: { ...g, over: true } });
     storeSave(save);
-    O.showSheet(T.verdictWinHTML(c, g.idx, g.wrong, save));
+    O.showSheet(T.verdictWinHTML(c, g.idx, g.wrong, save), { cinema: true });
   } else {
-    O.showSheet(T.verdictLoseHTML(c, g.idx));
+    O.showSheet(T.verdictLoseHTML(c, g.idx), { cinema: true });
   }
 }
 
@@ -183,7 +301,7 @@ function confront(who, clue) {
     ? c.actions.find((a) => a.id === next.found[next.found.length - 1])
     : null;
   const news = freshNews(next, c);
-  O.showSheet(T.reactionHTML(c, who, clue, R.reactionFor(c, who, clue), reveal, news));
+  O.showSheet(T.reactionHTML(c, who, clue, R.reactionFor(c, who, clue), reveal, news), { cinema: news.length > 0 });
 }
 
 function checkLinks() {
@@ -191,6 +309,20 @@ function checkLinks() {
   const next = R.checkPair(g, c);
   store.set({ game: next });
   if (next.lkResult && next.lkResult.status === "new") O.toast("Kết nối mới đã được ghi vào sổ tay");
+}
+
+// Kéo hồ sơ này thả lên hồ sơ kia trên bảng ghim: chọn cả hai rồi đối chiếu ngay, không tốn giờ
+function pairLink(a, b) {
+  const g = game(), c = CASES[g.idx];
+  if (!g || g.busy || g.over) return;
+  let n = R.pickClue({ ...g, pick: [] }, a);
+  n = R.pickClue(n, b);
+  if (n.pick.length !== 2) return;
+  n = R.checkPair(n, c);
+  store.set({ game: { ...n, pick: [] } });
+  const status = n.lkResult && n.lkResult.status;
+  if (status === "new") O.toast("Kết nối mới đã được ghi vào sổ tay");
+  else if (status === "none") wiggle([a, b]);
 }
 
 function resetProgress() {
@@ -214,9 +346,9 @@ function resumeRun(run) {
   const c = CASES[run.idx];
   // Dữ liệu vụ có thể đã đổi sau khi lưu: hồ sơ đã thu mà không còn tồn tại thì không khôi phục
   if (!run.game.found.every((id) => c.actions.some((a) => a.id === id))) return false;
-  const g = { ...run.game, busy: false };
+  const g = { ...R.newGame(run.idx, c), ...run.game, busy: false };
   announced = R.nowMinutes(g, c);
-  store.set({ screen: "case", game: g, nb: false });
+  store.set({ screen: "case", game: g, nb: false, region: c.region });
   return true;
 }
 
@@ -228,12 +360,21 @@ function restoreRun() {
 
 /* ---------- Hành động gắn với data-action ---------- */
 export const actions = {
+  region: (d) => {
+    storeRegion(d.id);
+    store.set({ region: d.id });
+  },
   start: (d) => startCase(Number(d.i)),
   menu: () => goMenu(),
   go: (d) => goLoc(Number(d.loc)),
   act: (d) => act(d.id),
   pan: (d) => stage.pan(Number(d.dir)),
-  "nb-toggle": () => store.set({ nb: !store.get().nb }),
+  "nb-toggle": () => {
+    O.hideTestimony();
+    store.set({ nb: !store.get().nb });
+  },
+  "tm-close": () => O.hideTestimony(),
+  "lk-pair": (d) => pairLink(d.a, d.b),
   "nb-tab": (d) => {
     $("nb-body").scrollTop = 0;
     setGame({ tab: d.tab });
@@ -242,13 +383,29 @@ export const actions = {
   mx: (d) => store.set({ game: R.cycleMatrix(game(), d.rid, d.act) }),
   "lk-pick": (d) => store.set({ game: R.pickClue(game(), d.id) }),
   "lk-check": () => checkLinks(),
+  "dd-pick": (d) => store.set({ game: R.pickDeduce(game(), d.id) }),
+  "dd-clear": () => store.set({ game: { ...game(), dpick: [], ddResult: null } }),
+  "dd-try": () => ddTry(),
+  "lock-key": (d) => lockKey(d.k),
+  "lock-del": () => lockDel(),
+  "lock-go": () => lockGo(),
+  "wait-do": (d) => waitDo(d.id),
+  "vd-who": (d) => vdPick("who", d.role, d.id),
+  "vd-ev": (d) => vdPick("evid", d.role, d.id),
+  "vd-fact": (d) => vdPick("facts", d.key, d.id),
   "confront-open": (d) => openConfront(d.who),
   confront: (d) => confront(d.who, d.clue),
-  accuse: () => openAccuse(),
+  accuse: () => {
+    O.hideTestimony();
+    openAccuse();
+  },
   pick: (d) => pickCulprit(d.id),
   "st-pick": (d) => pickStep(d.step, d.id),
   submit: () => submitAccuse(),
-  close: () => O.closeSheet(),
+  close: () => {
+    lockEntry = null;
+    O.closeSheet();
+  },
   help: () => O.showSheet(T.helpHTML()),
   "reset-ask": () => O.showSheet(T.resetHTML()),
   "reset-confirm": () => resetProgress()
@@ -257,12 +414,19 @@ export const actions = {
 // Khởi động: dựng sân khấu, vẽ menu, nối phím tắt
 export function boot() {
   stage.mountStage();
+  mountPinboard($("nb-body"), pairLink);
   onLampMove(lightSecrets);
   restoreRun();
   store.subscribe(persistRun);
   store.subscribe(render);
   document.addEventListener("keydown", (e) => {
+    if (lockEntry && O.sheetOpen()) {
+      if (/^[0-9]$/.test(e.key)) return lockKey(e.key), e.preventDefault();
+      if (e.key === "Backspace") return lockDel(), e.preventDefault();
+      if (e.key === "Enter") return lockGo(), e.preventDefault();
+    }
     if (e.key === "Escape") {
+      lockEntry = null;
       if (O.sheetOpen()) O.closeSheet();
       else if (store.get().nb) store.set({ nb: false });
       return;

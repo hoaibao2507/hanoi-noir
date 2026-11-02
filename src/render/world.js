@@ -8,6 +8,9 @@
 import Phaser from "phaser";
 import { cursorState } from "../ui/cursor.js";
 import { createAmbience } from "../ui/ambience.js";
+import { createLighting, lightsPluginEntry } from "./lighting.js";
+import { createActors, parseFigures } from "./actors.js";
+import { analyze } from "./analyze.js";
 import { OX, WORLD_H } from "../world/layout.js";
 
 // Phóng nhẹ lớp nền để parallax không lộ mép. Khớp với #world-art trong main.css
@@ -37,12 +40,14 @@ export function mount() {
       audio: { noAudio: true },
       resolution: Math.min(window.devicePixelRatio || 1, 2),
       scale: { mode: Phaser.Scale.RESIZE },
+      plugins: { scene: [lightsPluginEntry] },
       scene: [WorldScene]
     });
   } catch (err) {
     console.warn("Phaser không khởi động được, dùng SVG trong DOM.", err);
     game = null;
   }
+  if (import.meta.env && import.meta.env.DEV) window.__phaser = game; // chỉ khi chạy dev, để gỡ lỗi trong console
 }
 
 // Tách chữ khỏi nền. Chữ giữ lại cho DOM vẽ; mưa và khói được vẽ lại bằng Phaser
@@ -58,13 +63,18 @@ export function splitArt(svg) {
   const open = svg.match(/<svg\b[^>]*>/)[0];
   const shift = svg.includes(`translate(${OX} 0)`) ? OX : 0; // cảnh mở rộng đặt chữ trong nhóm dịch OX
   const overlay = `${open}<g transform="translate(${shift} 0)">${texts.join("")}</g></svg>`;
-  return { base, overlay };
+  return { base, overlay, figs: parseFigures(svg, shift) };
 }
 
-export function setArt(base, sceneKey, onReady) {
+export function setArt(base, sceneKey, onReady, figs = []) {
   if (!game) return;
-  latest = { base, sceneKey, onReady };
+  latest = { base, sceneKey, onReady, figs };
   if (scene) scene.showArt();
+}
+
+// Đèn chập chờn một lúc: dùng cho diễn biến và chuyển cảnh
+export function flicker(strength) {
+  if (scene && scene.lighting) scene.lighting.flicker(strength);
 }
 
 export function setView(v) {
@@ -127,7 +137,11 @@ class WorldScene extends Phaser.Scene {
   create() {
     scene = this;
     this.art = null;
-    this.ambience = createAmbience(this);
+    const glOn = this.sys.game.renderer.type === Phaser.WEBGL;
+    this.lighting = createLighting(this, glOn);
+    document.getElementById("scene").classList.toggle("gl-lit", this.lighting.lit); // CSS bớt lớp đèn pin giả khi đã có đèn thật
+    this.actors = createActors(this, this.lighting.lit);
+    this.ambience = createAmbience(this, this.lighting.lit);
     if (latest) this.showArt();
   }
 
@@ -139,13 +153,17 @@ class WorldScene extends Phaser.Scene {
       this.art.setPosition(box.x, box.y);
       this.art.setDisplaySize(box.w, box.h);
     }
-    this.ambience.update(Math.min(delta, 50) / 1000, t, {
+    const env = {
       cur,
       W: this.scale.width,
       H: this.scale.height,
       toScreen: (wx, wy) => [box.x + (wx * box.w) / view.worldW, box.y + (wy * box.h) / WORLD_H],
       unit: box.w / view.worldW
-    });
+    };
+    const dt = Math.min(delta, 50) / 1000;
+    this.lighting.update(dt, t, env);
+    this.actors.update(dt, t, env);
+    this.ambience.update(dt, t, env);
   }
 
   // Vẽ nền của yêu cầu gần nhất. Raster xong mới thay ảnh cũ, nên không bao giờ hiện nền dở dang
@@ -153,19 +171,29 @@ class WorldScene extends Phaser.Scene {
     const job = latest;
     if (!job || !view) return;
     const id = ++token;
+    const t0 = performance.now();
     const q = quality();
     const W = Math.round(view.worldW * q), H = Math.round(WORLD_H * q);
     rasterize(sized(job.base, W, H), W, H)
       .then((canvas) => {
         if (id !== token) return; // đã có yêu cầu mới hơn
         const key = `art-${id}`;
-        this.textures.addCanvas(key, canvas);
+        const t1 = performance.now();
+        const { normal, lamps, probe } = analyze(canvas, view.worldW, WORLD_H, job.figs);
+        this.textures.addImage(key, canvas, normal);
         if (this.art) this.art.setTexture(key);
         else this.art = this.add.image(0, 0, key).setOrigin(0, 0).setDepth(0);
+        if (this.lighting.lit) this.art.setLighting(true);
         if (texKey) this.textures.remove(texKey);
         texKey = key;
         rasterQ = q;
+        this.lamps = lamps;
+        this.lighting.setScene(lamps);
+        this.actors.setScene(job.figs, canvas, normal, view.worldW, probe);
         this.ambience.setScene(job.sceneKey);
+        if (import.meta.env && import.meta.env.DEV) {
+          console.debug(`[nền] ${job.sceneKey}: raster ${Math.round(t1 - t0)} ms, phân tích + dựng ${Math.round(performance.now() - t1)} ms, ${W}×${H}`);
+        }
         if (job.onReady) job.onReady();
       })
       .catch((err) => console.warn("Không vẽ được nền cảnh.", err));

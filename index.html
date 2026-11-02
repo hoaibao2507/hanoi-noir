@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Hanoi Noir: trò chơi điều tra vụ án phố cổ Hà Nội, toàn màn hình, chạy trên trình duyệt.">
-  <title>Hanoi Noir · Vụ Án Phố Cổ</title>
+  <meta name="description" content="Hanoi Noir: trò chơi điều tra vụ án ở phố cổ Hà Nội và Sài Gòn, toàn màn hình, chạy trên trình duyệt.">
+  <title>Hanoi Noir · Vụ Án Phố Cổ và Sài Gòn</title>
   <!-- Icon nhúng trực tiếp (SVG data URI) để bản build một file vẫn có icon, không cần file riêng -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230c0907'/%3E%3Ccircle cx='27' cy='27' r='13' fill='%23ffd98e' fill-opacity='.18' stroke='%23f0b35a' stroke-width='5'/%3E%3Ccircle cx='27' cy='27' r='4.5' fill='%23ffd98e'/%3E%3Cpath d='M37 37l13 13' stroke='%23f0b35a' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,6 +45,12 @@
   <div id="curtain" aria-hidden="true">
     <div id="card"><div class="k"></div><div class="t"></div><div class="s"></div></div>
   </div>
+
+  <!-- Hai thanh đen kiểu phim, hiện khi chuyển cảnh và khi có diễn biến quan trọng -->
+  <div id="bars" aria-hidden="true"><i></i><i></i></div>
+
+  <!-- Lời khai cận cảnh: thẻ dưới màn hình, không chặn thao tác -->
+  <div id="testimony"></div>
 
   <!-- Hộp thoại kiểu hồ sơ giấy -->
   <div id="modal" class="hidden" role="dialog" aria-modal="true"></div>

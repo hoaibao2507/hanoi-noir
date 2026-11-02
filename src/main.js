@@ -6,7 +6,8 @@ import {
   faCircleCheck, faCircleQuestion, faCircleXmark, faComments, faFileCircleCheck,
   faFileLines, faFolderOpen, faForward, faGavel, faHeart, faHourglassEnd,
   faLink, faLocationDot, faLock, faMagnifyingGlass, faRotateLeft, faRotateRight, faTableCells,
-  faTriangleExclamation, faTrophy, faUserSecret, faVideo, faXmark
+  faTriangleExclamation, faTrophy, faUserSecret, faVideo, faXmark,
+  faCity, faDeleteLeft, faHourglassHalf, faLandmark, faLightbulb, faLockOpen
 } from "@fortawesome/free-solid-svg-icons";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { boot, actions } from "./app.js";
@@ -21,6 +22,7 @@ library.add(
   faFileLines, faFolderOpen, faForward, faGavel, faHeart, faHourglassEnd,
   faLink, faLocationDot, faLock, faMagnifyingGlass, faRotateLeft, faRotateRight, faTableCells,
   faTriangleExclamation, faTrophy, faUserSecret, faVideo, faXmark,
+  faCity, faDeleteLeft, faHourglassHalf, faLandmark, faLightbulb, faLockOpen,
   faClock
 );
 dom.i2svg();

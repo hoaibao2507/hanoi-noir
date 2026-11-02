@@ -61,3 +61,24 @@ export function clearRun() {
     /* bỏ qua */
   }
 }
+
+// Vùng đang xem ở menu (mã vùng như "hn", "sg"), lưu riêng để lần sau mở lại đúng vùng
+const REGION_KEY = "hanoi-noir-region-v1";
+
+export function loadRegion(valid, fallback) {
+  try {
+    const r = localStorage.getItem(REGION_KEY);
+    if (valid.includes(r)) return r;
+  } catch (e) {
+    /* bỏ qua: dùng vùng mặc định */
+  }
+  return fallback;
+}
+
+export function storeRegion(id) {
+  try {
+    localStorage.setItem(REGION_KEY, id);
+  } catch (e) {
+    /* không lưu được thì thôi */
+  }
+}
