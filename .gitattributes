@@ -1,0 +1,7 @@
+# Mọi file văn bản dùng LF trong repo lẫn thư mục làm việc (tránh cảnh báo LF/CRLF khi commit trên Windows)
+* text=auto eol=lf
+
+# File nhị phân không bị đổi kết thúc dòng
+*.png binary
+*.jpg binary
+*.woff2 binary

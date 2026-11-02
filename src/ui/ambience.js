@@ -48,7 +48,6 @@ export function createAmbience(scene, lit = false) {
   ensurePuff(scene);
 
   const warm = scene.add.graphics().setBlendMode("ADD").setDepth(4);
-  const dust = scene.add.graphics().setBlendMode("ADD").setDepth(3);
   const drops = scene.add.graphics().setDepth(2);
   const freeImages = []; // hình khói đã dùng xong, tái sử dụng để khỏi tạo đối tượng mới
   let puffs = [];
@@ -127,7 +126,11 @@ export function createAmbience(scene, lit = false) {
     if (key !== moteKey) {
       moteKey = key;
       const n = Math.round(clamp((W * H) / 26000, 18, 70));
+      for (const m of motes) m.img.destroy();
+      // Mỗi hạt bụi là một sprite chấm sáng mờ (cùng texture "puff" với khói): cả đàn được gộp thành vài lượt vẽ,
+      // không phải dựng lại đường vẽ Graphics cho từng hạt ở mỗi khung hình
       motes = Array.from({ length: n }, () => ({
+        img: scene.add.image(0, 0, "puff").setBlendMode("ADD").setDepth(3).setTint(DUST),
         x: Math.random() * W,
         y: Math.random() * H,
         r: 0.6 + Math.random() * 1.5,
@@ -137,7 +140,6 @@ export function createAmbience(scene, lit = false) {
         ph: Math.random() * Math.PI * 2
       }));
     }
-    dust.clear();
     for (const m of motes) {
       m.x += m.vx * dt;
       m.y += m.vy * dt;
@@ -152,8 +154,10 @@ export function createAmbience(scene, lit = false) {
       const sx = m.x - cur.px * 14 * m.depth;
       const sy = m.y - cur.py * 8 * m.depth;
       const beam = Math.max(0, 1 - Math.hypot(sx - cur.x, sy - cur.y) / BEAM);
-      dust.fillStyle(DUST, (0.1 + 0.55 * beam) * (0.75 + 0.25 * Math.sin(m.ph)));
-      dust.fillCircle(sx, sy, m.r * (0.8 + 0.6 * beam));
+      m.img
+        .setPosition(sx, sy)
+        .setScale((m.r * 5 * (0.8 + 0.6 * beam)) / 128)
+        .setAlpha((0.1 + 0.55 * beam) * (0.75 + 0.25 * Math.sin(m.ph)));
     }
   }
 

@@ -32,6 +32,8 @@ export function newGame(caseIdx, c) {
     ddFrom: {},
     lockTries: {},
     confronted: {},
+    hints: 0,
+    hintId: null,
     wrong: 0,
     over: false,
     busy: false,
@@ -420,3 +422,57 @@ export const totalStars = (save, cases) => cases.reduce((s, c) => s + (save.star
 export const allSolved = (save, cases) => cases.every((c) => save.stars[c.id]);
 
 export const emptySave = () => ({ unlocked: 0, stars: {} });
+
+/* ---------- Gợi ý ---------- */
+// Gợi ý không tốn giờ và không ảnh hưởng số sao; chỉ được đếm để hiện ở màn kết thúc.
+
+// Các nhóm hồ sơ then chốt: mỗi nhóm cần ít nhất một hồ sơ trong `ids` (bước của chain, hoặc vai của verdict)
+const keyGroups = (c) => (c.verdict ? c.verdict.roles : c.chain || []).map((g) => g.ids);
+
+// Điểm điều tra của một hồ sơ: { loc: chỉ số địa điểm, label: nhãn trên cảnh }, hoặc null nếu hồ sơ không đặt trên bản đồ
+export function spotOf(c, id) {
+  for (let i = 0; i < c.locations.length; i++) {
+    const h = c.locations[i].hs.find(([hid]) => hid === id);
+    if (h) return { loc: i, label: h[3] };
+  }
+  return null;
+}
+
+// Việc cần làm để lấy được hồ sơ `id`: đến điểm điều tra (go), chờ hồ sơ về (wait), ghép suy luận (deduce) hoặc đưa chứng cứ (confront).
+// Đi ngược qua mọi điều kiện: điểm bị khóa bởi một kết luận, kết luận cần các hồ sơ khác, lời khai mới cần hỏi người đó trước
+function stepFor(game, c, id, depth = 0) {
+  const a = actionOf(c, id);
+  if (!a || depth > 8 || game.done[id]) return null;
+  if (a.gate && !game.done[a.gate]) return stepFor(game, c, a.gate, depth + 1);
+  if (a.via === "deduce") {
+    const d = (c.deduce || []).find((x) => x.gives === id);
+    if (!d) return null;
+    const missing = d.needs.find((n) => !game.done[n]);
+    return missing ? stepFor(game, c, missing, depth + 1) : { kind: "deduce", id, needs: d.needs };
+  }
+  if (a.via === "confront") {
+    const r = (c.confront || []).find((x) => x.reveal === id);
+    if (!r) return null;
+    if (!questioned(game, c, r.who)) {
+      const ask = c.actions.find((x) => !x.via && x.visual && x.visual.k === "who" && x.visual.id === r.who);
+      return ask ? stepFor(game, c, ask.id, depth + 1) : null;
+    }
+    return game.done[r.clue] ? { kind: "confront", id, who: r.who, clue: r.clue } : stepFor(game, c, r.clue, depth + 1);
+  }
+  if (isPending(game, c, id)) return { kind: "wait", id, at: arrivalOf(c, id) };
+  const spot = spotOf(c, id);
+  return spot ? { kind: "go", id, ...spot } : null;
+}
+
+// Việc nên làm tiếp theo: hồ sơ then chốt đầu tiên còn thiếu, theo lối còn đi được. Đủ rồi thì { kind: "accuse" }
+export function nextStep(game, c) {
+  for (const ids of keyGroups(c)) {
+    if (ids.some((i) => game.done[i])) continue;
+    for (const id of ids) {
+      if (isGone(game, c, id)) continue;
+      const st = stepFor(game, c, id);
+      if (st) return st;
+    }
+  }
+  return { kind: "accuse" };
+}

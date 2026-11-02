@@ -40,6 +40,7 @@ export function mount() {
       audio: { noAudio: true },
       resolution: Math.min(window.devicePixelRatio || 1, 2),
       scale: { mode: Phaser.Scale.RESIZE },
+      input: { keyboard: false, mouse: false, touch: false, gamepad: false }, // chuột, chạm, phím do DOM lo; Phaser không cần nghe
       plugins: { scene: [lightsPluginEntry] },
       scene: [WorldScene]
     });
@@ -175,11 +176,12 @@ class WorldScene extends Phaser.Scene {
     const q = quality();
     const W = Math.round(view.worldW * q), H = Math.round(WORLD_H * q);
     rasterize(sized(job.base, W, H), W, H)
-      .then((canvas) => {
+      .then(async (canvas) => {
         if (id !== token) return; // đã có yêu cầu mới hơn
         const key = `art-${id}`;
         const t1 = performance.now();
-        const { normal, lamps, probe } = analyze(canvas, view.worldW, WORLD_H, job.figs);
+        const { normal, lamps, probe } = await analyze(canvas, view.worldW, WORLD_H, job.figs, () => id !== token);
+        if (id !== token) return; // trong lúc phân tích đã có nền mới hơn
         this.textures.addImage(key, canvas, normal);
         if (this.art) this.art.setTexture(key);
         else this.art = this.add.image(0, 0, key).setOrigin(0, 0).setDepth(0);
@@ -196,6 +198,8 @@ class WorldScene extends Phaser.Scene {
         }
         if (job.onReady) job.onReady();
       })
-      .catch((err) => console.warn("Không vẽ được nền cảnh.", err));
+      .catch((err) => {
+        if (!err.stale) console.warn("Không vẽ được nền cảnh.", err);
+      });
   }
 }

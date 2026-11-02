@@ -8,9 +8,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/rules.test.js tests/save.test.js tests/sg.test.js tests/render.test.js"
+    "test": "node --test tests/rules.test.js tests/save.test.js tests/sg.test.js tests/render.test.js tests/hints.test.js",
+    "lint": "eslint .",
+    "e2e": "vite build && node tests/e2e/smoke.mjs"
   },
   "dependencies": {
+    "@fontsource/be-vietnam-pro": "^5.3.0",
+    "@fontsource/noto-serif-display": "^5.3.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
@@ -18,7 +22,11 @@
     "phaser": "4.2.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@tailwindcss/vite": "^4.3.3",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
+    "playwright-core": "^1.64.1",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.5",
     "vite-plugin-singlefile": "^2.3.4"

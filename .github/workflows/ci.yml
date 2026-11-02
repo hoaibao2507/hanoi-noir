@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # ESLint: lỗi thật như biến chưa khai báo, biến thừa
+      - run: npm run lint
+
+      # Luật chơi, dữ liệu 6 vụ án, số đo nhân vật, cửa (không cần trình duyệt)
+      - run: npm test
+
+      # Bản build một file phải dựng được
+      - run: npm run build
+
+      # Mở dist/index.html bằng Chrome có sẵn trên runner: chơi vài bước, kiểm tra console, WebGL, mạng, focus, khôi phục ván
+      - run: node tests/e2e/smoke.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-failure
+          path: e2e-failure.png
+          if-no-files-found: ignore

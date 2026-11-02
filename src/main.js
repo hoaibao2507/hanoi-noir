@@ -1,4 +1,5 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import "./styles/fonts.css";
 import "./styles/main.css";
 import { config, dom, library } from "@fortawesome/fontawesome-svg-core";
 import {

@@ -58,23 +58,36 @@ function head(o, f) {
 
   // Nét mặt
   const ey = 16.6, ex = 5.2;
+  const expr = o.expr || "calm"; // calm | tense (căng thẳng, bị chạm vào điểm yếu) | worried (lo lắng, sắp khai thêm) | smile
+  const ry = expr === "tense" ? 1.05 : expr === "worried" ? 1.6 : 1.5;
+  const brow = (sg) => {
+    if (expr === "tense") return f ? `M${sg * 2.4} 13.2 Q${sg * 5.6} 11.2 ${sg * 9} 12` : `M${sg * 2.2} 13.7 Q${sg * 5.8} 11.6 ${sg * 9.2} 12`;
+    if (expr === "worried") return `M${sg * 2.4} 11 Q${sg * 5.8} 11 ${sg * 9.2} 13`;
+    return f ? `M${sg * 2.6} 12.9 Q${sg * 5.6} 10.4 ${sg * 9} 12.3` : `M${sg * 2.4} 12.6 Q${sg * 5.8} 11 ${sg * 9.2} 12.4`;
+  };
   for (const sg of [-1, 1]) {
-    s += `<ellipse cx="${sg * ex}" cy="${ey}" rx="2.7" ry="1.5" fill="#f4efe6"/>`;
+    s += `<ellipse cx="${sg * ex}" cy="${ey}" rx="2.7" ry="${ry}" fill="#f4efe6"/>`;
     s += C(sg * (ex - 0.1), ey, 1.35, "#2a1b12") + C(sg * (ex - 0.1) - 0.45, ey - 0.5, 0.4, "#fff", 'opacity=".9"');
     s += STROKE(`M${sg * ex - 2.9} ${ey - 0.2} Q${sg * ex} ${ey - 2.4} ${sg * ex + 2.9} ${ey - 0.2}`, "#2a1b12", 0.75);
-    // Lông mày: nữ mảnh và cong, nam đậm và thẳng hơn
-    s += STROKE(f
-      ? `M${sg * 2.6} 12.9 Q${sg * 5.6} 10.4 ${sg * 9} 12.3`
-      : `M${sg * 2.4} 12.6 Q${sg * 5.8} 11 ${sg * 9.2} 12.4`, dark, f ? 0.95 : 1.5);
+    // Lông mày: nữ mảnh và cong, nam đậm và thẳng hơn; căng thẳng thì cau xuống, lo lắng thì nhướn đầu mày lên
+    s += STROKE(brow(sg), dark, f ? 0.95 : 1.5);
   }
+  if (expr === "worried") s += P("M10.6 5.6 Q12.4 9.2 10.6 10.8 Q8.8 9.2 10.6 5.6 Z", "#bfe3f5", 'opacity=".85"');
   s += STROKE("M0.2 17.6 C0 20.6 -1.3 22.3 -2.1 22.9 Q0 24.1 2.1 22.9", skDD, 0.85, 'opacity=".85"');
   s += C(-1.1, 23.1, 0.35, skDD, 'opacity=".7"') + C(1.1, 23.1, 0.35, skDD, 'opacity=".7"');
   if (f) {
-    s += P("M-3.5 28 Q-1.7 26.6 0 27.2 Q1.7 26.6 3.5 28 Q0 31.2 -3.5 28 Z", "#b85a4e");
-    s += C(-7.6, 22.4, 2.7, "#ff8a7a", 'opacity=".16"') + C(7.6, 22.4, 2.7, "#ff8a7a", 'opacity=".16"');
+    const lips = {
+      calm: "M-3.5 28 Q-1.7 26.6 0 27.2 Q1.7 26.6 3.5 28 Q0 31.2 -3.5 28 Z",
+      tense: "M-3.3 28.3 Q0 27.8 3.3 28.3 Q0 29.6 -3.3 28.3 Z",
+      worried: "M-3.3 29.2 Q0 27.1 3.3 29.2 Q0 28.4 -3.3 29.2 Z",
+      smile: "M-3.9 27.3 Q0 27.9 3.9 27.3 Q0 31.8 -3.9 27.3 Z"
+    };
+    s += P(lips[expr] || lips.calm, "#b85a4e");
+    s += C(-7.6, 22.4, 2.7, "#ff8a7a", `opacity="${expr === "tense" ? 0.08 : 0.16}"`) + C(7.6, 22.4, 2.7, "#ff8a7a", `opacity="${expr === "tense" ? 0.08 : 0.16}"`);
   } else {
-    s += STROKE("M-3.6 28.1 Q0 29.9 3.6 28.1", "#7e362c", 1);
-    s += STROKE("M-1.8 30.2 Q0 31 1.8 30.2", skDD, 0.7, 'opacity=".6"');
+    const mouth = { calm: "M-3.6 28.1 Q0 29.9 3.6 28.1", tense: "M-3.4 28.7 L3.4 28.7", worried: "M-3.4 29.5 Q0 27.6 3.4 29.5", smile: "M-4 27.5 Q0 31 4 27.5" };
+    s += STROKE(mouth[expr] || mouth.calm, "#7e362c", 1);
+    if (expr === "calm") s += STROKE("M-1.8 30.2 Q0 31 1.8 30.2", skDD, 0.7, 'opacity=".6"');
   }
 
   // Tóc
@@ -125,10 +138,12 @@ function head(o, f) {
 /* ---------- Thân: cổ, áo, tay, quần, giày ---------- */
 // opts: seated (chỉ tới FIG_SEAT), legs (vẽ chân), bottom (độ dài thân áo)
 function body(o, f, opts) {
-  const skin = o.skin || "#dca57a", top = o.top || "#4f6b3a", pants = o.pants || "#2b2f3a";
+  const aodai = f && o.outfit === "aodai"; // áo dài: cổ đứng, cài chéo, tà dài tới gần cổ chân, quần lụa sáng màu bên trong
+  const skin = o.skin || "#dca57a", top = o.top || "#4f6b3a", pants = o.pants || (aodai ? "#efe8d6" : "#2b2f3a");
   const skD = shade(skin, -0.16), skDD = shade(skin, -0.32);
   const topD = shade(top, -0.2), topL = shade(top, 0.16), pantsD = shade(pants, -0.16), pantsL = shade(pants, 0.18);
-  const yb = opts.seated ? FIG_SEAT : f ? 110 : 106;
+  const long = aodai && opts.legs && !opts.seated; // tà áo dài che gần hết chân
+  const yb = opts.seated ? FIG_SEAT : long ? 204 : f ? 110 : 106;
   let s = "";
 
   // Chân và giày
@@ -146,7 +161,9 @@ function body(o, f, opts) {
   }
 
   // Thân áo
-  const torso = f
+  const torso = long
+    ? `M-5 40 C-12 41 -20 41.5 -24 48 L-23 66 C-21 76 -17 84 -16.5 90 C-16.5 112 -19 156 -22 ${yb} L22 ${yb} C19 156 16.5 112 16.5 90 C17 84 21 76 23 66 L24 48 C20 41.5 12 41 5 40 Z`
+    : f
     ? `M-5 40 C-12 41 -20 41.5 -24 48 L-23 66 C-21 76 -17 84 -16.5 90 C-16.5 100 -20 106 -21 ${yb} L21 ${yb} C20 106 16.5 100 16.5 90 C17 84 21 76 23 66 L24 48 C20 41.5 12 41 5 40 Z`
     : `M-6 40 C-14 41 -24 41.5 -28 48 L-27 66 C-25 80 -23 92 -22 ${yb} L22 ${yb} C23 92 25 80 27 66 L28 48 C24 41.5 14 41 6 40 Z`;
   s += P(torso, top);
@@ -155,14 +172,24 @@ function body(o, f, opts) {
     : `M6 40 C14 41 24 41.5 28 48 L27 66 C25 80 23 92 22 ${yb} L10 ${yb} C12 90 12 62 6 40 Z`, topD, 'opacity=".5"');
   if (f) s += STROKE("M-14 62 Q-8 70 -2 64", topD, 0.9, 'opacity=".55"') + STROKE("M14 62 Q8 70 2 64", topD, 0.9, 'opacity=".55"');
 
-  // Cổ áo: sơ mi trắng khi có cà vạt, còn lại là cổ chữ V lộ da
+  // Cổ áo: sơ mi trắng khi có cà vạt, còn lại là cổ chữ V lộ da. Áo dài thì cổ đứng và đường cài chéo qua vai phải
   const tie = o.tie, white = "#eee8da";
+  if (aodai) {
+    s += P("M-5.8 37.6 L-5.6 45.2 Q0 49 5.6 45.2 L5.8 37.6 Q0 41.6 -5.8 37.6 Z", topL);
+    s += STROKE("M2.4 46.6 C10 49.6 16.6 55.6 20 66 L20.4 100", topD, 0.9, 'opacity=".8"');
+    for (const [bx, by] of [[5, 47.8], [13, 52.4], [18.6, 60]]) s += C(bx, by, 0.9, topD);
+    if (long) {
+      s += STROKE(`M-17.4 120 L-22 ${yb - 1}`, topD, 0.8, 'opacity=".6"') + STROKE(`M17.4 120 L22 ${yb - 1}`, topD, 0.8, 'opacity=".6"');
+      s += L(-22, yb - 1.4, 22, yb - 1.4, topL, 1.4, 'opacity=".75"');
+    }
+  } else {
   const neckV = tie ? white : skin;
   s += P("M-7.2 39.6 L0 53.5 L7.2 39.6 Z", neckV);
   if (!tie) s += P("M-7.2 39.6 L0 53.5 L7.2 39.6 Q0 44 -7.2 39.6 Z", skD, 'opacity=".5"');
   s += P("M-8.6 39 L-1.4 52.6 L-10.8 48.4 Z", tie ? white : topL) + P("M8.6 39 L1.4 52.6 L10.8 48.4 Z", tie ? "#d9d2c1" : shade(topL, -0.12));
   s += L(0, tie ? 53 : 54, 0, yb, topD, 0.8, 'opacity=".7"');
   for (const y of [66, 80, 94]) if (y < yb - 6) s += C(f ? 1.4 : 1.5, y, 1.05, topD);
+  }
   if (tie) {
     s += P("M-2.7 43.6 L2.7 43.6 L2.1 49.6 L-2.1 49.6 Z", shade(tie, -0.15));
     s += P("M-2.3 49.6 L2.3 49.6 L3.8 86 L0 92 L-3.8 86 Z", tie);
@@ -172,22 +199,48 @@ function body(o, f, opts) {
     s += R(-22.6, 103, 45.2, 5.6, "#1d1612", 'rx="1"') + R(-3, 103.8, 6, 4, "none", 'stroke="#c9a227" stroke-width="0.9" rx="0.8"');
   }
 
-  // Tay: ống tay áo thon, cổ tay áo, bàn tay
+  // Tay: ống tay áo thon, cổ tay áo, bàn tay. Dáng đứng: tay buông; đút túi, chống hông, khoanh tay (không áp dụng cho người ngồi)
   const arm = f
     ? { sx: 21.5, ex: 25, wx: 23.5, w1: 11.5, w2: 9.6, w3: 8 }
     : { sx: 25, ex: 29.5, wx: 28, w1: 14, w2: 11.6, w3: 9.4 };
-  for (const sg of [-1, 1]) {
-    const c = sg < 0 ? shade(top, -0.04) : shade(top, -0.16);
-    s += limb(sg * arm.sx, 51, sg * arm.ex, 88, arm.w1, arm.w2, c);
-    s += limb(sg * arm.ex, 88, sg * arm.wx, 112, arm.w2, arm.w3, c);
-    s += STROKE(`M${sg * (arm.sx - arm.w1 * 0.42)} 56 L${sg * (arm.ex - arm.w2 * 0.42)} 86`, shade(top, 0.14), 0.8, 'opacity=".35"');
-    s += L(sg * arm.wx - 4.4, 111, sg * arm.wx + 4.4, 111, topL, 1.2, 'opacity=".7"');
+  const pose = opts.seated ? "stand" : opts.pose || "stand";
+  const sleeve = (sg) => (sg < 0 ? shade(top, -0.04) : shade(top, -0.16));
+  const blob = (x, y, rx, ry, sg, rot = 0) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${sg < 0 ? skin : skD}" transform="rotate(${rot} ${x} ${y})"/>`;
+  const hanging = (sg) => {
+    const c = sleeve(sg);
+    let a = limb(sg * arm.sx, 51, sg * arm.ex, 88, arm.w1, arm.w2, c) + limb(sg * arm.ex, 88, sg * arm.wx, 112, arm.w2, arm.w3, c);
+    a += STROKE(`M${sg * (arm.sx - arm.w1 * 0.42)} 56 L${sg * (arm.ex - arm.w2 * 0.42)} 86`, shade(top, 0.14), 0.8, 'opacity=".35"');
+    a += L(sg * arm.wx - 4.4, 111, sg * arm.wx + 4.4, 111, topL, 1.2, 'opacity=".7"');
     const hx = sg * (arm.wx + 0.4);
     const hand = sg < 0 ? skin : skD;
     // Bàn tay: cổ tay thon, mu bàn tay rộng nhất ở khớp ngón, các ngón khép lại thon dần; ngón cái ở phía trong
-    s += P(`M${hx - 3.1} 112 C${hx - 3.7} 116 ${hx - 4} 119 ${hx - 3.7} 122.5 C${hx - 3.6} 126 ${hx - 3.1} 129.5 ${hx - 1.8} 131.4 Q${hx} 132.6 ${hx + 1.8} 131.4 C${hx + 3.1} 129.5 ${hx + 3.6} 126 ${hx + 3.7} 122.5 C${hx + 4} 119 ${hx + 3.7} 116 ${hx + 3.1} 112 Z`, hand);
-    s += P(`M${hx - sg * 3} 114 C${hx - sg * 5.4} 117 ${hx - sg * 5.8} 121.5 ${hx - sg * 4.6} 124.6 L${hx - sg * 3} 121.5 Z`, hand);
-    s += STROKE(`M${hx - 1.3} 126 L${hx - 1.2} 131 M${hx + 0.1} 126 L${hx + 0.1} 131.4 M${hx + 1.5} 126 L${hx + 1.4} 131`, skDD, 0.45, 'opacity=".5"');
+    a += P(`M${hx - 3.1} 112 C${hx - 3.7} 116 ${hx - 4} 119 ${hx - 3.7} 122.5 C${hx - 3.6} 126 ${hx - 3.1} 129.5 ${hx - 1.8} 131.4 Q${hx} 132.6 ${hx + 1.8} 131.4 C${hx + 3.1} 129.5 ${hx + 3.6} 126 ${hx + 3.7} 122.5 C${hx + 4} 119 ${hx + 3.7} 116 ${hx + 3.1} 112 Z`, hand);
+    a += P(`M${hx - sg * 3} 114 C${hx - sg * 5.4} 117 ${hx - sg * 5.8} 121.5 ${hx - sg * 4.6} 124.6 L${hx - sg * 3} 121.5 Z`, hand);
+    a += STROKE(`M${hx - 1.3} 126 L${hx - 1.2} 131 M${hx + 0.1} 126 L${hx + 0.1} 131.4 M${hx + 1.5} 126 L${hx + 1.4} 131`, skDD, 0.45, 'opacity=".5"');
+    return a;
+  };
+  // Cánh tay gập: vai → khuỷu → điểm cuối (tay nằm ở đó)
+  const bent = (sg, ex, ey, tx, ty) => {
+    const c = sleeve(sg);
+    return limb(sg * arm.sx, 51, ex, ey, arm.w1, arm.w2, c) + limb(ex, ey, tx, ty, arm.w2, arm.w3, c);
+  };
+  if (pose === "cross") {
+    for (const sg of [-1, 1]) {
+      // Hai cẳng tay vắt chéo trước ngực; tay phải (bên phải ảnh) đè lên trên
+      const ex = sg * (arm.ex - 3), tx = -sg * 13, ty = sg < 0 ? 77 : 71;
+      s += bent(sg, ex, 84, tx, ty) + blob(tx - (-sg) * 2.5, ty + 0.5, 3.6, 4.4, sg, sg * 35);
+    }
+  } else if (pose === "pocket" || pose === "hip") {
+    const ps = f ? -1 : 1; // bên có tay đút túi hoặc chống hông
+    s += hanging(-ps);
+    if (pose === "pocket") {
+      s += bent(ps, ps * (arm.ex - 1), 87, ps * 15.5, 106) + blob(ps * 18.2, 103.6, 2.4, 1.8, ps, ps * 30);
+      s += STROKE(`M${ps * 11.5} 103 L${ps * 19.5} 109.5`, pantsD, 0.8, 'opacity=".8"');
+    } else {
+      s += bent(ps, ps * (arm.ex + 8), 84, ps * 19, 104) + blob(ps * 19.6, 106, 3.4, 3.1, ps, ps * 40);
+    }
+  } else {
+    s += hanging(-1) + hanging(1);
   }
   return { under: s, yb };
 }
@@ -211,10 +264,20 @@ function neck(o, f) {
 function person(o, opts = {}) {
   const f = isFemale(o);
   const h = head(o, f);
-  const b = body(o, f, { seated: !!o.seated, legs: !opts.bust });
+  const b = body(o, f, { seated: !!o.seated, legs: !opts.bust, pose: opts.pose });
   // Đầu phóng 10% quanh cằm: đọc rõ hơn khi nhân vật nhỏ trên màn hình, vẫn cỡ 6 đầu rưỡi
   const big = (g) => `<g transform="translate(0 33) scale(1.1) translate(0 -33)">${g}</g>`;
   return big(h.back) + neck(o, f) + b.under + (o.scarf ? scarf(o.scarf) : "") + big(h.face + h.hairFront + h.acc);
+}
+
+// Dáng đứng cố định cho từng người (suy ra từ trang phục nên ở cảnh nào họ cũng đứng một kiểu): nam đút túi hoặc khoanh tay, nữ chống hông hoặc khoanh tay
+function poseFor(o) {
+  if (o.pose) return o.pose;
+  if (o.seated) return "stand";
+  const key = `${o.top}${o.hair}${o.skin}`;
+  let h = 0;
+  for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return (isFemale(o) ? ["stand", "hip", "cross", "stand"] : ["stand", "pocket", "cross", "stand"])[h % 4];
 }
 
 /* ---------- Người trong cảnh ---------- */
@@ -223,13 +286,14 @@ export function figure(x, headY, s = 1, o = {}) {
   const topLocal = o.hair === "bun" ? -18 : o.hair === "hat" ? -12.6 : -5.4;
   const bot = o.seated ? FIG_SEAT : FIG_H;
   const m = [x, headY + topLocal * s, headY + bot * s, HALF_W * s, o.seated ? 1 : 0, s].map((v) => +v.toFixed(1)).join(",");
-  return `<g class="fig" data-fig="${m},${SHOE}"><g transform="translate(${x} ${headY}) scale(${s})">${person(o)}</g></g>`;
+  return `<g class="fig" data-fig="${m},${SHOE}"><g transform="translate(${x} ${headY}) scale(${s})">${person(o, { pose: poseFor(o) })}</g></g>`;
 }
 
 /* ---------- Chân dung nghi phạm (khung 120 × 140) ---------- */
-export function portrait(look, id) {
+// expr: calm (mặc định) | tense | worried | smile
+export function portrait(look, id, expr = "calm") {
   const { top, hair } = look;
-  const o = { ...look, glasses: look.acc === "glasses", mustache: look.acc === "mustache", tie: look.acc === "tie" ? look.ac || "#b71c1c" : null, scarf: look.acc === "scarf" ? look.ac : null };
+  const o = { ...look, expr, glasses: look.acc === "glasses", mustache: look.acc === "mustache", tie: look.acc === "tie" ? look.ac || "#b71c1c" : null, scarf: look.acc === "scarf" ? look.ac : null };
   const g = `pt${id}`;
   const ty = hair === "bun" ? 32 : hair === "hat" ? 27 : 17;
   return `<svg class="portrait" viewBox="0 0 120 140" role="img" aria-label="Chân dung">` +

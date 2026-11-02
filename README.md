@@ -11,10 +11,14 @@ Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc 
 npm install
 npm run dev      # máy chủ phát triển (Vite)
 npm run build    # tạo dist/index.html: một file duy nhất, mở trực tiếp được
-npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải vụ Sài Gòn
+npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải vụ Sài Gòn (không cần trình duyệt)
+npm run lint     # ESLint: biến chưa khai báo, biến thừa...
+npm run e2e      # build rồi mở dist/index.html bằng Chrome thật, chơi vài bước (cần Chrome hoặc Edge đã cài)
 ```
 
-Font chữ tải từ Google Fonts nên cần Internet. Biểu tượng, GSAP, Phaser và CSS đã được đóng gói sẵn.
+Font chữ (Be Vietnam Pro, Noto Serif Display), biểu tượng, GSAP, Phaser và CSS đều đã được đóng gói vào một file, nên mở offline vẫn đúng.
+Font lấy từ gói `@fontsource` (giấy phép OFL), chỉ nạp tập ký tự latin và vietnamese ở định dạng woff2 (xem `src/styles/fonts.css`).
+GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm thử trình duyệt mỗi lần push lên `main` và mỗi pull request.
 
 ## Cấu trúc
 
@@ -41,12 +45,16 @@ Font chữ tải từ Google Fonts nên cần Internet. Biểu tượng, GSAP, P
 | `src/ui/overlays.js` | Chuyển cảnh mống mắt, thanh đen phim, đẩy máy quay, lời khai cận cảnh, hộp thoại, hồ sơ bay vào sổ tay |
 | `src/ui/ambience.js` | Hiệu ứng môi trường trong Phaser: bụi trong đèn pin, mưa, khói hương, ánh đèn lập lòe; bật theo cảnh qua `AMBIENT` |
 | `src/ui/dom.js` | Tiện ích DOM; đổi `<i>` thành SVG biểu tượng |
-| `src/art/art.js` | Minh họa SVG: cảnh, hai bên thế giới, camera, tài liệu |
+| `src/art/art.js` | Minh họa SVG: cảnh Hà Nội, hai bên thế giới, camera, tài liệu, bảng đăng ký cảnh |
+| `src/art/kit.js` | Đồ nghề vẽ SVG dùng chung (rect, path, gradient, glow, đèn lồng, nhà ống, bình...) |
+| `src/art/sg.js` | Cảnh vùng Sài Gòn |
+| `src/ui/coach.js` | Hướng dẫn lần đầu chơi |
 | `src/art/people.js` | Người trong cảnh (`figure`) và chân dung (`portrait`) dùng chung một bộ vẽ: tỉ lệ 6,9 đầu, vai, tay, bàn tay, giày, nét mặt, tóc, kính, ria |
 | `src/data/cases.js` | Danh sách vùng (`REGIONS`), loại hồ sơ, và dữ liệu 5 vụ phố cổ; gộp cả vụ Sài Gòn thành danh sách phẳng `CASES` |
 | `src/data/sg.js` | Vùng Sài Gòn: vụ "Đỉnh Triều Bến Vân Đồn" (nghi phạm, hồ sơ, kết luận, phiên xét xử nhiều người) |
 | `src/styles/main.css` | Token thiết kế (`@theme`) và các thành phần giao diện |
 | `tests/rules.test.js` | Kiểm thử đơn vị và dữ liệu các vụ (`npm test`) |
+| `tests/hints.test.js` | Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ và thắng được |
 | `tests/render.test.js` | Số đo nhân vật mà `art.js` gắn vào cảnh (lớp Phaser dùng để làm người thở và đổ bóng) |
 | `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
 
@@ -99,6 +107,12 @@ Font chữ tải từ Google Fonts nên cần Internet. Biểu tượng, GSAP, P
   Hồ sơ vừa thu bay vào nút Sổ tay.
 - Bảng ghim: tab Liên kết là bảng bần với các tấm hồ sơ ghim đinh. Kéo một tấm thả lên tấm khác để đối chiếu (không tốn giờ);
   cặp đúng được nối bằng sợi chỉ SVG. Bấm chọn hai tấm rồi bấm Đối chiếu vẫn dùng được cho bàn phím và màn cảm ứng.
+- Dáng và nét mặt: mỗi người có dáng đứng cố định (tay buông, đút túi, chống hông, khoanh tay) suy ra từ trang phục, nên ở cảnh nào cũng giống nhau;
+  một số nữ lớn tuổi mặc áo dài (`look.outfit: "aodai"`). Chân dung khi bị đưa chứng cứ đổi nét mặt: căng thẳng khi bị chạm vào điểm yếu, lo lắng khi sắp khai thêm.
+- Hiệu năng: `analyze()` chạy theo lát 6 ms và nhường luồng chính nên đổi cảnh không còn khựng (đo bằng PerformanceObserver: không có tác vụ dài).
+  Bụi là sprite thay vì vẽ lại Graphics mỗi khung. Phaser tắt input vì chuột, chạm, phím do DOM lo.
+- Gợi ý và hướng dẫn: nút bóng đèn mở gợi ý hai mức (không tốn giờ, không ảnh hưởng sao; số lần dùng hiện ở màn thắng). Hướng dẫn lần đầu
+  chạy một lần sau phần mở đầu của vụ đầu tiên; xem lại bằng nút trong Cách chơi.
 - Mọi hiệu ứng chuyển động tắt khi người dùng bật giảm chuyển động. Khi chạy `npm run dev`, `window.__phaser` trỏ tới game Phaser
   và console in thời gian dựng nền của từng cảnh, để gỡ lỗi.
 

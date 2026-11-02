@@ -771,6 +771,45 @@ body[data-screen="menu"] .pan { display: none !important; }
 }
 #scene::before { animation: grain 0.8s steps(1) infinite; }
 
+/* Gợi ý: điểm điều tra được chỉ rõ nhấp nháy một vòng sáng lớn quanh thẻ */
+.hs.is-hint .hs-chip::before {
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border-radius: 26px;
+  border: 3px solid var(--color-lamp-2);
+  box-shadow: 0 0 26px rgba(255, 217, 142, 0.7), inset 0 0 18px rgba(255, 217, 142, 0.35);
+  animation: hint-pulse 1.3s ease-in-out infinite;
+  pointer-events: none;
+}
+.hs.is-hint .hs-tag { color: var(--color-lamp-2); border-color: var(--color-lamp-2); }
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+/* Hướng dẫn lần đầu: màn tối có một ô sáng quanh thành phần được giới thiệu, cùng thẻ giải thích */
+#coach { position: fixed; inset: 0; z-index: 38; }
+#coach.no-spot { background: rgba(8, 6, 4, 0.7); }
+.coach-spot {
+  position: fixed;
+  border-radius: 18px;
+  box-shadow: 0 0 0 100vmax rgba(8, 6, 4, 0.74), 0 0 0 2px var(--color-lamp), 0 0 30px rgba(255, 217, 142, 0.5);
+  pointer-events: none;
+  transition: left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+#coach.no-spot .coach-spot { display: none; }
+.coach-card {
+  position: fixed;
+  width: min(340px, calc(100vw - 24px));
+  padding: 16px 18px;
+  border-radius: 20px;
+  border-color: rgba(240, 179, 90, 0.45);
+}
+.coach-t { font-size: 20px; margin: 2px 0 6px; color: var(--color-lamp-2); }
+.coach-p { font-size: 14px; line-height: 1.55; }
+.coach-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+
 /* Chuyển cảnh mống mắt: --r là bán kính lỗ trong suốt quanh (--cx, --cy); r âm thì đen kín */
 #curtain {
   background: radial-gradient(circle at var(--cx, 50%) var(--cy, 48%), transparent var(--r, -90px), var(--color-night) calc(var(--r, -90px) + 80px));

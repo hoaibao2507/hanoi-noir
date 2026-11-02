@@ -39,7 +39,7 @@ function layout(board) {
   const svg = board.querySelector(".threads");
   if (!svg) return;
   svg.replaceChildren();
-  let threads = [];
+  let threads;
   try {
     threads = JSON.parse(board.dataset.threads || "[]");
   } catch {

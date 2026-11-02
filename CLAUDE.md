@@ -1,4 +1,4 @@
-# Hanoi Noir · Vụ Án Phố Cổ — tài liệu cho Claude
+# Hanoi Noir · Vụ Án Phố Cổ và Sài Gòn — tài liệu cho Claude
 
 File này tự động được nạp vào mỗi session mới. Nó tóm tắt kiến trúc, logic và giao diện để không phải khảo sát lại
 từ đầu. `README.md` là bản cho người đọc (có thêm ghi chú thiết kế chi tiết từng luật). Khi sửa code làm thay đổi
@@ -8,12 +8,15 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
 
 ## 1. Tổng quan
 
-- Game điều tra 5 vụ án ở phố cổ Hà Nội, chạy trên trình duyệt, toàn màn hình, panorama kéo ngang.
+- Game điều tra 6 vụ án ở hai vùng (`REGIONS`): **Phố cổ Hà Nội** (5 vụ, `hn`) và **Sài Gòn** (1 vụ, `sg`, có các cơ chế riêng: suy luận, khóa mã,
+  giờ máy lệch, hồ sơ về muộn, xét xử nhiều người). Chạy trên trình duyệt, toàn màn hình, panorama kéo ngang.
 - JavaScript thuần (ES module), **không framework**. Giao diện là chuỗi HTML do template sinh ra, gán bằng `innerHTML`.
 - Thư viện: Vite 8, Tailwind CSS 4 (`@tailwindcss/vite`), GSAP (hoạt ảnh UI), Phaser 4.2.1 (nền cảnh + hiệu ứng),
   Font Awesome SVG core (icon), `vite-plugin-singlefile`.
-- Build ra **một file** `dist/index.html` (JS, CSS, SVG gộp hết), mở trực tiếp bằng trình duyệt được. Chỉ font Google Fonts tải từ mạng.
-- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 62 test, không cần trình duyệt).
+- Build ra **một file** `dist/index.html` (JS, CSS, SVG gộp hết), mở trực tiếp bằng trình duyệt được, **không cần mạng**:
+  font nhúng từ `@fontsource` (`src/styles/fonts.css`, chỉ woff2, latin + vietnamese; thêm độ đậm mới = thêm khối `@font-face` ở đó).
+- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 68 test, không cần trình duyệt) ·
+  `npm run lint` (ESLint) · `npm run e2e` (build + mở bản build bằng Chrome thật qua `playwright-core`, `tests/e2e/smoke.mjs`).
 - Không có router, không backend. Lưu tiến độ bằng `localStorage`.
 - `dist/` và `node_modules/` bị gitignore.
 
@@ -27,29 +30,41 @@ src/
   app.js              Bộ điều khiển: store + render + luồng chơi + bảng actions
   state/store.js      createStore: get / set(patch) / subscribe
   game/rules.js       LUẬT CHƠI THUẦN (không DOM, không localStorage)
-  game/save.js        localStorage: số sao + ván đang chơi
-  data/cases.js       DỮ LIỆU 5 vụ án (file lớn nhất, ~80 KB)
+  game/save.js        localStorage: số sao, ván đang chơi, vùng đang xem
+  data/cases.js       TYPES, REGIONS, 5 vụ Hà Nội; gộp thêm SG_CASES thành CASES (phẳng) + casesOf(region)
+  data/sg.js          Vùng Sài Gòn: vụ s1 "Đỉnh Triều Bến Vân Đồn" (suy luận, khóa mã, giờ máy lệch, xét xử nhiều người)
   world/layout.js     Hằng số thế giới 2400x900, vị trí cửa
   world/doors.js      doorsFor(): sinh danh sách cửa của một địa điểm
   art/people.js       figure() và portrait(): người trong cảnh và chân dung, chung một bộ vẽ (tỉ lệ 6,9 đầu)
-  art/art.js          Toàn bộ minh họa SVG sinh bằng code (~74 KB)
+  art/kit.js          Đồ nghề vẽ SVG dùng chung: rect/path/circle/line/txt, gradient, glow/haze, lantern, tube, vase, bowl, lotus, candle, uid
+  art/sg.js           Cảnh vùng Sài Gòn (sgLobby, sgSecroom, sgGarage, sgPenthouse, sgStreet, sgLab, menuSg + sgHouse, wires, sgCar)
+  art/art.js          Cảnh Hà Nội, hai bên thế giới (FLANK/widen), camera, tài liệu, bảng đăng ký SCENES (~70 KB)
   render/world.js     Lớp Phaser: raster hóa SVG nền, vẽ, đồng bộ với DOM
   render/lighting.js  Ánh sáng thật (Phaser Lights): đèn pin, nguồn sáng dò trong tranh, quầng sáng, chỉnh màu
-  render/analyze.js   Từ nền đã raster: bản đồ pháp tuyến giả, vị trí nguồn sáng, probe màu
+  render/analyze.js   Từ nền đã raster: bản đồ pháp tuyến giả, vị trí nguồn sáng, probe màu (async, chia lát 6 ms để không khựng)
   render/actors.js    Nhân vật thành mảnh riêng: thở, nghiêng theo con trỏ, đổ bóng
   ui/pinboard.js      Bảng ghim kéo thả của tab Liên kết (sợi chỉ SVG)
+  ui/coach.js         Hướng dẫn lần đầu chơi: chuỗi thẻ làm sáng từng nút (cờ `hanoi-noir-coach-v1`)
   ui/stage.js         Camera panorama (kéo, bánh xe, phím), nối DOM với Phaser
   ui/cursor.js        Đèn pin theo con trỏ + độ nghiêng parallax
   ui/flashlight.js    Hiện/mờ "dấu vết ẩn" theo khoảng cách tới đèn pin
-  ui/ambience.js      Bụi, mưa, khói, ánh đèn lập lòe (Phaser Graphics)
+  ui/ambience.js      Bụi (sprite), mưa và khói, ánh đèn lập lòe
   ui/templates.js     Mọi mẫu HTML (menu, HUD, điểm điều tra, cửa, sổ tay, hộp thoại)
   ui/overlays.js      Chuyển cảnh (veil), toast, sheet (modal), hoạt ảnh GSAP
   ui/dom.js           $, esc, icons, setHTML
   styles/main.css     Token @theme + toàn bộ CSS thành phần
+  styles/fonts.css    @font-face nhúng (woff2 từ @fontsource), nạp trong main.js
   vendor/spector-stub.js  Module rỗng thay Spector.js mà Phaser nạp
 tests/
-  rules.test.js       Luật chơi, cửa, tính toàn vẹn dữ liệu 5 vụ, lời giải đi được
+  rules.test.js       Luật chơi, cửa (cả 5–6 cửa), tính toàn vẹn dữ liệu mọi vụ, lời giải đi được
   save.test.js        Lưu/đọc ván đang chơi (mock localStorage)
+  sg.test.js          Vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải, xét xử nhiều người, giao diện s1
+  render.test.js      Số đo nhân vật (data-fig) mà people.js gắn vào mọi cảnh
+  hints.test.js       Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ trong ngân sách giờ, và buộc tội đúng thắng
+  e2e/smoke.mjs       Kiểm thử khói bằng Chrome thật (chạy bằng `npm run e2e`, không nằm trong `npm test`)
+eslint.config.js      ESLint flat config (chỉ bắt lỗi thật)
+.gitattributes        LF cho mọi file văn bản
+.github/workflows/ci.yml  CI: lint, test, build, e2e
 ```
 
 ## 3. Luồng dữ liệu
@@ -63,14 +78,16 @@ click [data-action]  ->  main.js (ủy quyền)  ->  app.js actions[name](datase
 
 - **Tất cả tương tác dùng `data-action="..."` + `data-*`**, không dùng `onclick`. Thêm hành động mới = thêm khóa vào
   `export const actions` trong `app.js` + gắn `data-action` trong template.
-- State của store: `{ screen: "menu" | "case", save, game, nb }`
+- State của store: `{ screen: "menu" | "case", save, game, nb, region }`
   - `save` = `{ unlocked, stars: {caseId: 1..3} }` (tiến độ vĩnh viễn)
-  - `game` = ván đang chơi (xem 4.1), `nb` = sổ tay đang mở
-- Biến cục bộ trong `app.js` (không nằm trong store): `accuse` (`{culprit, steps}` lựa chọn ở phiên xét xử, giữ giữa các lần
-  thử), `worldKey` (nhận biết đổi thế giới để reset camera), `announced` (phút đã báo diễn biến).
+  - `game` = ván đang chơi (xem 4.1), `nb` = sổ tay đang mở, `region` = vùng đang xem ở menu (`"hn"`|`"sg"`, lưu riêng)
+- Biến cục bộ trong `app.js` (không nằm trong store): `accuse` (`{culprit, steps, who, evid, facts}`: lựa chọn ở phiên xét xử, giữ giữa
+  các lần thử), `lockEntry` (bàn phím số đang mở), `worldKey` (nhận biết đổi thế giới để reset camera), `announced` (phút đã báo diễn biến).
+- Hành động ngoài các hành động cốt lõi: `region`; suy luận `dd-pick|dd-clear|dd-try`; khóa mã `lock-key|lock-del|lock-go`; `wait-do`;
+  xét xử nhiều người `vd-who|vd-ev|vd-fact`; bảng ghim `lk-pair`; lời khai cận cảnh `tm-close`; gợi ý `hint|hint-more`; xem lại hướng dẫn `coach-reset`.
 - `setHTML(el, html)` chỉ gán `innerHTML` khi chuỗi đổi (cache ở `el.__html`) rồi chạy `icons()` để đổi `<i class="fa-...">`
   thành SVG. Gán `innerHTML` trực tiếp phải tự gọi `icons(node)` (xem `showSheet`).
-- Phím: `Esc` đóng sheet rồi đóng sổ tay; `← → Home End` pan camera khi không có sheet.
+- Phím: `Esc` đóng sheet rồi đóng sổ tay; `← → Home End` pan camera khi không có sheet; bàn phím số của khóa mã nhận 0–9, Backspace, Enter.
 
 ## 4. Luật chơi (`game/rules.js`)
 
@@ -79,7 +96,8 @@ Mọi hàm nhận state, trả state mới (bất biến). Hàm không đổi g�
 
 ### 4.1 Trạng thái `game` (từ `newGame`)
 `idx, loc, hours (còn lại), lives (=3), done{id:true}, found[id theo thứ tự thu], marks{suspectId:0|1|2}, mx{"rid|act":0|1|2},
-pick[], links[pairKey], lkResult, confronted{"who|clue":true}, wrong, over, busy, tab ("sus"|"ho"|"mx"|"lk"|"tl")`
+pick[], links[pairKey], lkResult, dpick[], ddResult, ddTries, ddFrom{}, lockTries{id:n}, confronted{"who|clue":true}, hints, hintId, wrong, over, busy,
+tab ("sus"|"ho"|"mx"|"lk"|"dd"|"tl")` — trường mới phải chịu được `undefined` vì `resumeRun` đọc ván lưu cũ.
 
 ### 4.2 Các cơ chế
 | Cơ chế | Hàm chính | Ghi chú |
@@ -92,13 +110,20 @@ pick[], links[pairKey], lkResult, confronted{"who|clue":true}, wrong, over, busy
 | Dòng thời gian | `timelineEvents`, `alibisOf`, `hasTimeline` | `spans[]` của hồ sơ → mốc; `needs[]` phải thu đủ mới gắn `who`. `alibi` của lời khai được đối chiếu: `clash` (bị bác), `proof` (xác nhận), `open` |
 | Ma trận đối chiếu | `cycleMatrix` | Chỉ vụ có `matrix` (hiện chỉ vụ 3). Ô quay vòng 0→1(✓)→2(✗) |
 | Nhãn nghi phạm | `cycleMark` | Chỉ là ghi chú người chơi (chưa rõ / nghi ngờ / loại trừ) |
-| Buộc tội | `judge`, `loseLife` | `judge(c, culprit, picks)`: đúng người **và** cả 3 bước `chain` (mỗi bước chọn 1 hồ sơ nằm trong `ids`). Sai = mất 1 mạng, hết 3 mạng → `over` |
+| Buộc tội (một thủ phạm) | `judge`, `loseLife` | `judge(c, culprit, picks)`: đúng người **và** cả 3 bước `chain` (mỗi bước chọn 1 hồ sơ nằm trong `ids`). Sai = mất 1 mạng, hết 3 mạng → `over` |
 | Sao | `starsFor(wrong)`, `recordWin` | 0 sai = 3★, 1 sai = 2★, còn lại 1★; lưu bản tốt nhất |
+| Suy luận | `pickDeduce`, `tryDeduce`, `deductionFor`, `closeDeductions` | Vụ có `deduce[{needs,gives}]`: ghép 2–`MAX_DEDUCE` hồ sơ, đúng cả tập thì nhận kết luận `gives` (hành động `via:"deduce"`, loại "Kết luận"), không tốn giờ |
+| Mở khóa | `gated`, `unlocksOf` | Hành động có `gate: id` ẩn tới khi hồ sơ `id` (thường là kết luận) đã có |
+| Khóa mã | `attemptLock` | `lock:{code,digits,prompt}`: sai `LOCK_TRIES` lần thì thiết bị tự khóa, mất `LOCK_PENALTY` giờ. Trạng thái: `open`/`wrong`/`locked`/`closed` |
+| Hồ sơ về muộn | `pendingMinutes`, `isPending`, `arrivalOf`, `waitHours`, `waitFor` | Diễn biến `kind:"arrive"`: hồ sơ chỉ đọc được từ mốc `at`; chờ tốn số giờ nguyên tới mốc |
+| Giờ máy lệch | `devices`, `closeDeductions` | Mốc `dev` lệch `off` phút tới khi kết luận `by` được rút ra, rồi alibi được đối chiếu lại |
+| Gợi ý | `nextStep`, `spotOf` | Không tốn giờ, không ảnh hưởng sao. `nextStep` tìm hồ sơ then chốt (`chain`/`verdict.roles`) đầu tiên còn thiếu rồi đi ngược qua `gate`/`deduce`/`confront`/`arrive` ra việc cần làm (`go`/`wait`/`deduce`/`confront`/`accuse`). `game.hints` đếm số lần mở, `game.hintId` là điểm đang nhấp nháy |
+| Xét xử nhiều người | `hasVerdict`, `judgeVerdict`, `culpritIds` | Vụ có `verdict:{roles,facts}` thay cho `chain`: mỗi vai đúng người và chứng cứ, mỗi câu dựng lại đúng. Phản hồi sai chỉ nói "vững/chưa vững" |
 
 Tất cả vụ **mở từ đầu** (menu không khóa vụ nào); `save.unlocked` chỉ còn để tương thích bản lưu cũ.
 
 ### 4.3 Lưu trữ (`game/save.js`)
-- `hanoi-noir-save-v2`: `{unlocked, stars}`. `hanoi-noir-run-v1`: `{idx, game}` ván đang chơi.
+- `hanoi-noir-save-v2`: `{unlocked, stars}`. `hanoi-noir-run-v1`: `{idx, game}` ván đang chơi. `hanoi-noir-region-v1`: vùng đang xem (`loadRegion`/`storeRegion`).
 - `persistRun` (subscribe) lưu sau **mỗi** thay đổi state ở màn điều tra; ván `over` thì xóa. Mở lại trang → `restoreRun`;
   chọn lại đúng vụ đang dở → tiếp tục (`resumeRun`), không bắt đầu lại.
 - `resumeRun` từ chối khôi phục nếu dữ liệu vụ đã đổi (hồ sơ `found` không còn tồn tại, địa điểm không còn).
@@ -106,7 +131,8 @@ Tất cả vụ **mở từ đầu** (menu không khóa vụ nào); `save.unlock
 
 ## 5. Dữ liệu vụ án (`data/cases.js`)
 
-Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Camera, Hồ sơ, Biên bản) và mảng `CASES`.
+Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Camera, Hồ sơ, Biên bản, Kết luận), `REGIONS` (tên, biểu tượng, cảnh nền menu, giới thiệu),
+`CASES` (phẳng: 5 vụ Hà Nội có `region:"hn"` + `SG_CASES` từ `data/sg.js`; chỉ số trong `CASES` là chỉ số vụ dùng cho bản lưu) và `casesOf(region)`.
 
 | # | id | Tên | Địa điểm chính | Độ khó | Giờ | Bắt đầu | Thủ phạm | Tính năng thêm |
 | - | -- | --- | --- | --- | --- | --- | --- | --- |
@@ -115,6 +141,7 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 | 3 | c3 | Chiếc Trâm Ngọc | Nhà cổ ông Tư, Hàng Ngang | ★★★★ | 16 | 22:00 | phuc | matrix |
 | 4 | c4 | Sổ Đỏ Hàng Bông | Văn phòng công chứng, Hàng Bông | ★★★★★ | 12 | 21:00 | dat | links |
 | 5 | c5 | Chày Đồng Hàng Mã | Hiệu thuốc Bảo An Đường, Hàng Mã (có án mạng) | ★★★★★★ | 11 | 22:00 | kim | links |
+| 1 (sg) | s1 | Đỉnh Triều Bến Vân Đồn | Chung cư Sao Mai Riverside, Quận 4 (6 địa điểm) | ★★★★★★★ | 13 | 21:00 | nhiều người (`verdict`) | deduce, lock, devices, arrive |
 
 (Mỗi vụ đều có `clock`, `world`, `confront`, `chain`; `links`/`matrix` tùy vụ.)
 
@@ -122,27 +149,32 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 ```js
 { id, no, title, place, level, budget,            // budget = tổng giờ điều tra
   clock: { start: "HH:MM" },
-  world: [{ at, kind: "gone"|"leave", id, text }], // diễn biến theo đồng hồ
+  region: "hn"|"sg",                                // c1–c5 được cases.js tự gắn "hn"
+  world: [{ at, kind: "gone"|"leave"|"arrive", id, text }], // diễn biến theo đồng hồ; arrive = hồ sơ chỉ đọc được từ mốc at
+  devices?: { dev: { name, off, by } },              // thiết bị chạy lệch off phút tới khi kết luận by được rút ra
   intro: "HTML/text mở đầu",
   suspects: [{ id, name, role, bio, look: {skin, hair, hc, top, acc, ac?} }],
-  //   hair: short|long|bun|bald|hat   acc: glasses|mustache|scarf|tie|none
+  //   hair: short|long|bun|bald|hat   acc: glasses|mustache|scarf|tie|none   sex?: "m"|"f" (mặc định suy từ tóc: long/bun = nữ)
   locations: [{ id, name, time, scene, hs: [[actionId, x, y, "nhãn", "soi"?], ...] }],
   //   x,y trên khung 1600x900; phần tử thứ 5 "soi" (tùy chọn) = dấu vết ẩn, cần đèn pin quét tới
   actions: [{ id, cost, type, title, text,
               visual: {k:"who",id} | {k:"paper",alt,title,rows[],stamp?} | {k:"cam",scene,time,cam,alt} | {k:"lock"} | {k:"box"},
-              via?: "confront",                    // lời khai mở bằng đưa chứng cứ
+              via?: "confront"|"deduce",           // mở bằng đưa chứng cứ / là kết luận của suy luận
+              gate?: id, lock?: {code,digits,prompt}, dev?: "dev",
               spans?: [{who?, needs?[], from, to, at}],
               alibi?: {who, from, to, at} }],
   culprit: "id",
   matrix?: { rows: [suspectId], cols: [{act, label}] },
   confront: [{ who, clue, reveal?, text }],
-  chain: [{ key, label, ask, ids: [actionId], hint }],   // 3 bước
+  chain: [{ key, label, ask, ids: [actionId], hint }],   // 3 bước (vụ một thủ phạm)
+  deduce?: [{ needs: [id], gives: id }],
+  verdict?: { roles: [{ key, who, ids }], facts: [...] }, // thay cho chain khi có nhiều người liên đới
   links?: [{ a, b, kind: "liên hệ"|"mâu thuẫn", about?: suspectId, text }],
   explanation: "HTML lời giải" }
 ```
 - Mỗi action thuộc **đúng một** vị trí `hs` (trừ `via:"confront"`, không có vị trí). Test kiểm tra điều này.
 - Mỗi vụ có một địa điểm "Phòng lưu trữ/kho" (`scene: "archive"`, thời gian "Bất kỳ lúc nào") để đặt hồ sơ tra cứu.
-- Cảnh dùng chung nhiều vụ: `archive`, `alley`, `alley_rain`, `altar`.
+- Cảnh dùng chung nhiều vụ: `archive`, `alley`, `alley_rain`, `altar`. Cảnh Sài Gòn: `sg_lobby`, `sg_secroom`, `sg_garage`, `sg_penthouse`, `sg_street`, `sg_lab` (+ nền menu `menu_sg`).
 - **Thêm/sửa vụ phải giữ cho test xanh**: `npm test` có kiểm tra toàn vẹn dữ liệu, tính nhất quán dòng thời gian/đồng hồ, và
   tìm lời giải theo chiều rộng (mọi vụ vẫn thắng được kể cả khi tính hạn mất hồ sơ/nghi phạm rời đi).
 
@@ -151,7 +183,8 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 ### 6.1 Khung `index.html` (id cố định, code tham chiếu)
 `#scene` (cuộn ngang) chứa `#gl` (canvas Phaser) và `#world` (DOM cùng kích thước thế giới) gồm `#world-art` (SVG/chữ),
 `#world-doors`, `#world-hs`. Ngoài ra: `#pan-l`/`#pan-r` (nút xem hai bên), `#ui` (HUD bốn góc, `pointer-events-none`),
-`#notebook` (+ `#nb-body`), `#curtain`/`#card` (chuyển cảnh), `#modal` (sheet), `#toast`. `body[data-screen]` = `menu`|`case`.
+`#notebook` (+ `#nb-body`), `#curtain`/`#card` (chuyển cảnh), `#bars` (hai thanh đen phim), `#testimony` (lời khai cận cảnh), `#modal` (sheet),
+`#toast`. `body[data-screen]` = `menu`|`case`.
 
 ### 6.2 Hệ tọa độ
 - Cảnh gốc 1600×900 (tọa độ `hs` trong cases.js). Thế giới 2400×900 (`WORLD_W`, `WORLD_H`): cảnh gốc đặt lệch `OX=400`.
@@ -159,7 +192,7 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 - `toWorldX(x) = x + OX`. Template đổi sang `%` của thế giới (`pctX`, `pctY`).
 - Cửa: `DOOR_SLOTS = {left:[40,230], right:[2040,2220]}`, `DOOR_W=130`; `doorPlan` xếp xen kẽ trái/phải → 4 cửa
   (5 địa điểm). Địa điểm có 5–6 cửa (vụ 6–7 địa điểm, như vụ Sài Gòn) dùng `DOOR_COMPACT`: cửa hẹp 100, ba khe mỗi bên; `doorPlan` ném lỗi khi quá 6 cửa. Biển tên của khe lẻ nâng lên một hàng (`door-s1`) để không đè nhau. `doorsFor(locations, current)` tạo cửa tới các địa điểm khác.
-- Hai bên thế giới do `widen()` trong art.js dựng: `FLANK[sceneKey]` chọn `room` hoặc `street` (+ màu). Cảnh mới **phải có mục trong `FLANK`**.
+- Hai bên thế giới do `widen()` trong art.js dựng: `FLANK[sceneKey]` chọn `room`, `street` (phố Hà Nội) hoặc `sgstreet` (phố Sài Gòn) (+ màu). Cảnh mới **phải có mục trong `FLANK`**.
 
 ### 6.3 Camera (`ui/stage.js`)
 `scale = max(vh/900, vw/worldW)` (cover). Kéo chuột/chạm, bánh xe, phím, nút mép. Camera = `translate3d` của `#world`;
@@ -183,14 +216,19 @@ rồi gọi `notifyLamp()`. `flashlight.js` đăng ký qua `onLampMove`: `.hs.is
 `is-near` khi <260px; đã làm thì template gắn sẵn `is-lit`. Cảnh dịch chuyển/điểm mới vẽ cũng gọi `notifyLamp()`.
 
 ### 6.6 Bố cục màn hình
-- **Menu**: tiêu đề + nút Cách chơi / Xóa tiến độ (trên), dải thẻ vụ án `.case-card` cuộn ngang (dưới).
+- **Menu**: tiêu đề + nút Cách chơi / Xóa tiến độ (trên); dưới là thanh chọn vùng `.region-bar` (Hà Nội · Sài Gòn) rồi dải thẻ vụ án `.case-card`
+  của vùng đó, cuộn ngang. Nền menu đổi theo vùng (`menu` / `menu_sg`).
 - **Màn điều tra** (4 góc): trên trái = nút về menu + tên vụ; giữa = địa điểm; trên phải = đồng hồ, giờ còn lại, 3 mạng (tim);
   dưới trái = Sổ tay (kèm số hồ sơ); dưới giữa = gợi ý còn bao nhiêu điểm; dưới phải = Buộc tội.
 - **Điểm điều tra** `.hs`: chip vàng 54px (xanh khi `is-done`, xám khi `is-off`) + nhãn; tốn >1 giờ thì nhãn ghi giờ.
-- **Cửa** `.door` có biển tên `.door-sign` hiện tên + giờ địa điểm đích.
+- **Cửa** `.door` có biển tên `.door-sign` hiện tên + giờ địa điểm đích. Điểm điều tra đang chờ hồ sơ về muộn có `.is-wait` (xanh lạnh, đồng hồ cát).
 - **Sổ tay** `#notebook`: ngăn kéo trái (desktop), tấm trượt từ dưới 82dvh (<768px). Tab: Nghi phạm · Hồ sơ · Đối chiếu (nếu `matrix`)
-  · Liên kết (nếu `links`) · Thời gian (nếu `hasTimeline`).
-- **Sheet** `#modal > .sheet`: hộp thoại giấy (nền sáng, chữ tối): briefing, diễn biến, đưa chứng cứ, phản ứng, phiên xét xử, kết quả, cách chơi, xóa tiến độ.
+  · Liên kết (nếu `links`, là bảng ghim kéo thả) · Suy luận (nếu `deduce`) · Thời gian (nếu `hasTimeline`).
+- **Sheet** `#modal > .sheet`: hộp thoại giấy (nền sáng, chữ tối): briefing, diễn biến, đưa chứng cứ, phản ứng, phiên xét xử (một hoặc nhiều người),
+  kết quả (thắng có ảnh polaroid), bàn phím số, chờ hồ sơ về muộn, kết luận mới, cách chơi, xóa tiến độ.
+- **Gợi ý**: nút bóng đèn cạnh Sổ tay (`data-action="hint"`). Mức 1 chỉ hướng, mức 2 (`hint-more`) nói rõ điểm hoặc hồ sơ và làm điểm nhấp nháy (`.is-hint`). Mỗi lần mở tăng `hints`, hiện ở màn thắng.
+- **Hướng dẫn lần đầu** (`ui/coach.js`): chạy một lần sau phần mở đầu của vụ đầu tiên (`coachPending` trong app.js). Các thành phần được làm sáng lấy theo `data-coach` (clock, lives, notebook, hint, accuse) hoặc `.hs.is-open`, `.door`; bước nào không có hoặc nằm ngoài khung nhìn thì bỏ. Khóa phía sau bằng `O.setCoachActive` (inert). Nút "Xem lại hướng dẫn" ở Cách chơi xóa cờ.
+- **Lời khai cận cảnh** `#testimony`: thẻ kính dưới màn hình khi hỏi cung (không chặn thao tác), tự ẩn sau 14 giây hoặc khi mở sheet/sổ tay/đi chỗ khác.
 
 ### 6.7 Phong cách (`styles/main.css`)
 - Tailwind 4: token trong `@theme`: `night #0c0907`, `ink #f1e6cf`, `ink-2 #bba98b`, `lamp #f0b35a`, `lamp-2 #ffd98e`,
@@ -201,7 +239,7 @@ rồi gọi `notifyLamp()`. `flashlight.js` đăng ký qua `onLampMove`: `.hs.is
 - Tôn trọng `prefers-reduced-motion` (CSS, `overlays.js`, `cursor.js`, `ambience.js` đều xử lý).
 - Responsive: điểm ngắt 767px (sổ tay) và 480px (chip/nhãn nhỏ lại).
 
-### 6.8 Minh họa (`art/art.js`)
+### 6.8 Minh họa (`art/art.js`, `kit.js`, `sg.js`, `people.js`)
 Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual) }`, toàn bộ là **chuỗi SVG sinh bằng code**
 (helper `rect/path/circle/line/txt/glow/haze/lin/frame`, `figure()` vẽ người, `tube()` nhà ống, `lantern`, `vase`…).
 - Cảnh đã đăng ký trong `SCENES`: `shop, altar, alley, alley_rain, archive, gallery, gate, corridor, banquet, notary, stair, pharmacy, lab, menu`.
@@ -240,4 +278,9 @@ trong `tests/rules.test.js` nếu cần, và số vụ nhắc trong README/help 
 - `busy` là khóa trong lúc chuyển cảnh (`veil`); các hành động trong rules từ chối khi `busy`.
 - Hoạt ảnh vào cảnh dùng `animateEntrance` (GSAP) và bỏ qua `.is-secret` vì độ mờ của chúng do đèn pin điều khiển.
 - Commit dùng thông điệp tiếng Việt, ngắn, mô tả thay đổi (xem `git log`).
-- Chưa có CI, linter hay formatter; kiểm tra duy nhất là `npm test` (62 test đang xanh).
+- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (68 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
+  không yêu cầu mạng, WebGL/đèn thật chạy, focus hộp thoại và sổ tay, khôi phục ván). CI (`.github/workflows/ci.yml`) chạy cả bốn bước. Chưa có formatter.
+  `.gitattributes` ép LF cho mọi file văn bản.
+- Trợ năng bàn phím (`ui/overlays.js`): khi hộp thoại mở, `#scene`, `#ui`, `#testimony`, nút xem hai bên **và** sổ tay đều `inert`; đóng thì trả focus về nút đã mở
+  (`selectorOf`/`returnTo`). Sổ tay đóng cũng `inert` (`setNotebook`). Hộp thoại lấy tên từ `h2` đầu tiên (`aria-labelledby`). Điểm điều tra và cửa được sắp theo x để
+  Tab đi từ trái sang phải; focus vào một nút ngoài khung nhìn thì camera tự trượt tới (`stage.js`, sự kiện `focusin`). Thêm sheet/hộp mới: cứ dùng `showSheet`.

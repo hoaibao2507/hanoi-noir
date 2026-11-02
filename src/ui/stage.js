@@ -38,6 +38,14 @@ export function mountStage() {
     scene.scrollLeft = 0;
     scene.scrollTop = 0;
   });
+  // Tab tới một điểm điều tra hoặc cửa nằm ngoài khung nhìn: camera trượt tới đưa nó vào giữa màn hình
+  scene.addEventListener("focusin", (e) => {
+    const el = e.target.closest && e.target.closest(".hs, .door");
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const mid = r.left + r.width / 2;
+    if (mid < 90 || mid > window.innerWidth - 90) setX(view.x + mid - window.innerWidth / 2, true);
+  });
   layout();
 }
 

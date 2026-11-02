@@ -9,13 +9,13 @@ import {
   isOpen, remainingAt, starsFor, allSolved, totalStars, linksOf,
   CONFRONT_COST, questioned, confrontOptions, alibisOf, timelineEvents, hasTimeline,
   isGone, clockAt, eventsDone, departed, gated, isPending, arrivalOf, waitHours, unlocksOf,
-  LOCK_TRIES, LOCK_PENALTY, MAX_DEDUCE
+  LOCK_TRIES, LOCK_PENALTY, MAX_DEDUCE, spotOf, actionOf
 } from "../game/rules.js";
 import { esc } from "./dom.js";
 
 const pctX = (u) => ((u / WORLD_W) * 100).toFixed(3);
 const pctY = (v) => ((v / WORLD_H) * 100).toFixed(3);
-const portraitOf = (s) => ART.portrait(s.look, s.id);
+const portraitOf = (s, expr) => ART.portrait(s.look, s.id, expr);
 const starsHTML = (n, max = 3) =>
   Array.from({ length: max }, (_, i) => `<span class="st${i < n ? "" : " dim"}">★</span>`).join("");
 
@@ -96,23 +96,28 @@ export function hudHTML(game, c, L) {
         <i class="fa-solid fa-location-dot text-lamp"></i>${esc(L.name)}<span class="text-ink-2">· ${esc(L.time)}</span>
       </div>
       <div class="pointer-events-auto flex items-center gap-2">
-        <span class="glass rounded-full px-3.5 py-2 text-sm font-semibold tabnum flex items-center gap-2 whitespace-nowrap"><i class="fa-regular fa-clock text-lamp"></i>${clockAt(game, c)}<span class="text-ink-2">·</span><span class="hidden sm:inline">Còn&nbsp;</span>${game.hours}/${c.budget}<span class="hidden sm:inline">&nbsp;giờ</span></span>
-        <span class="glass rounded-full px-3.5 py-2 text-sm flex items-center gap-1.5">${hearts}</span>
+        <span data-coach="clock" class="glass rounded-full px-3.5 py-2 text-sm font-semibold tabnum flex items-center gap-2 whitespace-nowrap"><i class="fa-regular fa-clock text-lamp"></i>${clockAt(game, c)}<span class="text-ink-2">·</span><span class="hidden sm:inline">Còn&nbsp;</span>${game.hours}/${c.budget}<span class="hidden sm:inline">&nbsp;giờ</span></span>
+        <span data-coach="lives" class="glass rounded-full px-3.5 py-2 text-sm flex items-center gap-1.5">${hearts}</span>
       </div>
     </div>
     <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3 md:p-5">
-      <button class="pointer-events-auto btn btn-ghost" data-action="nb-toggle" title="Sổ tay điều tra">
+      <div class="pointer-events-auto flex gap-2">
+      <button class="btn btn-ghost" data-coach="notebook" data-action="nb-toggle" title="Sổ tay điều tra">
         <i class="fa-solid fa-book-open"></i><span class="hidden sm:inline">Sổ tay</span>
         <span class="tabnum rounded-full bg-lamp/25 px-2 text-xs text-lamp-2">${game.found.length}</span>
       </button>
+      <button class="btn btn-ghost" data-coach="hint" data-action="hint" title="Gợi ý" aria-label="Gợi ý"><i class="fa-solid fa-lightbulb"></i><span class="hidden sm:inline">Gợi ý</span></button>
+      </div>
       <div class="pointer-events-none glass rounded-full px-4 py-2 text-sm hidden sm:flex items-center gap-2">${hintHTML(game, c, L)}</div>
-      <button class="pointer-events-auto btn btn-blood" data-action="accuse"><i class="fa-solid fa-gavel"></i> Buộc tội</button>
+      <button class="pointer-events-auto btn btn-blood" data-coach="accuse" data-action="accuse"><i class="fa-solid fa-gavel"></i> Buộc tội</button>
     </div>`;
 }
 
 /* ---------- Thế giới: điểm điều tra và cửa ---------- */
 export function hotspotsHTML(game, c, L) {
-  return L.hs
+  // Xếp theo x: Tab đi từ trái sang phải đúng như mắt nhìn cảnh
+  return [...L.hs]
+    .sort((p, q) => p[1] - q[1])
     .filter(([id]) => !isGone(game, c, id) && !gated(game, c, id))
     .map(([id, x, y, lab, flag]) => {
       const a = c.actions.find((z) => z.id === id);
@@ -124,8 +129,9 @@ export function hotspotsHTML(game, c, L) {
       const cost = done ? "" : wait ? ` · chờ tới ${arrivalOf(c, id)}` : a.cost > 1 ? ` · ${a.cost} giờ` : "";
       // Dấu vết ẩn: ẩn cho tới khi đèn pin quét tới (xem ui/flashlight.js); đã làm thì luôn hiện
       const secret = flag === "soi" ? ` is-secret${done ? " is-lit" : ""}` : "";
+      const hinted = !done && game.hintId === id ? " is-hint" : "";
       const note = done ? ", đã làm" : wait ? `, kết quả về lúc ${arrivalOf(c, id)}` : a.lock ? ", có khóa mã" : "";
-      return `<button class="hs ${state}${secret}" data-action="act" data-id="${id}" style="left:${pctX(OX + x)}%;top:${pctY(y)}%"
+      return `<button class="hs ${state}${secret}${hinted}" data-action="act" data-id="${id}" style="left:${pctX(OX + x)}%;top:${pctY(y)}%"
           ${open || wait ? "" : "disabled"} aria-label="${esc(lab)}${note}${done || wait ? "" : `, tốn ${a.cost} giờ`}">
         <span class="hs-in"><span class="hs-chip"><i class="fa-solid ${icon}"></i></span>
         <span class="hs-tag">${done ? "✓ " : ""}${esc(lab)}${cost}</span></span>
@@ -135,7 +141,8 @@ export function hotspotsHTML(game, c, L) {
 }
 
 export function doorsHTML(doors) {
-  return doors
+  return [...doors]
+    .sort((p, q) => p.x - q.x)
     .map((d) => {
       const arrow = d.side === "left" ? "fa-arrow-left" : "fa-arrow-right";
       const w = d.w || DOOR_W, compact = w < DOOR_W;
@@ -286,9 +293,11 @@ export function reactionHTML(c, who, clueId, r, reveal, news = []) {
   const s = c.suspects.find((x) => x.id === who);
   const clue = c.actions.find((x) => x.id === clueId);
   const line = r ? r.text : `${s.name} nhìn tờ hồ sơ, rồi giữ nguyên lời khai và không nói thêm.`;
+  // Nét mặt theo phản ứng: bị chạm vào điểm yếu thì căng thẳng, và lo lắng khi sắp khai thêm; giữ nguyên lời khai thì bình thản
+  const expr = r ? (reveal ? "worried" : "tense") : "calm";
   return `
     <h2>${esc(s.name)} trả lời</h2>
-    <div class="who flex items-center gap-3 mb-3">${portraitOf(s)}<span class="text-sm text-ink-2">Bạn đưa: <b>${esc(clue.title)}</b></span></div>
+    <div class="who flex items-center gap-3 mb-3">${portraitOf(s, expr)}<span class="text-sm text-ink-2">Bạn đưa: <b>${esc(clue.title)}</b></span></div>
     <div class="expl"><p>${esc(line)}</p></div>
     ${newsList(news)}
     ${reveal ? `<div class="banner mt-3"><i class="fa-solid fa-file-lines"></i> Lời khai mới đã được ghi: <b>${esc(reveal.title)}</b></div>` : ""}
@@ -677,7 +686,7 @@ const culpritsLine = (c) =>
 // Vụ kế tiếp trong cùng vùng, hoặc -1
 const nextInRegion = (idx) => CASES.findIndex((x, i) => i > idx && x.region === CASES[idx].region);
 
-export function verdictWinHTML(c, idx, wrong, save) {
+export function verdictWinHTML(c, idx, wrong, save, hints = 0) {
   const st = starsFor(wrong);
   const nx = nextInRegion(idx);
   const next = nx >= 0
@@ -696,6 +705,7 @@ export function verdictWinHTML(c, idx, wrong, save) {
     <h2>🏆 Công lý đã được thực thi</h2>
     <div class="big">${starsHTML(st)}</div>
     <p>${culpritsLine(c)}</p>
+    ${hints ? `<p class="muted text-sm"><i class="fa-solid fa-lightbulb"></i> Gợi ý đã dùng: ${hints}</p>` : ""}
     <div class="expl">${c.explanation}</div>
     ${finale}
     <div class="row">${next}<button class="btn btn-ghost" data-action="menu">Về danh sách vụ án</button></div>
@@ -734,9 +744,10 @@ export const helpHTML = () => `
     <p><b>Giờ máy lệch:</b> không phải mọi đồng hồ đều đúng. Mốc nào lấy từ một thiết bị có thể sai giờ sẽ có nhãn “giờ máy” trong tab Thời gian. Hãy đối chiếu cùng một sự kiện giữa các nguồn giờ khác nhau; khi tìm ra độ lệch, mọi mốc của thiết bị đó tự được hiệu chỉnh và ngoại phạm của mọi người được so lại.</p>
     <p><b>Khóa mã và kết quả về muộn:</b> điểm có ổ khóa cần nhập mã bằng bàn phím số; sai ${LOCK_TRIES} lần thì thiết bị tự khóa và bạn mất ${LOCK_PENALTY} giờ. Hồ sơ có nhãn đồng hồ cát chỉ về sau một mốc giờ; bấm vào để chờ, và thời gian chờ cũng tính vào ngân sách giờ.</p>
     <p><b>Phiên xét xử nhiều người (Sài Gòn):</b> với vụ có nhiều người liên đới, bạn chọn người cho từng vai, một hồ sơ làm chứng cứ cho mỗi vai, và trả lời vài câu dựng lại sự việc. Kết luận có giá trị hơn hồ sơ gốc. Sai một phần nào cũng mất một mạng.</p>
+    <p><b>Gợi ý:</b> nút bóng đèn ở góc dưới trái. Lần bấm đầu chỉ cho biết nên xem lại nơi nào hoặc làm việc gì; bấm “Chỉ rõ hơn” thì nói đúng điểm điều tra hoặc hồ sơ cần ghép, và điểm đó nhấp nháy trên cảnh. Gợi ý không tốn giờ và không ảnh hưởng số sao, chỉ được đếm ở màn kết thúc.</p>
     <p><b>Số sao:</b> ★★★ nếu kết tội đúng ngay lần đầu; ★★ nếu sai một lần; ★ nếu sai hai lần.</p>
   </div>
-  <div class="row"><button class="btn" data-action="close">Đã hiểu</button></div>`;
+  <div class="row"><button class="btn btn-ghost" data-action="coach-reset"><i class="fa-solid fa-circle-question"></i> Xem lại hướng dẫn</button><button class="btn" data-action="close">Đã hiểu</button></div>`;
 
 /* ---------- Khóa mã và chờ kết quả ---------- */
 
@@ -780,3 +791,41 @@ export const resetHTML = () => `
   <div class="row"><button class="btn btn-ghost" data-action="close">Huỷ</button><button class="btn btn-blood" data-action="reset-confirm">Xoá tiến độ</button></div>`;
 
 export { starsHTML };
+
+/* ---------- Gợi ý ---------- */
+// Lời gợi ý cho một việc cần làm tiếp (từ nextStep). level 1: chỉ hướng; level 2: nói rõ điểm, hồ sơ
+function hintLine(game, c, st, level) {
+  const title = (id) => (actionOf(c, id) || {}).title || id;
+  const nameOf = (id) => (c.suspects.find((x) => x.id === id) || {}).name || id;
+  if (st.kind === "accuse") return "Bạn đã có đủ chứng cứ then chốt cho mọi bước buộc tội. Hãy mở Buộc tội và chọn đúng hồ sơ cho từng bước.";
+  if (st.kind === "go" || st.kind === "wait") {
+    const spot = spotOf(c, st.id);
+    const L = spot ? c.locations[spot.loc] : null;
+    const here = !!spot && spot.loc === game.loc;
+    if (st.kind === "wait") {
+      return level < 2
+        ? "Có một hồ sơ quan trọng sắp về muộn. Hãy xem lại khi đồng hồ tới mốc."
+        : `Hồ sơ “${esc(title(st.id))}” về lúc ${esc(st.at || "")}${L ? ` ở ${esc(L.name)}` : ""}. Bấm vào điểm của nó để chờ.`;
+    }
+    if (level < 2) return here ? "Còn một điều đáng xem ngay tại đây." : `Hãy xem lại ${esc(L.name)}.`;
+    return here ? `Hãy điều tra “${esc(spot.label)}”.` : `Hãy tới ${esc(L.name)} và điều tra “${esc(spot.label)}”.`;
+  }
+  if (st.kind === "deduce") {
+    return level < 2
+      ? "Một vài hồ sơ bạn đang có có thể ghép lại thành kết luận. Hãy mở tab Suy luận trong Sổ tay."
+      : `Trong tab Suy luận, thử ghép: ${st.needs.map((n) => `“${esc(title(n))}”`).join(" + ")}.`;
+  }
+  // confront
+  return level < 2
+    ? `Thử đưa một hồ sơ cho ${esc(nameOf(st.who))} xem phản ứng.`
+    : `Đưa “${esc(title(st.clue))}” cho ${esc(nameOf(st.who))} (Sổ tay ▸ Nghi phạm ▸ Đưa chứng cứ).`;
+}
+
+export function hintSheetHTML(game, c, st, level) {
+  const more = level < 2 && st.kind !== "accuse";
+  return `
+    <h2>💡 Gợi ý</h2>
+    <div class="expl"><p>${hintLine(game, c, st, level)}</p></div>
+    <p class="muted text-sm mt-2">Gợi ý không tốn giờ và không ảnh hưởng số sao. Đã dùng: ${game.hints || 0}.</p>
+    <div class="row"><button class="btn" data-action="close">Đã hiểu</button>${more ? `<button class="btn btn-ghost" data-action="hint-more"><i class="fa-solid fa-lightbulb"></i> Chỉ rõ hơn</button>` : ""}</div>`;
+}

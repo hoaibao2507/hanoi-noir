@@ -135,14 +135,73 @@ export function sheetOpen() {
   return !$("modal").classList.contains("hidden");
 }
 
+/* Bàn phím và trợ năng: khi hộp thoại mở, mọi thứ phía sau bị "inert" (không focus, không đọc được), nên Tab không lạc ra ngoài.
+   Sổ tay đóng cũng inert, để Tab không rơi vào các nút nằm ngoài màn hình. Đóng thì trả focus về đúng nơi đã mở. */
+const BEHIND = ["scene", "ui", "testimony", "pan-l", "pan-r"];
+let nbOpen = false;
+let coachOn = false; // hướng dẫn lần đầu đang chạy: khóa phần phía sau như khi có hộp thoại
+let returnTo = null; // selector của phần tử giữ focus trước khi mở hộp thoại
+
+function syncInert() {
+  const lock = sheetOpen() || coachOn;
+  for (const id of BEHIND) $(id).inert = lock;
+  $("notebook").inert = lock || !nbOpen;
+}
+
+// Bật hoặc tắt khóa phía sau trong lúc chạy hướng dẫn (coach.js)
+export function setCoachActive(on) {
+  coachOn = on;
+  syncInert();
+}
+
+// Selector đủ để tìm lại một nút sau khi cảnh vẽ lại (phần tử cũ có thể đã bị thay)
+function selectorOf(el) {
+  if (!el || el === document.body) return null;
+  if (el.id) return `#${CSS.escape(el.id)}`;
+  const a = el.dataset && el.dataset.action;
+  if (!a) return null;
+  const key = ["id", "loc", "who", "tab", "k"].find((k) => el.dataset[k] !== undefined);
+  return `[data-action="${a}"]${key ? `[data-${key}="${CSS.escape(el.dataset[key])}"]` : ""}`;
+}
+
+function restoreFocus() {
+  const el = returnTo && document.querySelector(returnTo);
+  returnTo = null;
+  if (el && !el.disabled) el.focus({ preventScroll: true });
+}
+
+// Sổ tay mở hoặc đóng: bỏ inert, đưa focus vào nút đóng; đóng thì trả focus về nút Sổ tay
+export function setNotebook(open) {
+  const was = nbOpen;
+  nbOpen = open;
+  syncInert();
+  if (open === was) return;
+  if (open) {
+    $("notebook").querySelector(".nb-close").focus({ preventScroll: true });
+  } else if ($("notebook").contains(document.activeElement) || document.activeElement === document.body) {
+    const toggle = document.querySelector('[data-action="nb-toggle"]');
+    if (toggle) toggle.focus({ preventScroll: true });
+  }
+}
+
 // opts.cinema: tin quan trọng, thêm hai thanh đen, rung và đèn chập chờn
 export function showSheet(html, opts = {}) {
   $("toast").classList.remove("show");
   hideTestimony();
   const m = $("modal");
+  if (!sheetOpen()) returnTo = selectorOf(document.activeElement); // vẽ lại hộp đang mở không đổi nơi sẽ trả focus
   m.innerHTML = `<div class="sheet">${html}</div>`;
   icons(m);
+  // Tên của hộp thoại cho trình đọc màn hình: tiêu đề đầu tiên
+  const title = m.querySelector("h2");
+  if (title) {
+    title.id = "sheet-title";
+    m.setAttribute("aria-labelledby", "sheet-title");
+  } else {
+    m.removeAttribute("aria-labelledby");
+  }
   m.classList.remove("hidden");
+  syncInert();
   const b = m.querySelector("button");
   // Giữ hộp thoại ở đầu trang: focus vào nút cuối của một hộp dài sẽ cuộn xuống tận đáy
   if (b) b.focus({ preventScroll: true });
@@ -164,6 +223,8 @@ export function closeSheet() {
   const m = $("modal");
   m.classList.add("hidden");
   m.innerHTML = "";
+  syncInert();
+  restoreFocus();
   if (HAS_GSAP) bars(false, 0.35);
 }
 

@@ -15,6 +15,7 @@ import { lightSecrets } from "./ui/flashlight.js";
 import * as T from "./ui/templates.js";
 import * as O from "./ui/overlays.js";
 import { mountPinboard, syncPinboard, wiggle } from "./ui/pinboard.js";
+import { coachSeen, markCoachSeen, startCoach, skipCoach, coachActive } from "./ui/coach.js";
 import { $, setHTML } from "./ui/dom.js";
 
 const MENU_W = 1600;
@@ -32,6 +33,8 @@ let lockEntry = null;
 let worldKey = null;
 // Đồng hồ (theo phút) đã báo diễn biến tới đó; diễn biến nằm sau mốc này sẽ được báo khi tới
 let announced = 0;
+// Vào vụ đầu tiên trong đời thì sau phần mở đầu sẽ chạy hướng dẫn một lần
+let coachPending = false;
 
 const game = () => store.get().game;
 const setGame = (patch) => store.set({ game: { ...store.get().game, ...patch } });
@@ -59,6 +62,7 @@ function renderMenu(s) {
   stage.setHotspots("");
   setHTML($("ui"), T.menuHTML(s.save, region.id));
   $("notebook").classList.remove("is-open");
+  O.setNotebook(false);
   if (entering) O.animateMenu();
 }
 
@@ -76,6 +80,7 @@ function renderCase(s) {
   nb.scrollTop = y;
   syncPinboard(nb);
   $("notebook").classList.toggle("is-open", s.nb);
+  O.setNotebook(s.nb);
 }
 
 // Diễn biến xảy ra từ lần báo trước tới giờ hiện tại; mỗi diễn biến chỉ được báo một lần
@@ -99,6 +104,7 @@ async function startCase(i) {
   store.set({ screen: "case", game: g0, nb: false, region: c.region });
   await O.veil(`${T.regionOf(c).short} · Vụ ${c.no}`, c.title, c.place, null);
   setGame({ busy: false });
+  coachPending = !coachSeen();
   O.showSheet(T.briefingHTML(c));
   O.animateEntrance();
 }
@@ -112,7 +118,7 @@ async function goLoc(i) {
   const door = document.querySelector(`.door[data-loc="${i}"]`);
   const box = door && door.getBoundingClientRect();
   const origin = box && { x: box.left + box.width / 2, y: box.top + box.height / 2 };
-  await O.veil("Di chuyển đến", L.name, L.time, () => setGame({ loc: i }), origin);
+  await O.veil("Di chuyển đến", L.name, L.time, () => setGame({ loc: i, hintId: null }), origin);
   setGame({ busy: false });
   O.animateEntrance();
 }
@@ -274,7 +280,7 @@ function finish(win) {
     // Thắng thì hồ sơ đóng, nên ván này không còn gì để khôi phục
     store.set({ save, game: { ...g, over: true } });
     storeSave(save);
-    O.showSheet(T.verdictWinHTML(c, g.idx, g.wrong, save), { cinema: true });
+    O.showSheet(T.verdictWinHTML(c, g.idx, g.wrong, save, g.hints || 0), { cinema: true });
   } else {
     O.showSheet(T.verdictLoseHTML(c, g.idx), { cinema: true });
   }
@@ -323,6 +329,28 @@ function pairLink(a, b) {
   const status = n.lkResult && n.lkResult.status;
   if (status === "new") O.toast("Kết nối mới đã được ghi vào sổ tay");
   else if (status === "none") wiggle([a, b]);
+}
+
+/* ---------- Gợi ý và hướng dẫn ---------- */
+// level 1: chỉ hướng; level 2: nói rõ và làm điểm điều tra nhấp nháy. Mỗi lần mở được đếm vào g.hints
+function openHint(level) {
+  const g = game();
+  if (!g || g.busy) return;
+  if (g.over) return O.toast("Hồ sơ đã đóng. Hãy điều tra lại vụ này.");
+  const c = CASES[g.idx];
+  const st = R.nextStep(g, c);
+  const hintId = level >= 2 && st.kind === "go" && st.loc === g.loc ? st.id : g.hintId || null;
+  const next = { ...g, hints: (g.hints || 0) + 1, hintId };
+  store.set({ game: next });
+  O.showSheet(T.hintSheetHTML(next, c, st, level));
+}
+
+// Hộp thoại mở đầu vừa đóng và đây là lần đầu chơi: chạy hướng dẫn sau một nhịp để cảnh kịp hiện
+function maybeCoach() {
+  if (!coachPending || O.sheetOpen() || store.get().screen !== "case") return;
+  coachPending = false;
+  markCoachSeen();
+  setTimeout(() => startCoach((on) => O.setCoachActive(on)), 450);
 }
 
 function resetProgress() {
@@ -405,6 +433,13 @@ export const actions = {
   close: () => {
     lockEntry = null;
     O.closeSheet();
+    maybeCoach();
+  },
+  hint: () => openHint(1),
+  "hint-more": () => openHint(2),
+  "coach-reset": () => {
+    markCoachSeen(false);
+    O.toast("Hướng dẫn sẽ hiện lại khi bạn vào một vụ án.");
   },
   help: () => O.showSheet(T.helpHTML()),
   "reset-ask": () => O.showSheet(T.resetHTML()),
@@ -427,8 +462,11 @@ export function boot() {
     }
     if (e.key === "Escape") {
       lockEntry = null;
-      if (O.sheetOpen()) O.closeSheet();
-      else if (store.get().nb) store.set({ nb: false });
+      if (coachActive()) skipCoach();
+      else if (O.sheetOpen()) {
+        O.closeSheet();
+        maybeCoach();
+      } else if (store.get().nb) store.set({ nb: false });
       return;
     }
     if (O.sheetOpen() || store.get().screen !== "case") return;

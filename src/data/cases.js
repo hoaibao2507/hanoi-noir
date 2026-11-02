@@ -41,7 +41,7 @@ const HANOI = [
   intro: "Tối thứ Bảy, tiệm Hoa Sen đóng cửa lúc 19h30. Theo lời nhân viên Quyên, chiếc hộp gỗ trầm hương cổ — báu vật nằm trong tủ kính — vẫn còn nguyên khi cô khóa cửa. Sáng hôm sau, khi bà Lan đến kiểm kê, tủ kính đã trống trơn. Kính, khung và ổ khóa đều không có dấu hiệu bị phá. Hãy tìm xem ai đã mở được tủ.",
   suspects: [
     { id: "lan", name: "Bà Lan", role: "Chủ tiệm · 52 tuổi", bio: "Giữ một chìa khóa chính. Tối đó bà đi đám giỗ.",
-      look: { skin: "#f0c9a0", hair: "bun", hc: "#2b2b2b", top: "#7a3e8f", acc: "glasses" } },
+      look: { skin: "#f0c9a0", hair: "bun", hc: "#2b2b2b", top: "#7a3e8f", acc: "glasses", outfit: "aodai" } },
     { id: "quyen", name: "Quyên", role: "Nhân viên bán hàng · 26 tuổi", bio: "Mở cửa tiệm mỗi sáng. Con nhỏ đang ốm.",
       look: { skin: "#f4d3b0", hair: "long", hc: "#1f1a17", top: "#c8553d", acc: "none" } },
     { id: "binh", name: "Bình", role: "Thợ chạm gỗ cũ · 40 tuổi", bio: "Nghỉ việc tháng trước sau cuộc cãi vã với bà Lan.",
@@ -167,7 +167,7 @@ const HANOI = [
     { id: "hoang", name: "Hoàng", role: "Giám đốc phòng tranh · 45 tuổi", bio: "Có chìa cửa chính. Khi có sự cố điện, anh là người xử lý cầu dao.",
       look: { skin: "#f2cfae", hair: "short", hc: "#222", top: "#1f3a5f", acc: "tie", ac: "#8e2c2c" } },
     { id: "nga", name: "Nga", role: "Nhà sưu tầm · 50 tuổi", bio: "Từng trả giá cao nhất cho bức tranh nhưng bị từ chối.",
-      look: { skin: "#f5d6bc", hair: "bun", hc: "#5a3a2a", top: "#6c3483", acc: "none" } },
+      look: { skin: "#f5d6bc", hair: "bun", hc: "#5a3a2a", top: "#6c3483", acc: "none", outfit: "aodai" } },
     { id: "phong", name: "Phong", role: "Họa sĩ trẻ · 28 tuổi", bio: "Tranh của anh bị loại khỏi triển lãm đêm nay.",
       look: { skin: "#e8bf98", hair: "long", hc: "#111", top: "#1b1b1b", acc: "none", sex: "m" } },
     { id: "tuan", name: "Tuấn", role: "Môi giới nghệ thuật · 38 tuổi", bio: "Được hoa hồng nếu bán được tranh đêm nay.",
@@ -398,7 +398,7 @@ const HANOI = [
     { id: "kien", name: "Kiên", role: "Thợ bảo trì máy lạnh · 50 tuổi", bio: "Đến sửa máy lạnh tầng hai tối đó, mang theo vali đồ nghề.",
       look: { skin: "#c98f63", hair: "hat", hc: "#6b4a2b", top: "#4f6b3a", acc: "mustache" } },
     { id: "huong", name: "Bà Hương", role: "Chủ mảnh đất · 66 tuổi", bio: "Đang bán mảnh đất ba tầng. Hồ sơ gốc đã giao cho văn phòng để sang tên.",
-      look: { skin: "#f0c9a0", hair: "bun", hc: "#9e9e9e", top: "#7a3e8f", acc: "glasses" } }
+      look: { skin: "#f0c9a0", hair: "bun", hc: "#9e9e9e", top: "#7a3e8f", acc: "glasses", outfit: "aodai" } }
   ],
   locations: [
     { id: "notary", name: "Văn phòng công chứng · sảnh", time: "21:00", scene: "notary", hs: [
@@ -545,7 +545,7 @@ const HANOI = [
     { id: "tien", name: "Tiến", role: "Học việc · 19 tuổi", bio: "Theo học ông Hiển từ năm ngoái. Người đã gọi cảnh sát.",
       look: { skin: "#f0c9a0", hair: "short", hc: "#3b2a1b", top: "#7cb342", acc: "none" } },
     { id: "ngan", name: "Ngân", role: "Chủ quán trà đầu ngõ · 45 tuổi", bio: "Hàng xóm lâu năm của hiệu. Quán mở đến khuya.",
-      look: { skin: "#dba77e", hair: "bun", hc: "#2a1b10", top: "#00838f", acc: "none" } },
+      look: { skin: "#dba77e", hair: "bun", hc: "#2a1b10", top: "#00838f", acc: "none", outfit: "aodai" } },
     { id: "quang", name: "Quang", role: "Thợ khóa · 60 tuổi", bio: "Từng sửa khóa cho hiệu. Còn đòi ông Hiển tám triệu tiền công.",
       look: { skin: "#c98f63", hair: "short", hc: "#9e9e9e", top: "#455a64", acc: "glasses" } }
   ],

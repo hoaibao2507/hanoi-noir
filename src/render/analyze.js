@@ -2,12 +2,36 @@
    Phân tích nền cảnh đã raster để dựng ánh sáng thật: bản đồ pháp tuyến giả (lấy từ độ sáng,
    để đèn pin làm nổi vân gỗ, nếp tường, gờ đồ vật) và vị trí các nguồn sáng (đèn lồng, nến, cửa sổ).
    Không có DOM ngoài canvas, nên tính một lần khi nền được vẽ.
+   Việc tính được chia thành các lát ngắn (SLICE_MS) và nhường luồng chính giữa các lát, nên đổi cảnh không làm
+   khung hình khựng: trước đây một lần phân tích chiếm khoảng 150 ms liền.
    ===================================================================== */
 
 const NORMAL_W = 960;  // bề rộng bản đồ pháp tuyến; Phaser nội suy khi vẽ, nên không cần bằng ảnh gốc
 const GRID_W = 120;    // lưới dò nguồn sáng
 const BUMP = 1.1;      // độ gồ ghề của bản đồ pháp tuyến: vừa đủ để vân gỗ nổi lên, không viền nổi quanh mọi vật
 const MAX_LAMPS = 6;
+const SLICE_MS = 6;    // mỗi lát tính tối đa bấy nhiêu ms rồi nhường luồng chính
+
+// Nhường luồng chính: scheduler.yield nếu có, không thì MessageChannel (không bị trễ tối thiểu 4 ms như setTimeout)
+const yieldToMain = () =>
+  globalThis.scheduler && globalThis.scheduler.yield
+    ? globalThis.scheduler.yield()
+    : new Promise((resolve) => {
+        const c = new MessageChannel();
+        c.port1.onmessage = () => resolve();
+        c.port2.postMessage(0);
+      });
+
+// Người điều độ: gọi `await tick()` ở cuối mỗi hàng điểm ảnh; hết lát thì nhường luồng. Nền bị thay giữa chừng (stale()) thì bỏ dở
+function pacer(stale) {
+  let t = performance.now();
+  return async () => {
+    if (performance.now() - t < SLICE_MS) return;
+    await yieldToMain();
+    if (stale()) throw Object.assign(new Error("Nền đã bị thay"), { stale: true });
+    t = performance.now();
+  };
+}
 
 const make = (w, h) => {
   const c = document.createElement("canvas");
@@ -37,7 +61,7 @@ function luminance(data, n) {
 }
 
 // Làm mờ nhẹ (hộp 3 × 3, hai lượt) để mép cứng của hình vẽ không thành viền nổi gắt
-function soften(L, w, h) {
+async function soften(L, w, h, tick) {
   let src = L;
   for (let pass = 0; pass < 2; pass++) {
     const out = new Float32Array(src.length);
@@ -49,6 +73,7 @@ function soften(L, w, h) {
         }
         out[y * w + x] = sum / 9;
       }
+      await tick();
     }
     src = out;
   }
@@ -56,7 +81,7 @@ function soften(L, w, h) {
 }
 
 // Bản đồ pháp tuyến từ độ sáng (Sobel). Vùng phẳng cho (128,128,255): ánh sáng chiếu thẳng
-function normalMap(L, w, h) {
+async function normalMap(L, w, h, tick) {
   const out = make(w, h);
   const g = out.getContext("2d");
   const img = g.createImageData(w, h);
@@ -73,13 +98,14 @@ function normalMap(L, w, h) {
       img.data[o + 2] = (nz / len * 0.5 + 0.5) * 255;
       img.data[o + 3] = 255;
     }
+    await tick();
   }
   g.putImageData(img, 0, 0);
   return out;
 }
 
 // Nguồn sáng: điểm sáng và ấm hơn hẳn vùng xung quanh (đèn, nến, ô cửa), không phải mảng tường sáng rộng
-function findLamps(src, worldW, worldH, figs) {
+async function findLamps(src, worldW, worldH, figs, tick) {
   const s = shrink(src, GRID_W); // src đã là bản thu nhỏ, nên bước này rất rẻ
   const { data } = s.ctx.getImageData(0, 0, s.w, s.h);
   const n = s.w * s.h;
@@ -94,6 +120,7 @@ function findLamps(src, worldW, worldH, figs) {
       }
       local[y * s.w + x] = sum / cnt;
     }
+    await tick();
   }
   const cells = [];
   for (let i = 0; i < n; i++) {
@@ -124,18 +151,20 @@ function findLamps(src, worldW, worldH, figs) {
 }
 
 // Trả về { normal: canvas pháp tuyến, lamps: [{x, y, k, warm}] theo đơn vị thế giới,
-// probe(wx, wy): màu [r, g, b] của nền tại một điểm thế giới }. Mọi thứ đọc từ bản thu nhỏ, không đọc ngược cả ảnh gốc từ GPU
-export function analyze(art, worldW, worldH, figs = []) {
+// probe(wx, wy): màu [r, g, b] của nền tại một điểm thế giới }. Mọi thứ đọc từ bản thu nhỏ, không đọc ngược cả ảnh gốc từ GPU.
+// stale() báo nền này đã bị thay bằng nền khác: phân tích bỏ dở và ném lỗi có cờ `stale`
+export async function analyze(art, worldW, worldH, figs = [], stale = () => false) {
+  const tick = pacer(stale);
   const s = shrink(art, Math.min(NORMAL_W, art.width));
   const { data } = s.ctx.getImageData(0, 0, s.w, s.h);
-  const normal = normalMap(soften(luminance(data, s.w * s.h), s.w, s.h), s.w, s.h);
+  const normal = await normalMap(await soften(luminance(data, s.w * s.h), s.w, s.h, tick), s.w, s.h, tick);
   const probe = (wx, wy) => {
     const x = Math.min(s.w - 1, Math.max(0, Math.round((wx / worldW) * s.w)));
     const y = Math.min(s.h - 1, Math.max(0, Math.round((wy / worldH) * s.h)));
     const o = (y * s.w + x) * 4;
     return [data[o], data[o + 1], data[o + 2]];
   };
-  return { normal, lamps: findLamps(s.canvas, worldW, worldH, figs), probe };
+  return { normal, lamps: await findLamps(s.canvas, worldW, worldH, figs, tick), probe };
 }
 
 // Cắt một mảnh của nền và của bản đồ pháp tuyến (toạ độ 0..1 của cả khung). Viền rộng mx, my (tỉ lệ của mảnh)

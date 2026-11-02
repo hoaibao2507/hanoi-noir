@@ -304,7 +304,7 @@ test("mỗi vai đều có ít nhất hai lối chứng cứ độc lập, đề
     let ok = 0;
     for (const path of routes[r.key]) {
       let g;
-      try { g = play(path); } catch (e) { continue; }
+      try { g = play(path); } catch { continue; }
       if (r.ids.some((i) => g.done[i])) ok++;
     }
     assert.ok(ok >= 2, `${r.key}: chỉ ${ok} lối chứng cứ đi được`);
