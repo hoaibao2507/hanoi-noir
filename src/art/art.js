@@ -921,18 +921,18 @@ const ART = (() => {
   }
 
   // Cửa phòng: khung gỗ, khoảng tối và vệt sáng dưới cửa
-  function roomDoor(x, f) {
-    return rect(x - 8, 340, 146, 380, f.trim) +
-      rect(x, 352, 130, 368, "#120c08") +
-      rect(x + 12, 364, 106, 344, "#22170e") +
-      rect(x + 12, 712, 106, 6, "#e9b949", 'opacity=".5"');
+  function roomDoor(x, f, w = 130) {
+    return rect(x - 8, 340, w + 16, 380, f.trim) +
+      rect(x, 352, w, 368, "#120c08") +
+      rect(x + 12, 364, w - 24, 344, "#22170e") +
+      rect(x + 12, 712, w - 24, 6, "#e9b949", 'opacity=".5"');
   }
 
   // Cửa cửa hàng ngoài phố: mái che đỏ và khoảng tối bên dưới
-  function streetDoor(x) {
-    return rect(x - 6, 528, 142, 12, "#8b1e1e", 'rx="3"') +
-      rect(x, 540, 130, 180, "#120c08") +
-      rect(x + 12, 552, 106, 6, "#f0c15a", 'opacity=".6"');
+  function streetDoor(x, w = 130) {
+    return rect(x - 6, 528, w + 12, 12, "#8b1e1e", 'rx="3"') +
+      rect(x, 540, w, 180, "#120c08") +
+      rect(x + 12, 552, w - 24, 6, "#f0c15a", 'opacity=".6"');
   }
 
   // Một bên là căn phòng: tường, trần, sàn và các cửa đi (tọa độ thế giới)
@@ -944,7 +944,7 @@ const ART = (() => {
     for (let i = 0; i < 5; i++) s += line(x0, 740 + i * 36, x0 + 400, 740 + i * 36, "#2a170b", 2, 'opacity=".45"');
     s += glow(k, x0 + 200, 150, 90, f.lamp, 0.35) + circle(x0 + 200, 150, 10, f.lamp);
     s += rect(x0 + 186, 120, 28, 10, shade(f.trim, 0.2), 'rx="3"');
-    doors.forEach((d) => { s += roomDoor(d.x, f); });
+    doors.forEach((d) => { s += roomDoor(d.x, f, d.w); });
     return s;
   }
 
@@ -958,7 +958,7 @@ const ART = (() => {
       s += tube(x, base, w, h, { wall: seed % 2 ? "#4b3a2c" : "#3a2d3f", roof: "#1d1620", lit: "#ffc66e", seed });
     });
     s += rect(x0, 720, 400, 180, `url(#${k}-fstreet)`);
-    doors.forEach((d) => { s += streetDoor(d.x); });
+    doors.forEach((d) => { s += streetDoor(d.x, d.w); });
     return s;
   }
 
@@ -973,7 +973,7 @@ const ART = (() => {
       s += sgHouse(k, x, base, w, h, { wall: seed % 2 ? "#3a3a58" : "#4a3346", seed, neon });
     });
     s += wires(130, 3) + rect(x0, 720, 400, 180, `url(#${k}-fstreet)`);
-    doors.forEach((d) => { s += streetDoor(d.x); });
+    doors.forEach((d) => { s += streetDoor(d.x, d.w); });
     return s;
   }
 

@@ -22,13 +22,20 @@ export function worldWidth(sceneKey) {
   return sceneKey === "menu" ? COMP_W : WORLD_W;
 }
 
-// Xếp cửa cho các địa điểm khác: xen kẽ trái, phải, rồi lấp các khe kế tiếp
+// Địa điểm có hơn 4 cửa (vụ có 6 địa điểm trở lên) xếp gọn: cửa hẹp hơn và ba khe mỗi bên, tối đa 6 cửa
+export const DOOR_COMPACT = { w: 100, left: [12, 142, 272], right: [2012, 2142, 2272] };
+
+// Xếp cửa cho các địa điểm khác: xen kẽ trái, phải, rồi lấp các khe kế tiếp. Mỗi cửa có bề rộng w (đơn vị thế giới)
 export function doorPlan(count) {
+  const compact = count > 4;
+  const slots = compact ? DOOR_COMPACT : DOOR_SLOTS;
+  const w = compact ? DOOR_COMPACT.w : DOOR_W;
   const doors = [];
   for (let j = 0; j < count; j++) {
     const side = j % 2 === 0 ? "left" : "right";
     const slot = Math.floor(j / 2);
-    doors.push({ side, x: DOOR_SLOTS[side][slot], index: j });
+    if (slot >= slots[side].length) throw new Error(`Một địa điểm chỉ có tối đa ${slots.left.length * 2} cửa`);
+    doors.push({ side, x: slots[side][slot], index: j, w });
   }
   return doors;
 }

@@ -100,6 +100,31 @@ test("doorPlan đặt cửa xen kẽ hai bên và nằm trong phần biên của
   assert.equal(DOOR_SLOTS.right.length, 2);
 });
 
+test("doorPlan xếp được 5 và 6 cửa: có đủ vị trí, nằm trong dải biên và không chồng lên nhau", () => {
+  for (const n of [4, 5, 6]) {
+    const plan = doorPlan(n);
+    assert.equal(plan.length, n);
+    for (const side of ["left", "right"]) {
+      const ds = plan.filter((d) => d.side === side).sort((a, b) => a.x - b.x);
+      ds.forEach((d, i) => {
+        assert.ok(Number.isFinite(d.x), `${n} cửa: cửa ${d.index} chưa có vị trí`);
+        if (side === "left") assert.ok(d.x >= 0 && d.x + d.w <= OX, `${n} cửa: cửa trái ra ngoài dải`);
+        else assert.ok(d.x >= OX + COMP_W && d.x + d.w <= WORLD_W, `${n} cửa: cửa phải ra ngoài dải`);
+        if (i) assert.ok(d.x >= ds[i - 1].x + ds[i - 1].w, `${n} cửa: hai cửa ${side} chồng lên nhau`);
+      });
+    }
+  }
+  assert.throws(() => doorPlan(7));
+});
+
+test("mọi địa điểm của mọi vụ đều có cửa hợp lệ tới các địa điểm khác", () => {
+  for (const c of CASES) {
+    const doors = doorsFor(c.locations, 0);
+    assert.equal(doors.length, c.locations.length - 1, c.id);
+    assert.ok(doors.every((d) => Number.isFinite(d.x) && d.w > 0), `${c.id}: có cửa thiếu vị trí`);
+  }
+});
+
 test("doorsFor chỉ tạo cửa tới các địa điểm khác", () => {
   const doors = doorsFor(c1.locations, 0);
   assert.equal(doors.length, c1.locations.length - 1);

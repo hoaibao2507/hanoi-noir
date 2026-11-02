@@ -157,8 +157,8 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 - Cảnh gốc 1600×900 (tọa độ `hs` trong cases.js). Thế giới 2400×900 (`WORLD_W`, `WORLD_H`): cảnh gốc đặt lệch `OX=400`.
   Menu dùng thế giới 1600.
 - `toWorldX(x) = x + OX`. Template đổi sang `%` của thế giới (`pctX`, `pctY`).
-- Cửa: `DOOR_SLOTS = {left:[40,230], right:[2040,2220]}`, `DOOR_W=130`; `doorPlan` xếp xen kẽ trái/phải → tối đa 4 cửa
-  (tức tối đa 5 địa điểm/vụ). `doorsFor(locations, current)` tạo cửa tới các địa điểm khác.
+- Cửa: `DOOR_SLOTS = {left:[40,230], right:[2040,2220]}`, `DOOR_W=130`; `doorPlan` xếp xen kẽ trái/phải → 4 cửa
+  (5 địa điểm). Địa điểm có 5–6 cửa (vụ 6–7 địa điểm, như vụ Sài Gòn) dùng `DOOR_COMPACT`: cửa hẹp 100, ba khe mỗi bên; `doorPlan` ném lỗi khi quá 6 cửa. Biển tên của khe lẻ nâng lên một hàng (`door-s1`) để không đè nhau. `doorsFor(locations, current)` tạo cửa tới các địa điểm khác.
 - Hai bên thế giới do `widen()` trong art.js dựng: `FLANK[sceneKey]` chọn `room` hoặc `street` (+ màu). Cảnh mới **phải có mục trong `FLANK`**.
 
 ### 6.3 Camera (`ui/stage.js`)

@@ -943,3 +943,21 @@ body[data-screen="menu"] .pan { display: none !important; }
   from { opacity: 0; transform: rotate(-14deg) scale(2.4); }
   to { opacity: 1; transform: rotate(-14deg) scale(1); }
 }
+
+/* Hai cửa kề nhau trên cùng một bên chỉ cách nhau khoảng 190 đơn vị thế giới, hẹp hơn biển tên: biển của cửa thứ hai nâng lên
+   một hàng, nối với cửa bằng một sợi vạch mảnh, nên không bao giờ đè lên biển của cửa thứ nhất */
+.door-sign b { max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.door-s1 .door-sign { margin-bottom: 78px; }
+/* Địa điểm có 5 cửa trở lên: cửa hẹp, ba khe mỗi bên cách nhau 130 đơn vị, nên tên dài phải cắt ngắn hơn (tên đầy đủ nằm ở title) */
+.door-c .door-sign b { max-width: 150px; }
+.door-s1 .door-sign::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 2px;
+  height: 64px;
+  margin-left: -1px;
+  background: linear-gradient(to bottom, rgba(240, 179, 90, 0.55), rgba(240, 179, 90, 0));
+  pointer-events: none;
+}

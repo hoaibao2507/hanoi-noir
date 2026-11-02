@@ -138,8 +138,10 @@ export function doorsHTML(doors) {
   return doors
     .map((d) => {
       const arrow = d.side === "left" ? "fa-arrow-left" : "fa-arrow-right";
-      return `<button class="door door-${d.side}" style="left:${pctX(d.x + DOOR_W / 2)}%" data-action="go" data-loc="${d.loc}"
-          aria-label="Đi tới ${esc(d.name)}">
+      const w = d.w || DOOR_W, compact = w < DOOR_W;
+      // Biển của khe lẻ nâng lên một hàng; địa điểm đông cửa thì cửa hẹp hơn (door-c) nên inline width ghi đè CSS
+      return `<button class="door door-${d.side} door-s${(d.slot || 0) % 2}${compact ? " door-c" : ""}" style="left:${pctX(d.x + w / 2)}%${compact ? `;width:${pctX(w)}%` : ""}" data-action="go" data-loc="${d.loc}"
+          aria-label="Đi tới ${esc(d.name)}" title="${esc(d.name)}">
         <span class="door-sign"><i class="fa-solid ${arrow}"></i><span class="min-w-0"><b>${esc(d.name)}</b><small>${esc(d.time)}</small></span></span>
       </button>`;
     })
