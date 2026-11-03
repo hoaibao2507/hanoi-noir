@@ -480,7 +480,8 @@ test("diễn biến: báo đúng một lần theo thứ tự, và qua nửa đê
 
 test("mọi vụ vẫn có lời giải đi được khi tính cả hạn của hồ sơ và việc nghi phạm rời đi", () => {
   CASES.forEach((c, ci) => {
-    if (!c.chain) return; // vụ nhiều người có kiểm thử lời giải riêng trong tests/sg.test.js
+    // Vụ nhiều người và vụ có suy luận (kết luận không đặt trên bản đồ, tìm theo chiều rộng sẽ nổ) có kiểm thử lời giải riêng trong tests/sg*.test.js
+    if (!c.chain || c.deduce) return;
     const acts = c.actions.filter((a) => !a.via);
     const stateOf = (mask) => {
       const done = {};

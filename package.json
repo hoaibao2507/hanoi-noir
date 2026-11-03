@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/rules.test.js tests/save.test.js tests/sg.test.js tests/render.test.js tests/hints.test.js tests/notebook.test.js",
+    "test": "node --test tests/rules.test.js tests/save.test.js tests/sg.test.js tests/sg-vani.test.js tests/render.test.js tests/hints.test.js tests/notebook.test.js",
     "lint": "eslint .",
     "e2e": "vite build && node tests/e2e/smoke.mjs"
   },

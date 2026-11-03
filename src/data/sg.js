@@ -1,6 +1,6 @@
 /* =====================================================================
    HANOI NOIR · Vùng Sài Gòn
-   Vụ 1 "Đỉnh Triều Bến Vân Đồn": ba kẻ liên đới, thủ đoạn dựng bằng đồng hồ.
+   Vụ 1 "Đỉnh Triều Bến Vân Đồn": ba kẻ liên đới, thủ đoạn dựng bằng đồng hồ. Vụ 2 "Mực Chưa Khô" nằm ở sg-vani.js.
    Dùng các cơ chế mới của vùng này (xem README):
    - deduce: ghép 2–4 hồ sơ thành kết luận; kết luận là hồ sơ mới (via: "deduce") và có thể làm đầu vào cho suy luận sau
    - gate: điểm điều tra chỉ hiện sau khi có một hồ sơ (thường là kết luận)
@@ -9,6 +9,8 @@
    - world kind "arrive": hồ sơ chỉ có sau một mốc giờ (chờ được, tốn giờ)
    - verdict: phiên xét xử nhiều người, mỗi người một vai và một chứng cứ, kèm các câu dựng lại sự việc
    ===================================================================== */
+
+import { VANI } from "./sg-vani.js";
 
 export const SG_CASES = [
 {
@@ -382,5 +384,6 @@ export const SG_CASES = [
   },
 
   explanation: "<p><b>Một vụ tai nạn được dựng bằng đồng hồ.</b> Ông Châu không trượt chân. Thắm đánh ông choáng rồi dìm xuống nước ngập ở hầm B1 trong khoảng 19h27–19h33; Hải mở sẵn lối xuống hầm và chỉnh lùi giờ camera 17 phút; Ngân dựng kế hoạch, hưởng lợi, và đứng sau tấm ngoại phạm “Thắm đã ra về”.</p><p><b>Chiếc đồng hồ chậm 17 phút.</b> Camera ghi Trang ra cổng lúc 18:03 khi sổ khách ghi 18:20; ghi Thắm ra khỏi thang máy lúc 18:58 khi nhật ký ghi 19:15. Cùng một sự kiện, camera luôn sớm hơn 17 phút. Sau hiệu chỉnh, quãng Thắm “biến mất” khỏi sảnh chín phút (19:25–19:34) nằm ngay sau khi ông Châu xuống hầm (19:24); trước hiệu chỉnh nó lùi sớm 17 phút, tức là trước cả khi ông xuống hầm, nên vô hại.</p><p><b>Vòng kín xuống hầm.</b> Thang riêng chỉ có thẻ ông Châu. Dốc hầm không ai xuống. Thang bộ đang ở chế độ bảo trì nên không ghi thẻ, nhưng muốn xuống phải đi qua hành lang ở sảnh — và camera sảnh chỉ ghi Thắm. Hải bật chế độ bảo trì lúc 19:21 và tắt lúc 19:44; camera phòng bảo vệ (đã hiệu chỉnh) ghi đúng anh bấm, và anh ngồi tại ghế suốt thời gian đó nên không thể là người xuống hầm.</p><p><b>Dấu vết không nói dối.</b> Quần Thắm ướt 55 cm, trong khi nước ngoài đường chỉ 35 cm và nước hầm B1 là 58 cm. Sợi nylon vàng chanh dưới móng tay nạn nhân khớp áo mưa của cô, không phải áo xanh của bác Lành. Điện thoại cô kết nối trạm sóng trong nhà SMR-DAS-B1 từ 19:27 đến 19:33. Cô khai gọi cho Ngân từ ngã tư lúc 19:30, và Ngân xác nhận — nhưng cuộc gọi đó bắt đầu từ trong hầm. Hai lời khai chỉ dựa vào nhau.</p><p><b>Chủ mưu.</b> Gia Hòa Capital cho Châu Phát vay 90 tỷ do Thắm đứng tên, nhưng điện thoại, email và hợp đồng đều là của văn phòng luật sư Ngân. Điều 12 trao 51% cổ phần cho Gia Hòa nếu ông Châu chết trước 30/11, và ông đã ghi sẵn trong két sắt rằng sẽ cho Ngân thôi việc vào thứ Hai. Thứ Sáu, Gia Hòa trả 250 triệu cho vợ Hải và 180 triệu cho Thắm. Ngân gọi ông Châu lúc 19:10 rồi khai rằng không hề liên lạc với ông.</p><p><b>Những người bị loại.</b> Vũ biển thủ 18 tỷ và Trang nợ cờ bạc, nhưng cả hai ở căn hộ Thảo Điền lúc 19:32 theo tài xế Grab Food; từ đó tới bến Vân Đồn khi đường ngập mất ít nhất 45 phút. Bác Lành chỉ vào sảnh lúc 20:03 giờ thật, mặc áo mưa xanh, và là người gọi cảnh sát. Ngân rời bàn tiệc chỉ 14 phút trong khi từ Quận 1 sang bến Vân Đồn mất ít nhất 25 phút một chiều."
-}
+},
+VANI
 ];

@@ -56,7 +56,7 @@ try {
     await page.waitForSelector(".case-card", { timeout: 10000 });
     assert.equal(await page.locator(".case-card").count(), 5, "vùng Hà Nội phải có 5 vụ");
     await page.click('.region-tab[data-id="sg"]');
-    await page.waitForFunction(() => document.querySelectorAll(".case-card").length === 1);
+    await page.waitForFunction(() => document.querySelectorAll(".case-card").length === 2);
     await page.click('.region-tab[data-id="hn"]');
     await page.waitForFunction(() => document.querySelectorAll(".case-card").length === 5);
   });

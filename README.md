@@ -1,6 +1,6 @@
 # Hanoi Noir · Vụ Án Phố Cổ và Sài Gòn
 
-Trò chơi điều tra chạy trên trình duyệt, chia thành hai vùng phá án: 5 vụ ở phố cổ Hà Nội và vụ đầu tiên ở Sài Gòn
+Trò chơi điều tra chạy trên trình duyệt, chia thành hai vùng phá án: 5 vụ ở phố cổ Hà Nội và hai vụ ở Sài Gòn
 (*Đỉnh Triều Bến Vân Đồn*: ba kẻ liên đới, một án mạng được dựng thành tai nạn bằng đồng hồ). Menu có bộ chọn vùng.
 Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc dùng mũi tên để xem hai bên,
 đi qua cửa để sang địa điểm khác, nút chức năng nằm ở bốn góc.
@@ -11,7 +11,7 @@ Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc 
 npm install
 npm run dev      # máy chủ phát triển (Vite)
 npm run build    # tạo dist/index.html: một file duy nhất, mở trực tiếp được
-npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải vụ Sài Gòn (không cần trình duyệt)
+npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải hai vụ Sài Gòn (không cần trình duyệt)
 npm run lint     # ESLint: biến chưa khai báo, biến thừa...
 npm run e2e      # build rồi mở dist/index.html bằng Chrome thật, chơi vài bước (cần Chrome hoặc Edge đã cài)
 ```
@@ -48,15 +48,18 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
 | `src/art/art.js` | Minh họa SVG: cảnh Hà Nội, hai bên thế giới, camera, tài liệu, bảng đăng ký cảnh |
 | `src/art/kit.js` | Đồ nghề vẽ SVG dùng chung (rect, path, gradient, glow, đèn lồng, nhà ống, bình...) |
 | `src/art/sg.js` | Cảnh vùng Sài Gòn |
+| `src/art/sg-vani.js` | Cảnh vụ "Mực Chưa Khô" (cổng, văn phòng, phòng giám đốc, xưởng in, hẻm sau) |
 | `src/ui/coach.js` | Hướng dẫn lần đầu chơi |
 | `src/art/people.js` | Người trong cảnh (`figure`) và chân dung (`portrait`) dùng chung một bộ vẽ: tỉ lệ 6,9 đầu, vai, tay, bàn tay, giày, nét mặt, tóc, kính, ria |
-| `src/data/cases.js` | Danh sách vùng (`REGIONS`), loại hồ sơ, và dữ liệu 5 vụ phố cổ; gộp cả vụ Sài Gòn thành danh sách phẳng `CASES` |
+| `src/data/cases.js` | Danh sách vùng (`REGIONS`), loại hồ sơ, và dữ liệu 5 vụ phố cổ; gộp cả các vụ Sài Gòn thành danh sách phẳng `CASES` |
 | `src/data/sg.js` | Vùng Sài Gòn: vụ "Đỉnh Triều Bến Vân Đồn" (nghi phạm, hồ sơ, kết luận, phiên xét xử nhiều người) |
+| `src/data/sg-vani.js` | Vụ "Mực Chưa Khô" (Vani Ecommerce): một thủ phạm, báo cáo Zoom và Amazon ghi giờ Thái Bình Dương, điện thoại có mã, hồ sơ về muộn |
 | `src/styles/main.css` | Token thiết kế (`@theme`) và các thành phần giao diện |
 | `tests/rules.test.js` | Kiểm thử đơn vị và dữ liệu các vụ (`npm test`) |
 | `tests/hints.test.js` | Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ và thắng được |
 | `tests/render.test.js` | Số đo nhân vật mà `art.js` gắn vào cảnh (lớp Phaser dùng để làm người thở và đổ bóng) |
 | `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
+| `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": múi giờ, khung giờ bị hại, ngoại phạm, mã điện thoại, hạn hồ sơ và hai lối chứng cứ cho mỗi bước |
 | `tests/notebook.test.js` | Sổ tay: tìm hồ sơ không dấu, lọc theo loại, đánh dấu sao, ghi chú, tổng quan địa điểm |
 
 ## Ghi chú thiết kế
@@ -139,7 +142,8 @@ Các cơ chế này đều theo dữ liệu: vụ nào khai báo thì mới dùn
 - **Mở khóa bằng kết luận.** Hành động có `gate: id` ẩn khỏi cảnh cho tới khi hồ sơ `id` (thường là một kết luận) đã có.
 - **Giờ máy lệch.** `devices: { dev: { name, off, by } }` khai báo thiết bị chạy lệch `off` phút cho tới khi kết luận `by` được rút ra.
   Mốc (`spans`) có `dev: "dev"` hiện giờ máy kèm nhãn cảnh báo trong tab Thời gian; sau khi có kết luận, mọi mốc của thiết bị được cộng `off` và
-  ngoại phạm của mọi người được đối chiếu lại, nên có người hết bị bác oan còn người khác bị bác.
+  ngoại phạm của mọi người được đối chiếu lại, nên có người hết bị bác oan còn người khác bị bác. `off` cũng dùng được cho múi giờ:
+  vụ s2 khai báo báo cáo Zoom và thư Amazon ghi giờ Thái Bình Dương với `off: 900` (giờ Việt Nam = giờ máy + 15 giờ).
 - **Khóa mã.** `lock: { code, digits, prompt }` trên một hành động mở bàn phím số. Sai `LOCK_TRIES` lần thì thiết bị tự khóa và mất
   `LOCK_PENALTY` giờ. Mã luôn suy ra được từ hồ sơ khác (vụ s1: giờ đỉnh triều cao nhất hôm đó), không phải đoán.
 - **Hồ sơ về muộn.** Diễn biến `{ kind: "arrive", at, id }`: hồ sơ `id` chỉ đọc được từ mốc `at`. Bấm vào thì hỏi có chờ không; chờ tốn số giờ
@@ -150,6 +154,10 @@ Các cơ chế này đều theo dữ liệu: vụ nào khai báo thì mới dùn
 
 Vụ s1 được kiểm thử như một câu đố: `tests/sg.test.js` chơi lại lời giải ngắn nhất (còn dư giờ), kiểm tra mỗi vai có ít nhất hai lối chứng cứ độc lập,
 các hạn của camera và hiện trường không chặn lời giải, và mọi lựa chọn sai (đảo vai, chứng cứ sai vai, đáp án sai) đều thua.
+
+Vụ s2 "Mực Chưa Khô" (`src/data/sg-vani.js`) dùng lại các cơ chế trên nhưng chỉ có một thủ phạm (`chain` ba bước, mỗi bước chọn một kết luận).
+`tests/sg-vani.test.js` kiểm tra đổi múi giờ, khung giờ bị hại, trạng thái ngoại phạm của từng người, mã điện thoại, hạn của hồ sơ và hai lối chứng cứ mỗi bước.
+Tìm lời giải theo chiều rộng của `tests/rules.test.js` bỏ qua vụ có suy luận, vì kết luận không đặt trên bản đồ.
 
 ## Thêm địa điểm hoặc điểm điều tra
 

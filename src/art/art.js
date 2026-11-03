@@ -2,6 +2,7 @@ import { WORLD_W, COMP_W, OX } from "../world/layout.js";
 import { figure, portrait } from "./people.js";
 import { uid, esc, shade, lin, rect, path, circle, line, txt, blurs, glow, haze, frame, lantern, tube, vase, bowl, lotus, candle } from "./kit.js";
 import { sgHouse, wires, sgLobby, sgSecroom, sgGarage, sgPenthouse, sgStreet, sgLab, menuSg } from "./sg.js";
+import { sgVaniGate, sgVaniOffice, sgVaniCeo, sgVaniPrint, sgVaniDock } from "./sg-vani.js";
 /* =====================================================================
    HANOI NOIR · Minh họa SVG
    Toàn bộ hình ảnh vẽ bằng SVG (không dùng ảnh bitmap).
@@ -651,6 +652,35 @@ const ART = (() => {
         circle(160, 130, 20, "#4a2e3e") + rect(150, 100, 20, 8, "none", 'stroke="#ffd27a" stroke-dasharray="3 3"') +
         glow(k, 160, 40, 80, "#ffd27a", 0.3);
     }
+    if (kind === "cam_vani_gate") {
+      return rect(0, 0, 320, 190, "#0b1020") + rect(0, 120, 320, 70, "#1a212c") +
+        rect(200, 36, 120, 90, "#2a3340") + rect(214, 50, 44, 28, "#ffd27a", 'opacity=".6"') +
+        rect(18, 60, 96, 66, "#202a35") + rect(28, 72, 76, 40, "#27414c") + circle(66, 88, 7, "#d2a074") + rect(57, 94, 18, 18, "#2c5d86", 'rx="3"') +
+        rect(120, 108, 76, 6, "#e8e8e8") + rect(120, 108, 24, 6, "#d94a4a") + rect(156, 108, 24, 6, "#d94a4a") +
+        path("M222 152 L226 130 Q248 120 280 126 L292 152 Z", "#cfd4da") + circle(236, 154, 8, "#111") + circle(278, 154, 8, "#111") + circle(290, 140, 3, "#ff4d4d") +
+        glow(k, 150, 26, 60, "#ffd58a", 0.3);
+    }
+    if (kind === "cam_vani_office") {
+      return rect(0, 0, 320, 190, "#141a22") + rect(0, 120, 320, 70, "#222730") +
+        rect(24, 86, 120, 40, "#3a4452") + rect(48, 64, 52, 30, "#05080e") + rect(54, 70, 40, 18, "#12284a") +
+        circle(72, 108, 8, "#f4d6bd") + rect(62, 116, 20, 26, "#e0a31f", 'rx="4"') +
+        rect(176, 90, 120, 36, "#3a4452") + rect(210, 70, 40, 24, "#05080e") + rect(214, 74, 32, 16, "#1c4a3a") +
+        circle(226, 108, 8, "#f2d2b6") + rect(216, 116, 20, 26, "#7a4a8a", 'rx="4"') +
+        rect(0, 30, 90, 20, "#0b0f14") + glow(k, 160, 14, 90, "#e8f2ff", 0.25);
+    }
+    if (kind === "cam_vani_canteen") {
+      let c = rect(0, 0, 320, 190, "#1c1712") + rect(0, 110, 320, 80, "#2a2018") + rect(220, 40, 90, 60, "#3a2c20") + rect(228, 48, 74, 44, "#d9c3a0", 'opacity=".5"');
+      [[40, 120], [110, 130], [180, 122]].forEach(([x, y]) => { c += rect(x, y, 56, 20, "#6a4a30") + circle(x + 10, y - 14, 7, "#d9a77c") + rect(x + 4, y - 8, 14, 16, "#2f6f62", 'rx="3"') + circle(x + 44, y - 14, 7, "#e0b98e") + rect(x + 38, y - 8, 14, 16, "#a85a2a", 'rx="3"'); });
+      return c + circle(260, 118, 8, "#e0b98e") + rect(250, 126, 20, 30, "#8a8f98", 'rx="4"') + glow(k, 160, 10, 80, "#ffd27a", 0.25);
+    }
+    if (kind === "cam_vani_alley") {
+      let c = rect(0, 0, 320, 190, "#0a0f18") + path("M0 190 L320 190 L220 90 L100 90 Z", "#18202a") + rect(0, 0, 100, 190, "#1e2530") + rect(220, 0, 100, 190, "#1b212b") +
+        rect(100, 70, 120, 20, "#10151c") + rect(14, 64, 62, 96, "#05080e") + rect(18, 70, 54, 12, "#59636f") + glow(k, 40, 70, 40, "#ffd27a", 0.3);
+      c += circle(156, 104, 6, "#8a8f98") + path("M146 112 Q156 106 168 112 L172 140 L144 140 Z", "#8a8f98") + rect(146, 138, 7, 18, "#222") + rect(160, 138, 7, 18, "#222");
+      c += circle(44, 120, 7, "#e9c09b") + rect(34, 128, 20, 28, "#2f6f62", 'rx="4"') + rect(36, 154, 7, 14, "#222") + rect(46, 154, 7, 14, "#222") + `<g class="rain">`;
+      for (let i = 0; i < 30; i++) c += line((i * 41) % 320, (i * 57) % 170, ((i * 41) % 320) - 5, ((i * 57) % 170) + 14, "#8fb3d1", 1.2, 'opacity=".35"');
+      return c + `</g>`;
+    }
     // cam_rain
     let s = rect(0, 0, 320, 190, "#0b1118") + rect(0, 118, 320, 72, "#1a2028") + rect(40, 40, 70, 78, "#3d2c1a", 'opacity=".8"');
     s += glow(k, 200, 96, 34, "#ffe2a0", 0.6) + circle(200, 96, 10, "#ffe2a0", 'opacity=".5"');
@@ -700,7 +730,8 @@ const ART = (() => {
   }
   const CAM_KINDS = {
     cam_moto: 1, cam_suv: 1, cam_corridor: 1, cam_rain: 1,
-    cam_sg_lobby: 1, cam_sg_garage: 1, cam_sg_sec: 1, cam_sg_cafe: 1, cam_sg_gala: 1
+    cam_sg_lobby: 1, cam_sg_garage: 1, cam_sg_sec: 1, cam_sg_cafe: 1, cam_sg_gala: 1,
+    cam_vani_gate: 1, cam_vani_office: 1, cam_vani_canteen: 1, cam_vani_alley: 1
   };
 
   // Biểu đồ thủy triều trong ngày: hai đỉnh, mức báo động và khoảng đường ngập
@@ -728,16 +759,30 @@ const ART = (() => {
   }
 
   // Hai đồng hồ: cùng một sự kiện, camera chậm 17 phút so với giờ thật
+  // Mặt đồng hồ kim: tâm (cx, cy), nhãn dưới mặt, giờ hh:mm, màu viền
+  function clockFace(cx, cy, label, hh, mm, col) {
+    const ah = ((hh % 12) + mm / 60) * 30, am = mm * 6;
+    const pt = (deg, r) => `${cx + r * Math.sin((deg * Math.PI) / 180)} ${cy - r * Math.cos((deg * Math.PI) / 180)}`;
+    let s = `<circle cx="${cx}" cy="${cy}" r="46" fill="#f5efe0" stroke="${col}" stroke-width="5"/>`;
+    for (let i = 0; i < 12; i++) s += `<line x1="${pt(i * 30, 38).split(" ")[0]}" y1="${pt(i * 30, 38).split(" ")[1]}" x2="${pt(i * 30, 43).split(" ")[0]}" y2="${pt(i * 30, 43).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2"/>`;
+    s += `<line x1="${cx}" y1="${cy}" x2="${pt(ah, 24).split(" ")[0]}" y2="${pt(ah, 24).split(" ")[1]}" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>`;
+    s += `<line x1="${cx}" y1="${cy}" x2="${pt(am, 36).split(" ")[0]}" y2="${pt(am, 36).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2.6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="#2b2b2b"/>`;
+    return s + `<text x="${cx}" y="${cy + 66}" text-anchor="middle" font-family="monospace" font-size="11" fill="#e8eef4">${label}</text>`;
+  }
+
+  // Hai đồng hồ: cùng một cuộc họp, giờ Thái Bình Dương sớm hơn giờ Việt Nam 15 giờ
+  function tzView() {
+    return `<svg viewBox="0 0 320 190" role="img" aria-label="Hai đồng hồ lệch nhau 15 giờ: Thái Bình Dương 5 giờ 30 sáng, Việt Nam 20 giờ 30 tối">` +
+      `<rect width="320" height="190" fill="#14202e"/>` + clockFace(70, 78, "SEATTLE (PT) 05:30", 5, 30, "#3b6fa0") + clockFace(250, 78, "VIỆT NAM 20:30", 8, 30, "#c9a227") +
+      `<path d="M126 78 L194 78" stroke="#ff4fa3" stroke-width="3" stroke-dasharray="6 4"/><path d="M188 70 L198 78 L188 86" fill="none" stroke="#ff4fa3" stroke-width="3"/>` +
+      `<text x="160" y="68" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="700" fill="#ff8ac0">+15 giờ</text>` +
+      `<text x="160" y="182" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#cfe8ff">giờ Việt Nam = giờ Thái Bình Dương + 15 giờ</text>` +
+      `</svg>`;
+  }
+
+  // Hai đồng hồ: cùng một sự kiện, camera chậm 17 phút so với giờ thật
   function skewView() {
-    const clock = (cx, cy, label, hh, mm, col) => {
-      const ah = ((hh % 12) + mm / 60) * 30, am = mm * 6;
-      const pt = (deg, r) => `${cx + r * Math.sin((deg * Math.PI) / 180)} ${cy - r * Math.cos((deg * Math.PI) / 180)}`;
-      let s = `<circle cx="${cx}" cy="${cy}" r="46" fill="#f5efe0" stroke="${col}" stroke-width="5"/>`;
-      for (let i = 0; i < 12; i++) s += `<line x1="${pt(i * 30, 38).split(" ")[0]}" y1="${pt(i * 30, 38).split(" ")[1]}" x2="${pt(i * 30, 43).split(" ")[0]}" y2="${pt(i * 30, 43).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2"/>`;
-      s += `<line x1="${cx}" y1="${cy}" x2="${pt(ah, 24).split(" ")[0]}" y2="${pt(ah, 24).split(" ")[1]}" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>`;
-      s += `<line x1="${cx}" y1="${cy}" x2="${pt(am, 36).split(" ")[0]}" y2="${pt(am, 36).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2.6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="#2b2b2b"/>`;
-      return s + `<text x="${cx}" y="${cy + 66}" text-anchor="middle" font-family="monospace" font-size="11" fill="#e8eef4">${label}</text>`;
-    };
+    const clock = clockFace;
     return `<svg viewBox="0 0 320 190" role="img" aria-label="Hai đồng hồ lệch nhau 17 phút: camera 18 giờ 03, giờ thật 18 giờ 20">` +
       `<rect width="320" height="190" fill="#14202e"/>` + clock(70, 78, "CAMERA 18:03", 6, 3, "#3b6fa0") + clock(250, 78, "GIỜ THẬT 18:20", 6, 20, "#c9a227") +
       `<path d="M126 78 L194 78" stroke="#ff4fa3" stroke-width="3" stroke-dasharray="6 4"/><path d="M188 70 L198 78 L188 86" fill="none" stroke="#ff4fa3" stroke-width="3"/>` +
@@ -799,7 +844,12 @@ const ART = (() => {
     sg_garage:    { kind: "room", wall: "#222b32", floor: "#10242c", trim: "#0c1014", lamp: "#dff3ff" },
     sg_penthouse: { kind: "room", wall: "#2a2530", floor: "#3a281c", trim: "#14111a", lamp: "#ffd27a" },
     sg_street:    { kind: "sgstreet" },
-    sg_lab:       { kind: "room", wall: "#1c2a40", floor: "#1d2736", trim: "#070b12", lamp: "#cfe8ff" }
+    sg_lab:       { kind: "room", wall: "#1c2a40", floor: "#1d2736", trim: "#070b12", lamp: "#cfe8ff" },
+    sg_vani_gate:   { kind: "sgstreet" },
+    sg_vani_office: { kind: "room", wall: "#2b3340", floor: "#2a2e36", trim: "#0a0d12", lamp: "#e8f2ff" },
+    sg_vani_ceo:    { kind: "room", wall: "#2e2824", floor: "#3a281c", trim: "#0c0a08", lamp: "#ffd27a" },
+    sg_vani_print:  { kind: "room", wall: "#2c3640", floor: "#2a2f36", trim: "#0c1015", lamp: "#e8f2ff" },
+    sg_vani_dock:   { kind: "room", wall: "#2b323c", floor: "#161c24", trim: "#07090d", lamp: "#ffd58a" }
   };
 
   // Gradient dùng chung cho hai bên của một cảnh (tiền tố k là tiền tố cảnh + "-w")
@@ -1085,7 +1135,8 @@ const ART = (() => {
     alley: () => alley(false),
     alley_rain: () => alley(true),
     archive, gallery, gate, corridor, banquet, notary, stair, pharmacy, lab, menu,
-    sg_lobby: sgLobby, sg_secroom: sgSecroom, sg_garage: sgGarage, sg_penthouse: sgPenthouse, sg_street: sgStreet, sg_lab: sgLab, menu_sg: menuSg
+    sg_lobby: sgLobby, sg_secroom: sgSecroom, sg_garage: sgGarage, sg_penthouse: sgPenthouse, sg_street: sgStreet, sg_lab: sgLab, menu_sg: menuSg,
+    sg_vani_gate: sgVaniGate, sg_vani_office: sgVaniOffice, sg_vani_ceo: sgVaniCeo, sg_vani_print: sgVaniPrint, sg_vani_dock: sgVaniDock
   };
 
   return {
@@ -1102,6 +1153,7 @@ const ART = (() => {
       if (v.k === "box") return boxView();
       if (v.k === "tide") return tideView();
       if (v.k === "skew") return skewView();
+      if (v.k === "tz") return tzView();
       return "";
     }
   };

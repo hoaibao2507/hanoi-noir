@@ -539,12 +539,18 @@ function eventHTML(c, e) {
 }
 
 // Cảnh báo giờ máy ở đầu tab Thời gian: nêu thiết bị nào đã hiệu chỉnh, thiết bị nào còn chưa
+// Độ lệch giờ máy: tròn giờ thì ghi bằng giờ (múi giờ), còn lại ghi bằng phút
+const offLabel = (off) => {
+  const a = Math.abs(off);
+  return a >= 60 && a % 60 === 0 ? `${a / 60} giờ` : `${a} phút`;
+};
+
 function devicesNote(game, c) {
   const devs = Object.values(c.devices || {});
   if (!devs.length) return "";
   return devs
     .map((d) => game.done[d.by]
-      ? `<div class="banner mb-3"><i class="fa-regular fa-clock"></i> Giờ ${esc(d.name)} đã được hiệu chỉnh: giờ thật = giờ máy ${d.off >= 0 ? "+" : "−"} ${Math.abs(d.off)} phút.</div>`
+      ? `<div class="banner mb-3"><i class="fa-regular fa-clock"></i> Giờ ${esc(d.name)} đã được hiệu chỉnh: giờ thật = giờ máy ${d.off >= 0 ? "+" : "−"} ${offLabel(d.off)}.</div>`
       : `<div class="banner warn mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Các mốc có nhãn “giờ máy” lấy từ ${esc(d.name)}. Chưa chắc giờ trên thiết bị này đúng: hãy đối chiếu với các nguồn giờ khác.</div>`)
     .join("");
 }
@@ -596,7 +602,7 @@ export function notebookHTML(game, c, ui = {}) {
 /* ---------- Hộp thoại kiểu hồ sơ giấy ---------- */
 const briefingExtra = (c) =>
   c.deduce
-    ? `<p class="muted text-sm mt-2">Vụ này có thêm: tab <b>Suy luận</b> trong Sổ tay để ghép hồ sơ thành kết luận (kết luận mở ra điểm điều tra mới); một số thiết bị có <b>giờ máy lệch</b>; một số hồ sơ chỉ <b>về muộn</b> hoặc cần <b>mã số</b>; và phiên xét xử cần chỉ ra <b>nhiều người</b> cùng vai trò của từng người.</p>`
+    ? `<p class="muted text-sm mt-2">Vụ này có thêm: tab <b>Suy luận</b> trong Sổ tay để ghép hồ sơ thành kết luận (kết luận mở ra điểm điều tra mới); một số thiết bị có <b>giờ máy lệch</b>; một số hồ sơ chỉ <b>về muộn</b> hoặc cần <b>mã số</b>; và ${c.verdict ? `phiên xét xử cần chỉ ra <b>nhiều người</b> cùng vai trò của từng người` : `phiên buộc tội vẫn chỉ cần một người, nhưng mỗi bước phải dựa trên một <b>kết luận</b> do chính bạn rút ra`}.</p>`
     : "";
 
 export const briefingHTML = (c) => `
