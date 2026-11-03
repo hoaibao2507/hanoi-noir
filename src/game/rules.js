@@ -9,6 +9,7 @@ export const CONFRONT_COST = 1; // giờ cho mỗi lần đưa chứng cứ
 export const LOCK_TRIES = 3;    // số lần thử mã trước khi thiết bị tự khóa
 export const LOCK_PENALTY = 1;  // giờ mất khi thiết bị tự khóa
 export const MAX_DEDUCE = 4;    // số hồ sơ tối đa ghép được trong một suy luận
+export const MAX_NOTE = 500;    // số ký tự tối đa của một ghi chú
 
 // Trạng thái một vụ đang điều tra
 export function newGame(caseIdx, c) {
@@ -34,6 +35,8 @@ export function newGame(caseIdx, c) {
     confronted: {},
     hints: 0,
     hintId: null,
+    fav: {},
+    notes: {},
     wrong: 0,
     over: false,
     busy: false,
@@ -406,6 +409,86 @@ export function starsFor(wrong) {
 // Điểm điều tra còn làm được ở địa điểm này: chưa làm, chưa mất, và đã mở khóa
 export function remainingAt(game, c, loc) {
   return loc.hs.filter(([id]) => !game.done[id] && !isGone(game, c, id) && !gated(game, c, id));
+}
+
+/* ---------- Tổng quan địa điểm ---------- */
+
+// Mỗi địa điểm một dòng: đã làm bao nhiêu, còn bao nhiêu, bao nhiêu điểm đang chờ hồ sơ về muộn (kèm mốc sớm nhất).
+// Chỉ đếm điểm đã lộ ra (điểm còn bị khóa bởi một kết luận chưa tính), nên không tiết lộ điều người chơi chưa mở được
+export function overviewOf(game, c) {
+  return c.locations.map((L, i) => {
+    const left = remainingAt(game, c, L);
+    const waiting = left.filter(([id]) => isPending(game, c, id));
+    const wakeAt = waiting
+      .map(([id]) => arrivalOf(c, id))
+      .sort((p, q) => absMinutes(c, p) - absMinutes(c, q))[0] || null;
+    return {
+      loc: i,
+      name: L.name,
+      time: L.time,
+      current: i === game.loc,
+      done: L.hs.filter(([id]) => game.done[id]).length,
+      left: left.length,
+      waiting: waiting.length,
+      wakeAt
+    };
+  });
+}
+
+/* ---------- Ghi chú, đánh dấu và tìm hồ sơ trong Sổ tay ---------- */
+
+// Khóa ghi chú: kind "s" (nghi phạm) hoặc "a" (hồ sơ), tách tiền tố để mã nghi phạm và mã hồ sơ không bao giờ trùng nhau
+export const noteKey = (kind, id) => `${kind}:${id}`;
+
+// Ghi chú tự do của người chơi. Chỉ là nháp: không ảnh hưởng luật chơi. Rỗng thì xóa; không đổi gì thì trả đúng object cũ
+export function setNote(game, key, text) {
+  const t = String(text).slice(0, MAX_NOTE);
+  const notes = game.notes || {};
+  const had = key in notes;
+  if (t.trim() === "") {
+    if (!had) return game;
+    const rest = { ...notes };
+    delete rest[key];
+    return { ...game, notes: rest };
+  }
+  if (notes[key] === t) return game;
+  return { ...game, notes: { ...notes, [key]: t } };
+}
+
+// Đánh dấu sao hoặc bỏ dấu một hồ sơ đã thu (chỉ là ghi chú của người chơi)
+export function toggleFav(game, id) {
+  if (!game.found.includes(id)) return game;
+  const fav = { ...(game.fav || {}) };
+  if (fav[id]) delete fav[id];
+  else fav[id] = true;
+  return { ...game, fav };
+}
+
+// Chữ thường, bỏ dấu tiếng Việt (kể cả đ), để gõ "quyen" vẫn tìm ra "Quyên"
+export const fold = (s) =>
+  String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
+
+// Mọi chữ người chơi có thể tìm trong một hồ sơ: loại, tiêu đề, nội dung, tên người khai và ghi chú của chính họ
+function clueHaystack(game, c, a) {
+  const who = a.visual && a.visual.k === "who" ? c.suspects.find((s) => s.id === a.visual.id) : null;
+  const note = (game.notes || {})[noteKey("a", a.id)] || "";
+  return fold([a.type, a.title, a.text, who ? `${who.name} ${who.role}` : "", note].join(" "));
+}
+
+// Hồ sơ đã thu khớp bộ lọc, mới nhất trước. f.q: từ khóa (mọi từ đều phải có, không phân biệt dấu); f.type: loại hồ sơ; f.fav: chỉ hồ sơ đã đánh dấu
+export function filterClues(game, c, f = {}) {
+  const words = fold(f.q || "").split(/\s+/).filter(Boolean);
+  return game.found
+    .filter((id) => {
+      const a = actionOf(c, id);
+      if (!a) return false;
+      if (f.type && a.type !== f.type) return false;
+      if (f.fav && !(game.fav || {})[id]) return false;
+      if (!words.length) return true;
+      const hay = clueHaystack(game, c, a);
+      return words.every((w) => hay.includes(w));
+    })
+    .reverse();
 }
 
 // Tiến độ lưu: số sao tốt nhất của mỗi vụ. Mọi vụ đều mở từ đầu; unlocked chỉ giữ để tương thích bản lưu cũ

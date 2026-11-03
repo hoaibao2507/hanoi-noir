@@ -35,6 +35,9 @@ let worldKey = null;
 let announced = 0;
 // Vào vụ đầu tiên trong đời thì sau phần mở đầu sẽ chạy hướng dẫn một lần
 let coachPending = false;
+// Giao diện Sổ tay không lưu theo ván: từ khóa, loại hồ sơ đang lọc, chỉ xem hồ sơ đã đánh dấu, và các ô ghi chú đang mở
+const emptyNb = () => ({ q: "", type: "", fav: false, open: new Set() });
+let nbUi = emptyNb();
 
 const game = () => store.get().game;
 const setGame = (patch) => store.set({ game: { ...store.get().game, ...patch } });
@@ -76,7 +79,7 @@ function renderCase(s) {
   stage.setHotspots(T.hotspotsHTML(g, c, L));
   setHTML($("ui"), T.hudHTML(g, c, L));
   const nb = $("nb-body"), y = nb.scrollTop;
-  setHTML(nb, T.notebookHTML(g, c));
+  setHTML(nb, T.notebookHTML(g, c, nbUi));
   nb.scrollTop = y;
   syncPinboard(nb);
   $("notebook").classList.toggle("is-open", s.nb);
@@ -96,6 +99,7 @@ async function startCase(i) {
   O.closeSheet();
   const c = CASES[i];
   accuse = emptyAccuse();
+  nbUi = emptyNb();
   // Vụ đang dở: chọn lại đúng vụ đó thì tiếp tục từ chỗ đã dừng, không bắt đầu lại từ đầu
   const run = loadRun();
   if (run && run.idx === i && resumeRun(run)) return O.toast(`Tiếp tục ${c.title}`);
@@ -126,6 +130,7 @@ async function goLoc(i) {
 function goMenu() {
   O.closeSheet();
   O.hideTestimony();
+  nbUi = emptyNb();
   store.set({ screen: "menu", game: null, nb: false });
 }
 
@@ -331,6 +336,61 @@ function pairLink(a, b) {
   else if (status === "none") wiggle([a, b]);
 }
 
+/* ---------- Sổ tay: ghi chú, tìm hồ sơ, tổng quan địa điểm ---------- */
+// Gõ chữ vào ô ghi chú: lưu vào ván nhưng không vẽ lại (vẽ lại sẽ thay ô đang gõ, mất focus và làm hỏng bộ gõ tiếng Việt)
+function saveNote(key, text) {
+  const g = game();
+  if (!g || g.over) return;
+  const next = R.setNote(g, key, text);
+  if (next === g) return;
+  store.set({ game: next }, true);
+  persistRun();
+}
+
+// Gõ vào ô tìm: chỉ vẽ lại danh sách hồ sơ, giữ nguyên ô tìm đang có focus
+function refreshClues() {
+  const g = game();
+  const nb = $("nb-body");
+  const list = nb.querySelector("[data-clues]");
+  if (!g || !list) return;
+  const c = CASES[g.idx];
+  setHTML(list, T.clueListHTML(g, c, nbUi));
+  const n = nb.querySelector("[data-find-n]");
+  if (n) n.textContent = T.findCountText(g, c, nbUi);
+  nb.__html = null; // danh sách đã đổi ngoài chuỗi HTML đã nhớ: lần vẽ đầy đủ sau phải gán lại
+}
+
+function openNote(key) {
+  nbUi.open.add(key);
+  render();
+  const box = $("nb-body").querySelector(`textarea[data-note="${CSS.escape(key)}"]`);
+  if (box) box.focus({ preventScroll: true });
+}
+
+function setFilter(patch) {
+  nbUi = { ...nbUi, ...patch };
+  render();
+}
+
+function openOverview() {
+  const g = game();
+  if (!g || g.busy) return;
+  O.hideTestimony();
+  O.showSheet(T.overviewHTML(g, CASES[g.idx]));
+}
+
+// Ô nhập (tìm kiếm, ghi chú) báo qua sự kiện input chứ không qua data-action
+function onInput(e) {
+  const t = e.target;
+  if (!t.matches) return;
+  if (t.matches("input[data-find]")) {
+    nbUi.q = t.value;
+    refreshClues();
+  } else if (t.matches("textarea[data-note]")) {
+    saveNote(t.dataset.note, t.value);
+  }
+}
+
 /* ---------- Gợi ý và hướng dẫn ---------- */
 // level 1: chỉ hướng; level 2: nói rõ và làm điểm điều tra nhấp nháy. Mỗi lần mở được đếm vào g.hints
 function openHint(level) {
@@ -374,7 +434,10 @@ function resumeRun(run) {
   const c = CASES[run.idx];
   // Dữ liệu vụ có thể đã đổi sau khi lưu: hồ sơ đã thu mà không còn tồn tại thì không khôi phục
   if (!run.game.found.every((id) => c.actions.some((a) => a.id === id))) return false;
-  const g = { ...R.newGame(run.idx, c), ...run.game, busy: false };
+  // Bản lưu cũ chưa có đánh dấu và ghi chú; dữ liệu sai kiểu thì bỏ, để không làm hỏng Sổ tay
+  const plain = (o) => (o && typeof o === "object" && !Array.isArray(o) ? o : {});
+  const g = { ...R.newGame(run.idx, c), ...run.game, fav: plain(run.game.fav), notes: plain(run.game.notes), busy: false };
+  nbUi = emptyNb();
   announced = R.nowMinutes(g, c);
   store.set({ screen: "case", game: g, nb: false, region: c.region });
   return true;
@@ -435,6 +498,16 @@ export const actions = {
     O.closeSheet();
     maybeCoach();
   },
+  fav: (d) => store.set({ game: R.toggleFav(game(), d.id) }),
+  "note-open": (d) => openNote(d.key),
+  "nb-type": (d) => setFilter({ type: d.type }),
+  "nb-fav-only": () => setFilter({ fav: !nbUi.fav }),
+  "nb-find-clear": () => setFilter({ q: "", type: "", fav: false }),
+  overview: () => openOverview(),
+  "ov-go": (d) => {
+    O.closeSheet();
+    goLoc(Number(d.loc));
+  },
   hint: () => openHint(1),
   "hint-more": () => openHint(2),
   "coach-reset": () => {
@@ -454,6 +527,7 @@ export function boot() {
   restoreRun();
   store.subscribe(persistRun);
   store.subscribe(render);
+  document.addEventListener("input", onInput);
   document.addEventListener("keydown", (e) => {
     if (lockEntry && O.sheetOpen()) {
       if (/^[0-9]$/.test(e.key)) return lockKey(e.key), e.preventDefault();
@@ -470,6 +544,9 @@ export function boot() {
       return;
     }
     if (O.sheetOpen() || store.get().screen !== "case") return;
+    // Đang gõ vào ô tìm hoặc ghi chú: mũi tên, Home, End và chữ M là của ô nhập, không phải của camera hay phím tắt
+    if (e.target.closest && e.target.closest("input, textarea, select")) return;
+    if (e.key.toLowerCase() === "m" && !e.ctrlKey && !e.metaKey && !e.altKey && !coachActive()) return openOverview();
     if (stage.panKey(e.key)) e.preventDefault();
   });
   render();

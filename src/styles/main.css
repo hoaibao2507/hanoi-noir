@@ -747,6 +747,72 @@ body[data-screen="menu"] .pan { display: none !important; }
 .kp-ok { color: #fff; background: linear-gradient(180deg, #4fb59b, #2a8f76); border-color: #1f6f5b; }
 .kp-msg { margin-top: 10px; text-align: center; font-size: 13px; color: #6b5636; }
 
+/* Tab Hồ sơ: ô tìm, chip lọc loại, ngôi sao đánh dấu, ô ghi chú */
+.finder { margin-bottom: 12px; }
+.find {
+  display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 12px;
+  background: rgba(241, 230, 207, 0.06); border: 1px solid var(--line); color: var(--color-ink-2);
+  transition: border-color 0.2s ease;
+}
+.find:focus-within { border-color: var(--color-lamp); }
+.find input {
+  flex: 1; min-width: 0; padding: 10px 0; background: transparent; border: 0; outline: 0;
+  font: inherit; font-size: 14px; color: var(--color-ink);
+}
+.find input::placeholder { color: var(--color-ink-2); opacity: 0.8; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip {
+  padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--line); background: transparent; color: var(--color-ink-2);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip:hover:not(:disabled) { border-color: rgba(255, 217, 142, 0.5); color: var(--color-ink); }
+.chip.on { background: rgba(240, 179, 90, 0.18); border-color: var(--color-lamp); color: var(--color-lamp-2); }
+.chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.find-n { margin-top: 8px; font-size: 12px; color: var(--color-ink-2); }
+.clue.no-rise { animation: none; }
+.fav {
+  width: 32px; height: 32px; margin: -6px -8px 0 0; border-radius: 10px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: 0; color: var(--color-ink-2); font-size: 16px;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+.fav:hover { color: var(--color-lamp-2); transform: scale(1.12); }
+.fav.on { color: var(--color-lamp); }
+.note { display: block; margin-top: 8px; }
+.note-l { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-ink-2); }
+.note textarea {
+  display: block; width: 100%; min-height: 56px; max-height: 220px; resize: vertical; padding: 8px 10px;
+  border-radius: 10px; background: rgba(240, 179, 90, 0.07); border: 1px dashed rgba(240, 179, 90, 0.45);
+  font: inherit; font-size: 13.5px; line-height: 1.5; color: var(--color-ink); outline: 0;
+  field-sizing: content;
+}
+.note textarea:focus { border-style: solid; border-color: var(--color-lamp); }
+.note textarea::placeholder { color: var(--color-ink-2); opacity: 0.8; }
+.mark.note-add { color: var(--color-ink-2); }
+.mark.note-add:hover { color: var(--color-lamp-2); border-color: rgba(255, 217, 142, 0.5); }
+
+/* Tổng quan địa điểm (trong hộp thoại giấy, nên chữ tối) */
+.ov-list { display: grid; gap: 8px; }
+.ov-row {
+  display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; width: 100%;
+  padding: 10px 12px; border-radius: 14px; text-align: left; color: #2a1d10;
+  background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(42, 29, 16, 0.25);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+button.ov-row:hover { border-color: #8a5a14; background: rgba(255, 255, 255, 0.65); }
+.ov-row.cur { background: rgba(240, 179, 90, 0.3); border-color: #b7791f; }
+.ov-row.fin { opacity: 0.7; }
+.ov-ico { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(42, 29, 16, 0.1); color: #8a5a14; }
+.ov-row.fin .ov-ico { color: #1f7a70; }
+.ov-main { min-width: 0; }
+.ov-main b { display: block; font-size: 15px; }
+.ov-main small { display: block; font-size: 12px; color: #6b5636; }
+.ov-main .ltag { color: #5a3a10; background: rgba(42, 29, 16, 0.07); border-color: rgba(42, 29, 16, 0.2); }
+.ov-main .ltag.k-lh { color: #1f7a70; }
+.ov-n { font-size: 13px; font-weight: 700; white-space: nowrap; color: #8a5a14; font-variant-numeric: tabular-nums; }
+.ov-n.fin { color: #1f7a70; }
+
 /* Thanh thông báo trong sổ tay (nền tối): chữ sáng, khác với hộp thoại giấy */
 .nb .banner { color: #bfeedd; font-weight: 500; font-size: 13px; line-height: 1.5; margin-top: 0; }
 .nb .banner.mb-3 { margin-bottom: 12px; }

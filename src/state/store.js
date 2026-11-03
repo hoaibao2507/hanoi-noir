@@ -4,9 +4,10 @@ export function createStore(initial) {
   const subs = new Set();
   return {
     get: () => state,
-    set(patch) {
+    // quiet: đổi state mà không báo ai. Dùng khi vẽ lại sẽ phá thao tác đang dở (gõ chữ vào ô ghi chú mất focus)
+    set(patch, quiet = false) {
       state = { ...state, ...patch };
-      subs.forEach((fn) => fn(state));
+      if (!quiet) subs.forEach((fn) => fn(state));
     },
     subscribe(fn) {
       subs.add(fn);

@@ -57,6 +57,7 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
 | `tests/hints.test.js` | Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ và thắng được |
 | `tests/render.test.js` | Số đo nhân vật mà `art.js` gắn vào cảnh (lớp Phaser dùng để làm người thở và đổ bóng) |
 | `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
+| `tests/notebook.test.js` | Sổ tay: tìm hồ sơ không dấu, lọc theo loại, đánh dấu sao, ghi chú, tổng quan địa điểm |
 
 ## Ghi chú thiết kế
 
@@ -113,6 +114,15 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
   Bụi là sprite thay vì vẽ lại Graphics mỗi khung. Phaser tắt input vì chuột, chạm, phím do DOM lo.
 - Gợi ý và hướng dẫn: nút bóng đèn mở gợi ý hai mức (không tốn giờ, không ảnh hưởng sao; số lần dùng hiện ở màn thắng). Hướng dẫn lần đầu
   chạy một lần sau phần mở đầu của vụ đầu tiên; xem lại bằng nút trong Cách chơi.
+- Ghi chú, đánh dấu và tìm hồ sơ: tab Hồ sơ có ô tìm (bỏ dấu, mọi từ đều phải khớp, tìm cả trong ghi chú của người chơi), chip lọc theo
+  loại và chip "Đã đánh dấu". Mỗi hồ sơ có ★ và ô ghi chú; mỗi nghi phạm cũng có ô ghi chú. Dữ liệu nằm trong ván (`game.fav`, `game.notes`,
+  khóa ghi chú `a:<mã hồ sơ>` hoặc `s:<mã nghi phạm>`), tối đa `MAX_NOTE` ký tự, lưu cùng ván và không ảnh hưởng luật chơi hay số sao.
+  Ô nhập không được vẽ lại khi đang gõ (mất focus, hỏng bộ gõ Telex): ghi chú dùng `store.set(patch, true)` (cập nhật im lặng) rồi lưu ván
+  trực tiếp, còn ô tìm chỉ vẽ lại riêng vùng `[data-clues]`. Bộ lọc là trạng thái giao diện (`nbUi` trong `app.js`), không lưu.
+  Phím tắt và phím mũi tên camera bị bỏ qua khi đang gõ trong ô nhập.
+- Tổng quan địa điểm: nút bản đồ cạnh Gợi ý (hoặc phím M) mở bảng liệt kê mọi địa điểm, mỗi nơi còn bao nhiêu điểm điều tra, đã làm bao nhiêu
+  và điểm nào đang chờ hồ sơ về muộn (kèm mốc giờ). Chỉ đếm điểm đã lộ ra, nên điểm còn bị khóa bởi một kết luận không bị tiết lộ.
+  Bấm một nơi để đi tới (không tốn giờ).
 - Mọi hiệu ứng chuyển động tắt khi người dùng bật giảm chuyển động. Khi chạy `npm run dev`, `window.__phaser` trỏ tới game Phaser
   và console in thời gian dựng nền của từng cảnh, để gỡ lỗi.
 

@@ -15,7 +15,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
   Font Awesome SVG core (icon), `vite-plugin-singlefile`.
 - Build ra **một file** `dist/index.html` (JS, CSS, SVG gộp hết), mở trực tiếp bằng trình duyệt được, **không cần mạng**:
   font nhúng từ `@fontsource` (`src/styles/fonts.css`, chỉ woff2, latin + vietnamese; thêm độ đậm mới = thêm khối `@font-face` ở đó).
-- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 68 test, không cần trình duyệt) ·
+- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 94 test, không cần trình duyệt) ·
   `npm run lint` (ESLint) · `npm run e2e` (build + mở bản build bằng Chrome thật qua `playwright-core`, `tests/e2e/smoke.mjs`).
 - Không có router, không backend. Lưu tiến độ bằng `localStorage`.
 - `dist/` và `node_modules/` bị gitignore.
@@ -28,7 +28,7 @@ vite.config.js        Alias Phaser core, vá cờ build Phaser, singlefile
 src/
   main.js             Điểm vào: đăng ký icon FA, chặn click sau khi kéo, ủy quyền data-action, gọi boot()
   app.js              Bộ điều khiển: store + render + luồng chơi + bảng actions
-  state/store.js      createStore: get / set(patch) / subscribe
+  state/store.js      createStore: get / set(patch, quiet) / subscribe (quiet = đổi mà không báo, dùng cho ghi chú đang gõ)
   game/rules.js       LUẬT CHƠI THUẦN (không DOM, không localStorage)
   game/save.js        localStorage: số sao, ván đang chơi, vùng đang xem
   data/cases.js       TYPES, REGIONS, 5 vụ Hà Nội; gộp thêm SG_CASES thành CASES (phẳng) + casesOf(region)
@@ -61,6 +61,7 @@ tests/
   sg.test.js          Vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải, xét xử nhiều người, giao diện s1
   render.test.js      Số đo nhân vật (data-fig) mà people.js gắn vào mọi cảnh
   hints.test.js       Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ trong ngân sách giờ, và buộc tội đúng thắng
+  notebook.test.js    Sổ tay: tìm không dấu, lọc, sao, ghi chú, tổng quan địa điểm, escape HTML
   e2e/smoke.mjs       Kiểm thử khói bằng Chrome thật (chạy bằng `npm run e2e`, không nằm trong `npm test`)
 eslint.config.js      ESLint flat config (chỉ bắt lỗi thật)
 .gitattributes        LF cho mọi file văn bản
@@ -81,13 +82,13 @@ click [data-action]  ->  main.js (ủy quyền)  ->  app.js actions[name](datase
 - State của store: `{ screen: "menu" | "case", save, game, nb, region }`
   - `save` = `{ unlocked, stars: {caseId: 1..3} }` (tiến độ vĩnh viễn)
   - `game` = ván đang chơi (xem 4.1), `nb` = sổ tay đang mở, `region` = vùng đang xem ở menu (`"hn"`|`"sg"`, lưu riêng)
-- Biến cục bộ trong `app.js` (không nằm trong store): `accuse` (`{culprit, steps, who, evid, facts}`: lựa chọn ở phiên xét xử, giữ giữa
+- Biến cục bộ trong `app.js` (không nằm trong store): `nbUi` (`{q, type, fav, open:Set}`: bộ lọc hồ sơ và các ô ghi chú đang mở, không lưu), `accuse` (`{culprit, steps, who, evid, facts}`: lựa chọn ở phiên xét xử, giữ giữa
   các lần thử), `lockEntry` (bàn phím số đang mở), `worldKey` (nhận biết đổi thế giới để reset camera), `announced` (phút đã báo diễn biến).
 - Hành động ngoài các hành động cốt lõi: `region`; suy luận `dd-pick|dd-clear|dd-try`; khóa mã `lock-key|lock-del|lock-go`; `wait-do`;
-  xét xử nhiều người `vd-who|vd-ev|vd-fact`; bảng ghim `lk-pair`; lời khai cận cảnh `tm-close`; gợi ý `hint|hint-more`; xem lại hướng dẫn `coach-reset`.
+  xét xử nhiều người `vd-who|vd-ev|vd-fact`; bảng ghim `lk-pair`; Sổ tay `fav|note-open|nb-type|nb-fav-only|nb-find-clear`; tổng quan địa điểm `overview|ov-go`; lời khai cận cảnh `tm-close`; gợi ý `hint|hint-more`; xem lại hướng dẫn `coach-reset`.
 - `setHTML(el, html)` chỉ gán `innerHTML` khi chuỗi đổi (cache ở `el.__html`) rồi chạy `icons()` để đổi `<i class="fa-...">`
   thành SVG. Gán `innerHTML` trực tiếp phải tự gọi `icons(node)` (xem `showSheet`).
-- Phím: `Esc` đóng sheet rồi đóng sổ tay; `← → Home End` pan camera khi không có sheet; bàn phím số của khóa mã nhận 0–9, Backspace, Enter.
+- Phím: `Esc` đóng sheet rồi đóng sổ tay; `← → Home End` pan camera và `M` mở tổng quan địa điểm khi không có sheet và không đang gõ trong `input/textarea`; bàn phím số của khóa mã nhận 0–9, Backspace, Enter.
 
 ## 4. Luật chơi (`game/rules.js`)
 
@@ -96,8 +97,8 @@ Mọi hàm nhận state, trả state mới (bất biến). Hàm không đổi g�
 
 ### 4.1 Trạng thái `game` (từ `newGame`)
 `idx, loc, hours (còn lại), lives (=3), done{id:true}, found[id theo thứ tự thu], marks{suspectId:0|1|2}, mx{"rid|act":0|1|2},
-pick[], links[pairKey], lkResult, dpick[], ddResult, ddTries, ddFrom{}, lockTries{id:n}, confronted{"who|clue":true}, hints, hintId, wrong, over, busy,
-tab ("sus"|"ho"|"mx"|"lk"|"dd"|"tl")` — trường mới phải chịu được `undefined` vì `resumeRun` đọc ván lưu cũ.
+pick[], links[pairKey], lkResult, dpick[], ddResult, ddTries, ddFrom{}, lockTries{id:n}, confronted{"who|clue":true}, hints, hintId, fav{id:true}, notes{"a:id"|"s:id":text}, wrong, over, busy,
+tab ("sus"|"ho"|"mx"|"lk"|"dd"|"tl")` — trường mới phải chịu được `undefined` vì `resumeRun` đọc ván lưu cũ (`fav`/`notes` được ép về object trơn ở đó).
 
 ### 4.2 Các cơ chế
 | Cơ chế | Hàm chính | Ghi chú |
@@ -117,6 +118,8 @@ tab ("sus"|"ho"|"mx"|"lk"|"dd"|"tl")` — trường mới phải chịu được
 | Khóa mã | `attemptLock` | `lock:{code,digits,prompt}`: sai `LOCK_TRIES` lần thì thiết bị tự khóa, mất `LOCK_PENALTY` giờ. Trạng thái: `open`/`wrong`/`locked`/`closed` |
 | Hồ sơ về muộn | `pendingMinutes`, `isPending`, `arrivalOf`, `waitHours`, `waitFor` | Diễn biến `kind:"arrive"`: hồ sơ chỉ đọc được từ mốc `at`; chờ tốn số giờ nguyên tới mốc |
 | Giờ máy lệch | `devices`, `closeDeductions` | Mốc `dev` lệch `off` phút tới khi kết luận `by` được rút ra, rồi alibi được đối chiếu lại |
+| Ghi chú và tìm | `setNote`, `toggleFav`, `filterClues`, `fold`, `noteKey` | Chỉ là nháp của người chơi, không ảnh hưởng luật. `filterClues` tìm không dấu, mọi từ phải khớp (tiêu đề, nội dung, loại, tên người khai, ghi chú), trả mới nhất trước. `setNote` rỗng thì xóa, cắt ở `MAX_NOTE` |
+| Tổng quan địa điểm | `overviewOf` | Mỗi địa điểm: `done/left/waiting/wakeAt/current`. Dùng `remainingAt` nên không đếm điểm còn bị `gate` hay đã `gone` |
 | Gợi ý | `nextStep`, `spotOf` | Không tốn giờ, không ảnh hưởng sao. `nextStep` tìm hồ sơ then chốt (`chain`/`verdict.roles`) đầu tiên còn thiếu rồi đi ngược qua `gate`/`deduce`/`confront`/`arrive` ra việc cần làm (`go`/`wait`/`deduce`/`confront`/`accuse`). `game.hints` đếm số lần mở, `game.hintId` là điểm đang nhấp nháy |
 | Xét xử nhiều người | `hasVerdict`, `judgeVerdict`, `culpritIds` | Vụ có `verdict:{roles,facts}` thay cho `chain`: mỗi vai đúng người và chứng cứ, mỗi câu dựng lại đúng. Phản hồi sai chỉ nói "vững/chưa vững" |
 
@@ -219,13 +222,13 @@ rồi gọi `notifyLamp()`. `flashlight.js` đăng ký qua `onLampMove`: `.hs.is
 - **Menu**: tiêu đề + nút Cách chơi / Xóa tiến độ (trên); dưới là thanh chọn vùng `.region-bar` (Hà Nội · Sài Gòn) rồi dải thẻ vụ án `.case-card`
   của vùng đó, cuộn ngang. Nền menu đổi theo vùng (`menu` / `menu_sg`).
 - **Màn điều tra** (4 góc): trên trái = nút về menu + tên vụ; giữa = địa điểm; trên phải = đồng hồ, giờ còn lại, 3 mạng (tim);
-  dưới trái = Sổ tay (kèm số hồ sơ); dưới giữa = gợi ý còn bao nhiêu điểm; dưới phải = Buộc tội.
+  dưới trái = Sổ tay (kèm số hồ sơ), Gợi ý, Địa điểm (tổng quan, phím M); dưới giữa = gợi ý còn bao nhiêu điểm; dưới phải = Buộc tội.
 - **Điểm điều tra** `.hs`: chip vàng 54px (xanh khi `is-done`, xám khi `is-off`) + nhãn; tốn >1 giờ thì nhãn ghi giờ.
 - **Cửa** `.door` có biển tên `.door-sign` hiện tên + giờ địa điểm đích. Điểm điều tra đang chờ hồ sơ về muộn có `.is-wait` (xanh lạnh, đồng hồ cát).
-- **Sổ tay** `#notebook`: ngăn kéo trái (desktop), tấm trượt từ dưới 82dvh (<768px). Tab: Nghi phạm · Hồ sơ · Đối chiếu (nếu `matrix`)
+- **Sổ tay** `#notebook`: ngăn kéo trái (desktop), tấm trượt từ dưới 82dvh (<768px). Tab Hồ sơ có ô tìm `[data-find]`, chip lọc loại, ★ `.fav` và ghi chú `textarea[data-note]` ở mỗi thẻ; tab Nghi phạm có ghi chú ở mỗi người. **Ô nhập không được bị vẽ lại khi đang gõ**: gõ ghi chú gọi `store.set(..., true)` (im lặng) + `persistRun()`; gõ tìm chỉ `setHTML` vùng `[data-clues]` rồi đặt `nb.__html = null`; `keydown` toàn cục bỏ qua khi đang ở trong `input/textarea`. Tab: Nghi phạm · Hồ sơ · Đối chiếu (nếu `matrix`)
   · Liên kết (nếu `links`, là bảng ghim kéo thả) · Suy luận (nếu `deduce`) · Thời gian (nếu `hasTimeline`).
 - **Sheet** `#modal > .sheet`: hộp thoại giấy (nền sáng, chữ tối): briefing, diễn biến, đưa chứng cứ, phản ứng, phiên xét xử (một hoặc nhiều người),
-  kết quả (thắng có ảnh polaroid), bàn phím số, chờ hồ sơ về muộn, kết luận mới, cách chơi, xóa tiến độ.
+  kết quả (thắng có ảnh polaroid), tổng quan địa điểm (`.ov-row`), bàn phím số, chờ hồ sơ về muộn, kết luận mới, cách chơi, xóa tiến độ.
 - **Gợi ý**: nút bóng đèn cạnh Sổ tay (`data-action="hint"`). Mức 1 chỉ hướng, mức 2 (`hint-more`) nói rõ điểm hoặc hồ sơ và làm điểm nhấp nháy (`.is-hint`). Mỗi lần mở tăng `hints`, hiện ở màn thắng.
 - **Hướng dẫn lần đầu** (`ui/coach.js`): chạy một lần sau phần mở đầu của vụ đầu tiên (`coachPending` trong app.js). Các thành phần được làm sáng lấy theo `data-coach` (clock, lives, notebook, hint, accuse) hoặc `.hs.is-open`, `.door`; bước nào không có hoặc nằm ngoài khung nhìn thì bỏ. Khóa phía sau bằng `O.setCoachActive` (inert). Nút "Xem lại hướng dẫn" ở Cách chơi xóa cờ.
 - **Lời khai cận cảnh** `#testimony`: thẻ kính dưới màn hình khi hỏi cung (không chặn thao tác), tự ẩn sau 14 giây hoặc khi mở sheet/sổ tay/đi chỗ khác.
@@ -278,7 +281,7 @@ trong `tests/rules.test.js` nếu cần, và số vụ nhắc trong README/help 
 - `busy` là khóa trong lúc chuyển cảnh (`veil`); các hành động trong rules từ chối khi `busy`.
 - Hoạt ảnh vào cảnh dùng `animateEntrance` (GSAP) và bỏ qua `.is-secret` vì độ mờ của chúng do đèn pin điều khiển.
 - Commit dùng thông điệp tiếng Việt, ngắn, mô tả thay đổi (xem `git log`).
-- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (68 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
+- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (94 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
   không yêu cầu mạng, WebGL/đèn thật chạy, focus hộp thoại và sổ tay, khôi phục ván). CI (`.github/workflows/ci.yml`) chạy cả bốn bước. Chưa có formatter.
   `.gitattributes` ép LF cho mọi file văn bản.
 - Trợ năng bàn phím (`ui/overlays.js`): khi hộp thoại mở, `#scene`, `#ui`, `#testimony`, nút xem hai bên **và** sổ tay đều `inert`; đóng thì trả focus về nút đã mở

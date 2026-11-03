@@ -147,11 +147,61 @@ try {
     assert.equal((await active()).action, "nb-toggle", "focus phải về nút Sổ tay");
   });
 
-  await run("tải lại trang: ván đang chơi được khôi phục", async () => {
+  await run("tổng quan địa điểm: mở bằng nút và phím M, Esc trả focus, bấm một nơi để đi tới", async () => {
+    const spots = () => page.evaluate(() => [...document.querySelectorAll(".hs")].map((h) => h.getAttribute("aria-label")).join("|"));
+    const before = await spots();
+    await page.click('[data-action="overview"]');
+    await page.waitForSelector("#modal:not(.hidden) .ov-list");
+    assert.ok((await active()).inModal, "focus phải nằm trong hộp thoại");
+    assert.ok((await page.locator("#modal .ov-row").count()) >= 2, "phải liệt kê các địa điểm");
+    assert.equal(await page.locator('#modal .ov-row[aria-current="location"]').count(), 1, "đúng một nơi đang đứng");
+    await page.keyboard.press("Escape");
+    await page.waitForSelector("#modal.hidden", { state: "attached" });
+    assert.equal((await active()).action, "overview", "focus phải về nút Địa điểm");
+    await page.keyboard.press("m");
+    await page.waitForSelector("#modal:not(.hidden) .ov-list");
+    await page.click('#modal .ov-row[data-action="ov-go"]');
+    await page.waitForSelector("#modal.hidden", { state: "attached" });
+    await page.waitForFunction((b) => [...document.querySelectorAll(".hs")].map((h) => h.getAttribute("aria-label")).join("|") !== b, before, { timeout: 15000 });
+  });
+
+  await run("sổ tay: tìm hồ sơ, đánh dấu, ghi chú mà ô nhập không mất focus", async () => {
+    await page.click('[data-action="nb-toggle"]');
+    await page.waitForSelector("#notebook.is-open [data-find]");
+    await page.click("[data-find]");
+    await page.keyboard.type("zzzz");
+    assert.equal((await active()).tag, "INPUT", "gõ tìm kiếm không được làm mất focus");
+    await page.waitForFunction(() => /Không có hồ sơ nào khớp/.test(document.querySelector("[data-clues]").textContent));
+    assert.match(await page.textContent("[data-find-n]"), /Hiện 0\/1/);
+    await page.fill("[data-find]", "");
+    await page.keyboard.type("loi khai");
+    await page.waitForFunction(() => document.querySelectorAll("[data-clues] .clue").length === 1);
+    assert.equal((await active()).tag, "INPUT");
+    await page.click(".clue .fav");
+    await page.waitForSelector(".clue .fav.on");
+    assert.equal(await page.inputValue("[data-find]"), "loi khai", "bộ lọc còn nguyên sau khi vẽ lại");
+    await page.click('.clue [data-action="note-open"]');
+    await page.waitForSelector(".clue textarea[data-note]");
+    assert.equal((await active()).tag, "TEXTAREA", "mở ô ghi chú thì focus vào ô");
+    await page.keyboard.type("Quyên khai mâu thuẫn mmm");
+    assert.equal((await active()).tag, "TEXTAREA", "gõ ghi chú không được vẽ lại ô");
+    assert.equal(await page.inputValue("textarea[data-note]"), "Quyên khai mâu thuẫn mmm");
+    assert.equal(await page.evaluate(() => document.getElementById("modal").classList.contains("hidden")), true, "chữ m trong ô ghi chú không mở tổng quan");
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("hanoi-noir-run-v1")).game.notes);
+    assert.ok(Object.values(saved).includes("Quyên khai mâu thuẫn mmm"), "ghi chú phải được lưu vào ván");
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => !document.getElementById("notebook").classList.contains("is-open"));
+  });
+
+  await run("tải lại trang: ván đang chơi, đánh dấu và ghi chú được khôi phục", async () => {
     await page.reload();
     await page.waitForSelector('[data-action="nb-toggle"]', { timeout: 15000 });
     const found = await page.evaluate(() => Number(document.querySelector('[data-action="nb-toggle"] .tabnum').textContent));
     assert.equal(found, 1, "hồ sơ đã thu phải còn sau khi tải lại");
+    await page.click('[data-action="nb-toggle"]');
+    await page.waitForSelector("#notebook.is-open textarea[data-note]");
+    assert.equal(await page.inputValue("textarea[data-note]"), "Quyên khai mâu thuẫn mmm");
+    assert.equal(await page.locator(".clue .fav.on").count(), 1, "đánh dấu sao còn sau khi tải lại");
   });
 } catch (err) {
   problems.unshift(`thất bại ở bước "${step}": ${err.message}`);

@@ -9,7 +9,8 @@ import {
   isOpen, remainingAt, starsFor, allSolved, totalStars, linksOf,
   CONFRONT_COST, questioned, confrontOptions, alibisOf, timelineEvents, hasTimeline,
   isGone, clockAt, eventsDone, departed, gated, isPending, arrivalOf, waitHours, unlocksOf,
-  LOCK_TRIES, LOCK_PENALTY, MAX_DEDUCE, spotOf, actionOf
+  LOCK_TRIES, LOCK_PENALTY, MAX_DEDUCE, spotOf, actionOf,
+  MAX_NOTE, noteKey, filterClues, overviewOf
 } from "../game/rules.js";
 import { esc } from "./dom.js";
 
@@ -107,6 +108,7 @@ export function hudHTML(game, c, L) {
         <span class="tabnum rounded-full bg-lamp/25 px-2 text-xs text-lamp-2">${game.found.length}</span>
       </button>
       <button class="btn btn-ghost" data-coach="hint" data-action="hint" title="Gợi ý" aria-label="Gợi ý"><i class="fa-solid fa-lightbulb"></i><span class="hidden sm:inline">Gợi ý</span></button>
+      <button class="btn btn-ghost" data-action="overview" title="Tổng quan địa điểm (M)" aria-label="Tổng quan địa điểm"><i class="fa-solid fa-map-location-dot"></i><span class="hidden sm:inline">Địa điểm</span></button>
       </div>
       <div class="pointer-events-none glass rounded-full px-4 py-2 text-sm hidden sm:flex items-center gap-2">${hintHTML(game, c, L)}</div>
       <button class="pointer-events-auto btn btn-blood" data-coach="accuse" data-action="accuse"><i class="fa-solid fa-gavel"></i> Buộc tội</button>
@@ -185,7 +187,19 @@ function confrontButton(game, c, s) {
             aria-label="Đưa chứng cứ cho ${esc(s.name)}"><i class="fa-solid fa-file-lines"></i> Đưa chứng cứ${n ? ` (${n})` : ""}</button>`;
 }
 
-function susHTML(game, c) {
+// Ghi chú tự do của người chơi. Đã có chữ, hoặc người chơi vừa bấm mở (ui.open) thì hiện ô soạn; chưa thì chỉ có nút nhỏ.
+// Nội dung textarea bắt đầu bằng một dòng trống vì HTML luôn bỏ dòng xuống đầu tiên, nên ghi chú mở đầu bằng xuống dòng vẫn nguyên vẹn
+function noteHTML(game, ui, key, label) {
+  const text = (game.notes || {})[key] || "";
+  if (!text && !(ui.open && ui.open.has(key))) {
+    return `<button class="mark note-add" data-action="note-open" data-key="${esc(key)}" aria-label="Thêm ghi chú cho ${esc(label)}"><i class="fa-solid fa-pen"></i> Ghi chú</button>`;
+  }
+  return `<label class="note"><span class="note-l"><i class="fa-solid fa-pen"></i> Ghi chú của bạn</span>
+    <textarea data-note="${esc(key)}" rows="2" maxlength="${MAX_NOTE}" placeholder="Ghi điều bạn nghĩ, chỉ bạn thấy…" aria-label="Ghi chú cho ${esc(label)}">
+${esc(text)}</textarea></label>`;
+}
+
+function susHTML(game, c, ui) {
   const labels = ["Chưa rõ", "Nghi ngờ", "Loại trừ"];
   const icons = ["fa-circle-question", "fa-triangle-exclamation", "fa-circle-xmark"];
   return c.suspects
@@ -201,30 +215,70 @@ function susHTML(game, c) {
           <button class="mark m${m}" data-action="mark" data-id="${s.id}" aria-label="Đánh dấu ${esc(s.name)}: ${labels[m]}">
             <i class="fa-solid ${icons[m]}"></i> ${labels[m]}</button>
           ${confrontButton(game, c, s)}
+          ${noteHTML(game, ui, noteKey("s", s.id), s.name)}
         </div>
       </div>`;
     })
     .join("");
 }
 
-function cluesHTML(game, c) {
+/* ---------- Tab Hồ sơ: tìm, lọc theo loại, đánh dấu sao, ghi chú ---------- */
+// ui = { q, type, fav, open }: bộ lọc và các ô ghi chú đang mở, do app.js giữ (không nằm trong ván lưu)
+const isFiltering = (ui) => !!((ui.q || "").trim() || ui.type || ui.fav);
+
+export function findCountText(game, c, ui = {}) {
+  const n = filterClues(game, c, ui).length;
+  return isFiltering(ui) ? `Hiện ${n}/${game.found.length} hồ sơ` : `${game.found.length} hồ sơ`;
+}
+
+function clueCard(game, c, ui, id) {
+  const a = actionOf(c, id);
+  const t = TYPES[a.type];
+  const fav = !!(game.fav || {})[id];
+  // Đang lọc thì bỏ hiệu ứng nổi lên: danh sách vẽ lại sau mỗi phím gõ, hiệu ứng sẽ nhấp nháy
+  return `<article class="clue tone-${t.cls}${isFiltering(ui) ? " no-rise" : ""}">
+    <div class="flex items-center justify-between gap-2">
+      <div class="text-xs text-ink-2 flex items-center gap-2"><i class="fa-solid ${t.icon}"></i>${esc(a.type)}</div>
+      <button class="fav${fav ? " on" : ""}" data-action="fav" data-id="${id}" aria-pressed="${fav}" aria-label="Đánh dấu hồ sơ ${esc(a.title)}" title="${fav ? "Bỏ đánh dấu" : "Đánh dấu hồ sơ quan trọng"}"><i class="fa-${fav ? "solid" : "regular"} fa-star"></i></button>
+    </div>
+    ${visualHTML(c, a)}
+    <h4 class="text-[15px] mt-1 mb-1">${esc(a.title)}</h4>
+    <p class="text-[13.5px] leading-relaxed">${esc(a.text)}</p>
+    <div class="mt-2">${noteHTML(game, ui, noteKey("a", id), a.title)}</div>
+  </article>`;
+}
+
+// Danh sách thẻ hồ sơ khớp bộ lọc. app.js vẽ lại riêng vùng này khi gõ tìm kiếm, để ô tìm không bị thay mất focus
+export function clueListHTML(game, c, ui = {}) {
+  const ids = filterClues(game, c, ui);
+  if (!ids.length) {
+    return `<p class="text-ink-2 italic text-sm">Không có hồ sơ nào khớp. <button class="mark" data-action="nb-find-clear">Xóa bộ lọc</button></p>`;
+  }
+  return ids.map((id) => clueCard(game, c, ui, id)).join("");
+}
+
+function finderHTML(game, c, ui) {
+  const kinds = Object.keys(TYPES).filter((k) => game.found.some((id) => actionOf(c, id).type === k));
+  const count = (k) => game.found.filter((id) => actionOf(c, id).type === k).length;
+  const favs = game.found.filter((id) => (game.fav || {})[id]).length;
+  const chip = (on, attrs, label) => `<button class="chip${on ? " on" : ""}" aria-pressed="${on}" ${attrs}>${label}</button>`;
+  return `<div class="finder">
+    <label class="find"><i class="fa-solid fa-magnifying-glass"></i>
+      <input type="search" data-find value="${esc(ui.q || "")}" placeholder="Tìm hồ sơ, tên người, từ khóa…" aria-label="Tìm trong hồ sơ" autocomplete="off" spellcheck="false"></label>
+    <div class="chips">
+      ${chip(!ui.type, `data-action="nb-type" data-type=""`, "Tất cả")}
+      ${kinds.map((k) => chip(ui.type === k, `data-action="nb-type" data-type="${esc(k)}"`, `${esc(k)} (${count(k)})`)).join("")}
+      ${chip(!!ui.fav, `data-action="nb-fav-only"${favs || ui.fav ? "" : " disabled"}`, `<i class="fa-solid fa-star"></i> Đã đánh dấu (${favs})`)}
+    </div>
+    <p class="find-n" data-find-n role="status">${findCountText(game, c, ui)}</p>
+  </div>`;
+}
+
+function cluesHTML(game, c, ui) {
   if (!game.found.length) {
     return `<p class="text-ink-2 italic text-sm">Chưa có hồ sơ nào. Hãy đến từng địa điểm và bấm vào các điểm điều tra trên cảnh.</p>`;
   }
-  return game.found
-    .slice()
-    .reverse()
-    .map((id) => {
-      const a = c.actions.find((x) => x.id === id);
-      const t = TYPES[a.type];
-      return `<article class="clue tone-${t.cls}">
-        <div class="text-xs text-ink-2 flex items-center gap-2"><i class="fa-solid ${t.icon}"></i>${a.type}</div>
-        ${visualHTML(c, a)}
-        <h4 class="text-[15px] mt-1 mb-1">${esc(a.title)}</h4>
-        <p class="text-[13.5px] leading-relaxed">${esc(a.text)}</p>
-      </article>`;
-    })
-    .join("");
+  return `${finderHTML(game, c, ui)}<div data-clues>${clueListHTML(game, c, ui)}</div>`;
 }
 
 function matrixHTML(game, c) {
@@ -517,7 +571,7 @@ function timelineHTML(game, c) {
     ${events.length ? events.map((e) => eventHTML(c, e)).join("") : `<p class="text-ink-2 italic text-sm">Chưa có mốc nào. Mốc xuất hiện khi bạn thu thập hồ sơ có ghi giờ.</p>`}`;
 }
 
-export function notebookHTML(game, c) {
+export function notebookHTML(game, c, ui = {}) {
   const tabs = [
     ["sus", "fa-user-secret", "Nghi phạm"],
     ["ho", "fa-folder-open", `Hồ sơ (${game.found.length})`]
@@ -530,12 +584,12 @@ export function notebookHTML(game, c) {
     .map(([k, ic, l]) => `<button class="tab${game.tab === k ? " on" : ""}" aria-pressed="${game.tab === k}" data-action="nb-tab" data-tab="${k}"><i class="fa-solid ${ic}"></i> ${l}</button>`)
     .join("")}</div>`;
   let content;
-  if (game.tab === "sus") content = susHTML(game, c);
+  if (game.tab === "sus") content = susHTML(game, c, ui);
   else if (game.tab === "mx" && c.matrix) content = matrixHTML(game, c);
   else if (game.tab === "lk" && c.links) content = linksHTML(game, c);
   else if (game.tab === "dd" && c.deduce) content = deduceTabHTML(game, c);
   else if (game.tab === "tl" && hasTimeline(c)) content = timelineHTML(game, c);
-  else content = cluesHTML(game, c);
+  else content = cluesHTML(game, c, ui);
   return bar + content;
 }
 
@@ -723,6 +777,36 @@ export const verdictLoseHTML = (c, idx) => `<div>
   </div>
 </div>`;
 
+/* ---------- Tổng quan địa điểm ---------- */
+export function overviewHTML(game, c) {
+  const rows = overviewOf(game, c);
+  const left = rows.reduce((n, r) => n + r.left, 0);
+  const list = rows
+    .map((r) => {
+      const fin = r.left === 0;
+      const tags = [
+        r.current ? `<span class="ltag"><i class="fa-solid fa-location-dot"></i> Bạn đang ở đây</span>` : "",
+        r.waiting ? `<span class="ltag k-lh"><i class="fa-solid fa-hourglass-half"></i> ${r.waiting} điểm chờ tới ${esc(r.wakeAt)}</span>` : ""
+      ].join("");
+      const body = `<span class="ov-ico"><i class="fa-solid ${r.current ? "fa-location-dot" : fin ? "fa-circle-check" : "fa-door-open"}"></i></span>
+        <span class="ov-main"><b>${esc(r.name)}</b><small>${esc(r.time)} · ${r.done ? `đã làm ${r.done} điểm` : "chưa làm điểm nào"}</small>${tags}</span>
+        <span class="ov-n${fin ? " fin" : ""}">${fin ? "Xong" : `Còn ${r.left}`}</span>`;
+      // Nơi đang đứng không phải nút (đi tới chính nó là vô nghĩa)
+      return r.current
+        ? `<div class="ov-row cur${fin ? " fin" : ""}" aria-current="location">${body}</div>`
+        : `<button class="ov-row${fin ? " fin" : ""}" data-action="ov-go" data-loc="${r.loc}" aria-label="Đi tới ${esc(r.name)}, ${fin ? "đã xong" : `còn ${r.left} điểm`}">${body}</button>`;
+    })
+    .join("");
+  const clock = game.hours <= 0
+    ? `Đã hết giờ điều tra, hãy buộc tội.`
+    : `Đồng hồ ${clockAt(game, c)} · còn ${game.hours}/${c.budget} giờ · còn ${left} điểm điều tra trên cả vụ.`;
+  return `
+    <h2>📍 Tổng quan địa điểm</h2>
+    <p class="muted text-sm">${clock} Đi qua cửa không tốn giờ; bấm một nơi để tới đó.</p>
+    <div class="ov-list mt-3">${list}</div>
+    <div class="row"><button class="btn btn-ghost" data-action="close">Đóng</button></div>`;
+}
+
 export const helpHTML = () => `
   <h2>📖 Cách chơi</h2>
   <div class="expl">
@@ -735,6 +819,8 @@ export const helpHTML = () => `
     <p><b>Lời khai có thể dối:</b> đừng tin ngay. Hãy đối chiếu lời khai với camera, sổ sách và vật chứng.</p>
     <p><b>Đưa chứng cứ:</b> sau khi hỏi một người, mở Sổ tay ▸ Nghi phạm và bấm “Đưa chứng cứ” để đưa một hồ sơ cho họ xem. Mỗi lần tốn một giờ. Phản ứng có thể mở thêm một lời khai mới.</p>
     <p><b>Sổ tay:</b> gồm Nghi phạm (bấm thẻ để đánh dấu chưa rõ, nghi ngờ hoặc loại trừ; đây chỉ là ghi chú của bạn), Hồ sơ (mọi chứng cứ đã thu) và Đối chiếu nếu vụ có bảng này.</p>
+    <p><b>Tìm, đánh dấu và ghi chú:</b> trong tab Hồ sơ, gõ vào ô tìm để lọc theo tên, nội dung hoặc ghi chú của bạn (gõ không dấu cũng được), lọc theo loại hồ sơ, hoặc bấm ★ để đánh dấu hồ sơ quan trọng. Nút “Ghi chú” trên mỗi hồ sơ và mỗi nghi phạm mở một ô để bạn ghi suy nghĩ riêng; ghi chú được lưu cùng ván và không ảnh hưởng luật chơi.</p>
+    <p><b>Tổng quan địa điểm:</b> nút bản đồ ở góc dưới trái (hoặc phím M) liệt kê mọi địa điểm, mỗi nơi còn bao nhiêu điểm điều tra và điểm nào đang chờ hồ sơ về muộn. Bấm một nơi để đi tới đó, không tốn giờ.</p>
     <p><b>Buộc tội:</b> chọn thủ phạm, rồi chứng minh ba bước (mỗi bước một hồ sơ làm chứng cứ). Sai thủ phạm hoặc sai một bước đều mất một mạng; bạn có ba mạng. Phản hồi sẽ nói rõ bước nào đúng, bước nào cần xem lại.</p>
     <p><b>Dấu vết trong bóng tối:</b> vài dấu vết không hiện ngay. Đưa đèn pin (con trỏ) quét qua vùng nghi ngờ; khi ánh sáng chạm tới, điểm đó sáng lên.</p>
     <p><b>Liên kết hồ sơ:</b> tab Liên kết trong Sổ tay. Chọn hai hồ sơ rồi bấm Đối chiếu. Đối chiếu không tốn giờ, nhưng chỉ cặp đúng mới ghi được một kết nối: mâu thuẫn trong lời khai, hoặc một quan hệ giữa các hồ sơ.</p>
