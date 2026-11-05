@@ -7,7 +7,8 @@
 import { OX } from "../world/layout.js";
 
 export const AMBIENT = {
-  sg_street: { rain: true }
+  sg_street: { rain: true },
+  sg_btx_pad: { rain: true }
   // Khói: thêm khóa { smoke: [[x, y]] } cho cảnh cần khói (hiện chưa cảnh nào dùng)
 };
 

@@ -34,10 +34,10 @@ function play(ids, start = newGame(idx, c)) {
   return g;
 }
 
-test("vùng: chỉ còn vùng Sài Gòn với đúng hai vụ, và s1 là vụ số 1", () => {
+test("vùng: chỉ còn vùng Sài Gòn với đúng ba vụ, và s1 là vụ số 1", () => {
   assert.deepEqual(REGIONS.map((r) => r.id), ["sg"]);
-  assert.equal(casesOf("sg").length, 2);
-  assert.equal(CASES.length, 2, "đã bỏ mọi vụ Hà Nội");
+  assert.equal(casesOf("sg").length, 3);
+  assert.equal(CASES.length, 3, "đã bỏ mọi vụ Hà Nội");
   assert.equal(c.region, "sg");
   assert.equal(c.no, 1);
   assert.equal(idx, 0);
@@ -392,7 +392,8 @@ test("giao diện vụ Sài Gòn dựng được: HUD, sổ tay mọi tab, xét 
   assert.match(wrong, /Còn lại <b>2<\/b> mạng/);
   assert.match(T.verdictWinHTML(c, idx, 0, { stars: { s1: 3 }, unlocked: 0 }), /Chủ mưu: <b>Ngân<\/b>/);
   assert.match(T.verdictWinHTML(c, idx, 0, { stars: {}, unlocked: 0 }), new RegExp(`data-i="${idx + 1}"`), "sau vụ s1 là vụ s2 của cùng vùng");
-  assert.equal((T.verdictWinHTML(CASES[idx + 1], idx + 1, 0, { stars: {}, unlocked: 0 }).match(/data-action="start"/g) || []).length, 0, "vụ cuối vùng Sài Gòn chưa có vụ kế tiếp");
+  const last = CASES.length - 1;
+  assert.equal((T.verdictWinHTML(CASES[last], last, 0, { stars: {}, unlocked: 0 }).match(/data-action="start"/g) || []).length, 0, "vụ cuối vùng Sài Gòn chưa có vụ kế tiếp");
 });
 
 test("điểm điều tra đang chờ hiện đúng trạng thái và bấm được để chờ", () => {

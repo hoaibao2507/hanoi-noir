@@ -161,7 +161,8 @@ test("dữ liệu vụ án nhất quán: điểm điều tra trỏ tới hành �
         assert.ok(f.ask && f.hint, `${c.id}/${f.key}: thiếu câu hỏi hoặc gợi ý`);
       }
     } else {
-      assert.deepEqual([...c.chain.map((s) => s.key)].sort(), ["means", "motive", "opportunity"], `${c.id}: chuỗi có đủ ba bước, mỗi bước một lần`);
+      assert.equal(c.chain.length, 3, `${c.id}: chuỗi có đúng ba bước`);
+      assert.equal(new Set(c.chain.map((s) => s.key)).size, 3, `${c.id}: mỗi bước một khóa riêng`);
       for (const st of c.chain) {
         assert.ok(st.ids.length > 0 && st.ids.every((k) => all.includes(k)), `${c.id}/${st.key}: hồ sơ của bước phải tồn tại`);
         assert.ok(st.label && st.ask && st.hint, `${c.id}/${st.key}: thiếu nhãn, câu hỏi hoặc gợi ý`);

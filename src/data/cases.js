@@ -1,5 +1,5 @@
 /* =====================================================================
-   HANOI NOIR · Dữ liệu vụ án (hai vụ Sài Gòn nằm ở sg.js và sg-vani.js)
+   HANOI NOIR · Dữ liệu vụ án (ba vụ Sài Gòn nằm ở sg.js, sg-vani.js và sg-bitexco.js)
    - Mỗi vụ: nghi phạm, hành động điều tra, địa điểm và tọa độ điểm điều tra.
    - Tọa độ (x, y) của điểm điều tra tính trên khung cảnh 1600 × 900 (tỷ lệ 16:9).
    - Mỗi hành động thuộc đúng một địa điểm.

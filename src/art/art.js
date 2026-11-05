@@ -3,6 +3,7 @@ import { portrait } from "./people.js";
 import { uid, esc, shade, lin, rect, path, circle, line, blurs, glow } from "./kit.js";
 import { sgHouse, wires, sgLobby, sgSecroom, sgGarage, sgPenthouse, sgStreet, sgLab, menuSg } from "./sg.js";
 import { sgVaniGate, sgVaniOffice, sgVaniCeo, sgVaniPrint, sgVaniDock } from "./sg-vani.js";
+import { sgBtxPad, sgBtxLobby, sgBtxHall, sgBtxLounge, sgBtxOps } from "./sg-btx.js";
 /* =====================================================================
    HANOI NOIR · Minh họa SVG
    Toàn bộ hình ảnh vẽ bằng SVG (không dùng ảnh bitmap).
@@ -83,6 +84,35 @@ const ART = (() => {
       for (let i = 0; i < 30; i++) c += line((i * 41) % 320, (i * 57) % 170, ((i * 41) % 320) - 5, ((i * 57) % 170) + 14, "#8fb3d1", 1.2, 'opacity=".35"');
       return c + `</g>`;
     }
+    if (kind === "cam_btx_hall") {
+      let c = rect(0, 0, 320, 190, "#120e1a") + rect(0, 120, 320, 70, "#2a1e18") + rect(14, 14, 292, 60, "#1c2142") + glow(k, 250, 24, 40, "#e8e0ff", 0.3);
+      c += rect(0, 0, 20, 190, "#0a0810") + rect(252, 70, 62, 50, "#d9d4c4") + rect(268, 124, 36, 66, "#0d1118") + rect(276, 100, 22, 8, "#0a3a22") + rect(286, 100, 8, 4, "#4fe08a");
+      for (let i = 0; i < 6; i++) c += rect(172 + i * 10, 74, 6, 12, i === 2 ? "#ffd27a" : "#cfe8ff", 'opacity=".85"');
+      [[60, 130], [130, 140], [196, 128]].forEach(([x, y], i) => { c += circle(x, y - 22, 7, i === 1 ? "#f2d2b6" : "#e6bd96") + rect(x - 8, y - 14, 16, 36, ["#1c2742", "#7a2f3a", "#202028"][i], 'rx="4"'); });
+      return c + path("M286 118 l8 -14 l8 14 z", "#4fe08a", 'opacity=".5"') + glow(k, 160, 14, 80, "#ffd98e", 0.25);
+    }
+    if (kind === "cam_btx_pad") {
+      let c = rect(0, 0, 320, 190, "#0a0c1a") + rect(0, 110, 320, 80, "#161a24") + `<ellipse cx="160" cy="146" rx="96" ry="22" fill="none" stroke="#d9d4c4" stroke-width="3" opacity=".7"/>` + rect(0, 70, 56, 72, "#10141a") + rect(8, 90, 24, 52, "#05080e");
+      c += `<ellipse cx="260" cy="118" rx="42" ry="20" fill="#1c2430"/>` + rect(286, 104, 34, 6, "#1c2430") + glow(k, 20, 60, 36, "#ffd58a", 0.4);
+      c += circle(36, 122, 9, "#8a8f98") + rect(26, 130, 20, 26, "#5a5f68", 'rx="4"') + rect(40, 112, 74, 10, "#d9d4c4", 'transform="rotate(-18 40 112)"');
+      c += `<g class="rain">`;
+      for (let i = 0; i < 46; i++) c += line((i * 41) % 320, (i * 57) % 170, ((i * 41) % 320) - 6, ((i * 57) % 170) + 16, "#cfe8ff", 1.2, 'opacity=".4"');
+      return c + `</g>`;
+    }
+    if (kind === "cam_btx_ops") {
+      return rect(0, 0, 320, 190, "#12181f") + rect(0, 120, 320, 70, "#222a33") + rect(20, 20, 150, 66, "#05080e") + rect(26, 26, 40, 24, "#12304a") + rect(70, 26, 40, 24, "#1c3a2c") + rect(114, 26, 40, 24, "#2a2a40") + rect(26, 54, 40, 24, "#33281c") + rect(70, 54, 40, 24, "#2a2c32") + rect(114, 54, 40, 24, "#12304a") +
+        rect(150, 106, 150, 34, "#4a5560") + rect(176, 82, 60, 30, "#05080e") + rect(182, 86, 48, 22, "#0b1c2c") +
+        circle(120, 94, 9, "#c98f63") + rect(108, 82, 24, 8, "#e0b21f", 'rx="3"') + rect(108, 104, 24, 40, "#d97a1f", 'rx="4"') +
+        glow(k, 160, 14, 90, "#e8f2ff", 0.25);
+    }
+    if (kind === "cam_btx_nosignal") {
+      let c = rect(0, 0, 320, 190, "#1a1c20");
+      for (let r = 0; r < 19; r++) for (let q = 0; q < 32; q++) {
+        const v = ((r * 37 + q * 91 + r * q) % 11) / 11;
+        c += rect(q * 10, r * 10, 10, 10, `rgb(${Math.round(40 + v * 90)},${Math.round(44 + v * 90)},${Math.round(50 + v * 90)})`, 'opacity=".65"');
+      }
+      return c + rect(70, 74, 180, 44, "#05070a", 'rx="6" opacity=".85"') + `<text x="160" y="104" text-anchor="middle" font-family="monospace" font-size="20" fill="#ff8a7a" letter-spacing="3">NO SIGNAL</text>`;
+    }
     return "";
   }
   const CAM_DEFS = (k) => blurs(k);
@@ -123,7 +153,8 @@ const ART = (() => {
   }
   const CAM_KINDS = {
     cam_sg_lobby: 1, cam_sg_garage: 1, cam_sg_sec: 1, cam_sg_cafe: 1, cam_sg_gala: 1,
-    cam_vani_gate: 1, cam_vani_office: 1, cam_vani_canteen: 1, cam_vani_alley: 1
+    cam_vani_gate: 1, cam_vani_office: 1, cam_vani_canteen: 1, cam_vani_alley: 1,
+    cam_btx_hall: 1, cam_btx_pad: 1, cam_btx_ops: 1, cam_btx_nosignal: 1
   };
 
   // Biểu đồ thủy triều trong ngày: hai đỉnh, mức báo động và khoảng đường ngập
@@ -196,7 +227,12 @@ const ART = (() => {
     sg_vani_office: { kind: "room", wall: "#2b3340", floor: "#2a2e36", trim: "#0a0d12", lamp: "#e8f2ff" },
     sg_vani_ceo:    { kind: "room", wall: "#2e2824", floor: "#3a281c", trim: "#0c0a08", lamp: "#ffd27a" },
     sg_vani_print:  { kind: "room", wall: "#2c3640", floor: "#2a2f36", trim: "#0c1015", lamp: "#e8f2ff" },
-    sg_vani_dock:   { kind: "room", wall: "#2b323c", floor: "#161c24", trim: "#07090d", lamp: "#ffd58a" }
+    sg_vani_dock:   { kind: "room", wall: "#2b323c", floor: "#161c24", trim: "#07090d", lamp: "#ffd58a" },
+    sg_btx_pad:     { kind: "roof", wall: "#262c36", floor: "#242a33", trim: "#0c0f14", lamp: "#ffd58a" },
+    sg_btx_lobby:   { kind: "room", wall: "#1c2a40", floor: "#39434d", trim: "#070b12", lamp: "#ffd98e" },
+    sg_btx_hall:    { kind: "room", wall: "#1a1426", floor: "#30221b", trim: "#07060c", lamp: "#ffd98e" },
+    sg_btx_lounge:  { kind: "room", wall: "#3a2420", floor: "#3a181d", trim: "#0c0807", lamp: "#ffd98e" },
+    sg_btx_ops:     { kind: "room", wall: "#222c36", floor: "#29313a", trim: "#080b0f", lamp: "#e8f2ff" }
   };
 
   // Gradient dùng chung cho hai bên của một cảnh (tiền tố k là tiền tố cảnh + "-w")
@@ -253,6 +289,22 @@ const ART = (() => {
     return s;
   }
 
+  // Một bên là sân thượng trong giông: bầu trời, dãy nhà kỹ thuật bằng bê tông có cửa đi và sàn sân đáp (tọa độ thế giới)
+  function roofSide(k, f, x0, doors) {
+    let s = rect(x0, 0, 400, 900, `url(#${k}-fsky)`) +
+      rect(x0, 260, 400, 460, shade(f.wall, 0.05)) + rect(x0, 250, 400, 14, shade(f.wall, -0.4)) +
+      rect(x0, 720, 400, 180, `url(#${k}-ffloor)`) + rect(x0, 714, 400, 8, f.trim);
+    for (let i = 0; i < 6; i++) s += line(x0, 300 + i * 70, x0 + 400, 300 + i * 70, shade(f.wall, -0.3), 2, 'opacity=".5"');
+    s += glow(k, x0 + 200, 240, 90, f.lamp, 0.35) + rect(x0 + 170, 236, 60, 10, f.lamp);
+    doors.forEach((d) => { s += roomDoor(d.x, f, d.w); });
+    let rain = "";
+    for (let i = 0; i < 40; i++) {
+      const rx = x0 + ((i * 59) % 400), ry = (i * 131) % 900;
+      rain += line(rx, ry, rx - 7, ry + 24, "#9fc3dd", 1.2, `opacity=".3" style="animation-delay:-${((i * 0.11) % 1).toFixed(2)}s"`);
+    }
+    return s + `<g class="rain">${rain}</g>`;
+  }
+
   // Đặt khung cảnh gốc (1600 đơn vị) vào giữa thế giới 2400, hai bên dựng theo phong cách của cảnh
   function widen(key, svg, doors = []) {
     const m = svg.match(/^(<svg[^>]*>)<defs>([\s\S]*?)<\/defs>([\s\S]*)<\/svg>$/);
@@ -263,8 +315,9 @@ const ART = (() => {
     const left = doors.filter((d) => d.side === "left");
     const right = doors.filter((d) => d.side === "right");
     const side = f.kind === "sgstreet" ? sgStreetSide : null;
-    const sideL = side ? side(k, 0, left) : roomSide(k, f, 0, left);
-    const sideR = side ? side(k, WORLD_W - 400, right) : roomSide(k, f, WORLD_W - 400, right);
+    const room = f.kind === "roof" ? roofSide : roomSide;
+    const sideL = side ? side(k, 0, left) : room(k, f, 0, left);
+    const sideR = side ? side(k, WORLD_W - 400, right) : room(k, f, WORLD_W - 400, right);
     const seam = rect(OX, 0, 60, 900, `url(#${k}-seamL)`) + rect(OX + COMP_W - 60, 0, 60, 900, `url(#${k}-seamR)`);
     return open.replace(`viewBox="0 0 ${COMP_W} 900"`, `viewBox="0 0 ${WORLD_W} 900"`) +
       `<defs>${defs}${blurs(k)}${flankDefs(k, f)}</defs>` +
@@ -273,7 +326,8 @@ const ART = (() => {
 
   const SCENES = {
     sg_lobby: sgLobby, sg_secroom: sgSecroom, sg_garage: sgGarage, sg_penthouse: sgPenthouse, sg_street: sgStreet, sg_lab: sgLab, menu_sg: menuSg,
-    sg_vani_gate: sgVaniGate, sg_vani_office: sgVaniOffice, sg_vani_ceo: sgVaniCeo, sg_vani_print: sgVaniPrint, sg_vani_dock: sgVaniDock
+    sg_vani_gate: sgVaniGate, sg_vani_office: sgVaniOffice, sg_vani_ceo: sgVaniCeo, sg_vani_print: sgVaniPrint, sg_vani_dock: sgVaniDock,
+    sg_btx_pad: sgBtxPad, sg_btx_lobby: sgBtxLobby, sg_btx_hall: sgBtxHall, sg_btx_lounge: sgBtxLounge, sg_btx_ops: sgBtxOps
   };
 
   return {

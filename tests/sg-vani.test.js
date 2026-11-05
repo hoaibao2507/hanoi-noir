@@ -36,7 +36,7 @@ function play(ids, start = newGame(idx, c)) {
 test("vụ s2 thuộc vùng Sài Gòn, là vụ số 2, có Thắm, Vũ, Ngân, Trang cùng hai nhân vật do tác giả đặt", () => {
   assert.equal(c.region, "sg");
   assert.equal(c.no, 2);
-  assert.deepEqual(casesOf("sg").map((x) => x.id), ["s1", "s2"]);
+  assert.deepEqual(casesOf("sg").map((x) => x.id), ["s1", "s2", "s3"]);
   const names = c.suspects.map((s) => s.name);
   for (const n of ["Vũ", "Ngân", "Thắm", "Trang"]) assert.ok(names.includes(n), `${n} phải có trong vụ`);
   assert.equal(c.suspects.length, 6);

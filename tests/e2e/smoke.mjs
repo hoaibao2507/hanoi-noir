@@ -52,9 +52,9 @@ const inert = (id) => page.evaluate((i) => document.getElementById(i).inert, id)
 try {
   await page.goto(pathToFileURL(dist).href);
 
-  await run("menu hiện hai vụ Sài Gòn và không có thanh chọn vùng", async () => {
+  await run("menu hiện ba vụ Sài Gòn và không có thanh chọn vùng", async () => {
     await page.waitForSelector(".case-card", { timeout: 10000 });
-    assert.equal(await page.locator(".case-card").count(), 2, "chỉ còn hai vụ Sài Gòn");
+    assert.equal(await page.locator(".case-card").count(), 3, "chỉ còn ba vụ Sài Gòn");
     assert.equal(await page.locator(".region-tab").count(), 0, "một vùng thì không hiện thanh chọn vùng");
   });
 

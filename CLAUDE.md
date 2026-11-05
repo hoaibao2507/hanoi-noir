@@ -8,7 +8,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
 
 ## 1. Tổng quan
 
-- Game điều tra 2 vụ án ở Sài Gòn (`REGIONS` hiện chỉ có `sg`; các vụ Hà Nội đã bị gỡ, menu chỉ hiện thanh chọn vùng khi có từ hai vùng). Cơ chế riêng:
+- Game điều tra 3 vụ án ở Sài Gòn (`REGIONS` hiện chỉ có `sg`; các vụ Hà Nội đã bị gỡ, menu chỉ hiện thanh chọn vùng khi có từ hai vùng). Cơ chế riêng:
   suy luận, khóa mã, giờ máy lệch, hồ sơ về muộn, xét xử nhiều người. **Hồ sơ và chứng cứ không được mất theo thời gian** (không dùng diễn biến `gone`/`leave`)
   và **ngân sách giờ của vụ ≥ nửa số điểm điều tra** (30 điểm → ≥ 15 giờ); hai điều này có test canh trong `tests/rules.test.js`. Chạy trên trình duyệt, toàn màn hình, panorama kéo ngang.
 - JavaScript thuần (ES module), không framework lớn. Giao diện chủ yếu là chuỗi HTML do `templates.js` sinh ra, gán bằng `innerHTML`; riêng **Sổ tay** là component Preact (`ui/notebook.js`, viết bằng `htm`, không cần biên dịch JSX).
@@ -16,7 +16,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
   Font Awesome SVG core (icon), Preact 11 + htm (Sổ tay), `vite-plugin-singlefile`. Test dùng `preact-render-to-string`.
 - Build ra **một file** `dist/index.html` (JS, CSS, SVG gộp hết), mở trực tiếp bằng trình duyệt được, **không cần mạng**:
   font nhúng từ `@fontsource` (`src/styles/fonts.css`, chỉ woff2, latin + vietnamese; thêm độ đậm mới = thêm khối `@font-face` ở đó).
-- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 104 test, không cần trình duyệt) ·
+- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 125 test, không cần trình duyệt) ·
   `npm run lint` (ESLint) · `npm run e2e` (build + mở bản build bằng Chrome thật qua `playwright-core`, `tests/e2e/smoke.mjs`).
 - Không có router, không backend. Lưu tiến độ bằng `localStorage`.
 - `dist/` và `node_modules/` bị gitignore.
@@ -32,15 +32,17 @@ src/
   state/store.js      createStore: get / set(patch, quiet) / subscribe (quiet = đổi mà không báo, dùng cho ghi chú đang gõ)
   game/rules.js       LUẬT CHƠI THUẦN (không DOM, không localStorage)
   game/save.js        localStorage: số sao, ván đang chơi, vùng đang xem
-  data/cases.js       TYPES, REGIONS (chỉ sg); CASES = SG_CASES (phẳng) + casesOf(region)
-  data/sg.js          Vùng Sài Gòn: vụ s1 "Đỉnh Triều Bến Vân Đồn" (suy luận, khóa mã, giờ máy lệch, xét xử nhiều người); gộp thêm vụ s2 từ sg-vani.js
+  data/cases.js       TYPES, REGIONS (chỉ sg); CASES = SG_CASES (phẳng: s1, s2, s3) + casesOf(region)
+  data/sg.js          Vùng Sài Gòn: vụ s1 "Đỉnh Triều Bến Vân Đồn" (suy luận, khóa mã, giờ máy lệch, xét xử nhiều người); gộp thêm vụ s2 từ sg-vani.js và vụ s3 từ sg-bitexco.js
   data/sg-vani.js     Vụ s2 "Mực Chưa Khô" (Vani Ecommerce, một thủ phạm: suy luận, múi giờ Thái Bình Dương, khóa mã, hồ sơ về muộn)
+  data/sg-bitexco.js  Vụ s3 "Búp Sen Đen" (tháp Bitexco, một thủ phạm: giờ chết bị dời bằng thẻ ra vào, vòng loại trừ bốn lớp, khóa mã, hồ sơ về muộn)
   world/layout.js     Hằng số thế giới 2400x900, vị trí cửa
   world/doors.js      doorsFor(): sinh danh sách cửa của một địa điểm
   art/people.js       figure() và portrait(): người trong cảnh và chân dung, chung một bộ vẽ (tỉ lệ 6,9 đầu)
   art/kit.js          Đồ nghề vẽ SVG dùng chung: rect/path/circle/line/txt, gradient, glow/haze, lantern, tube, vase, bowl, lotus, candle, uid
   art/sg.js           Cảnh vùng Sài Gòn (sgLobby, sgSecroom, sgGarage, sgPenthouse, sgStreet, sgLab, menuSg + sgHouse, wires, sgCar)
   art/sg-vani.js      Cảnh vụ s2 (sgVaniGate, sgVaniOffice, sgVaniCeo, sgVaniPrint, sgVaniDock); phòng giám định dùng lại sgLab
+  art/sg-btx.js       Cảnh vụ s3 (sgBtxPad, sgBtxLobby, sgBtxHall, sgBtxLounge, sgBtxOps); phòng giám định dùng lại sgLab
   art/art.js          Hai bên thế giới (FLANK/widen), khung camera, tài liệu, bảng đăng ký SCENES (cảnh Hà Nội đã bị gỡ, còn ~20 KB)
   render/world.js     Lớp Phaser: raster hóa SVG nền, vẽ, đồng bộ với DOM
   render/lighting.js  Ánh sáng thật (Phaser Lights): đèn pin, nguồn sáng dò trong tranh, quầng sáng, chỉnh màu
@@ -67,6 +69,7 @@ tests/
   save.test.js        Lưu/đọc ván đang chơi (mock localStorage)
   sg.test.js          Vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải, xét xử nhiều người, giao diện s1
   sg-vani.test.js     Vụ s2: múi giờ PT, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian, lời giải và hai lối chứng cứ mỗi bước
+  sg-btx.test.js      Vụ s3: giờ chết thật, xưng hô "cậu", vòng loại trừ, ngoại phạm, mã 5249, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước, giấy tờ gọn trong khung
   render.test.js      Số đo nhân vật (data-fig) mà people.js gắn vào mọi cảnh
   hints.test.js       Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ trong ngân sách giờ, và buộc tội đúng thắng
   notebook.test.js    Sổ tay: tìm không dấu, lọc, sao, ghi chú, tổng quan địa điểm, escape HTML
@@ -143,14 +146,15 @@ Tất cả vụ **mở từ đầu** (menu không khóa vụ nào); `save.unlock
 ## 5. Dữ liệu vụ án (`data/cases.js`)
 
 Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Camera, Hồ sơ, Biên bản, Kết luận), `REGIONS` (tên, biểu tượng, cảnh nền menu, giới thiệu),
-`CASES` (phẳng: `SG_CASES` từ `data/sg.js`, gồm cả s2 từ `data/sg-vani.js`; chỉ số trong `CASES` là chỉ số vụ dùng cho bản lưu) và `casesOf(region)`.
+`CASES` (phẳng: `SG_CASES` từ `data/sg.js`, gồm s2 từ `data/sg-vani.js` và s3 từ `data/sg-bitexco.js`; chỉ số trong `CASES` là chỉ số vụ dùng cho bản lưu) và `casesOf(region)`.
 
 | # | id | Tên | Địa điểm chính | Độ khó | Giờ | Bắt đầu | Thủ phạm | Tính năng thêm |
 | - | -- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | s1 | Đỉnh Triều Bến Vân Đồn | Chung cư Sao Mai Riverside, Quận 4 (6 địa điểm, 30 điểm điều tra) | ★★★★★★★ | 15 | 21:00 | nhiều người (`verdict`) | deduce, lock, devices, arrive |
 | 2 | s2 | Mực Chưa Khô | Vani Ecommerce, 59 Võ Văn Hát, Long Trường (6 địa điểm, 29 điểm điều tra, có án mạng) | ★★★★★★ | 15 | 23:10 | vu | deduce, lock, devices (giờ Thái Bình Dương, +15 giờ), arrive, gate, `chain` ba bước toàn bằng kết luận |
+| 3 | s3 | Búp Sen Đen | Tháp tài chính Bitexco, 2 Hải Triều, Quận 1 (6 địa điểm, 30 điểm điều tra, có án mạng) | ★★★★★★★ | 15 | 23:20 | quan | deduce (17 kết luận), lock (5249), arrive (4 hồ sơ), gate (2), confront (5 người thú nhận chuyện riêng), `chain` ba bước khóa `time`/`access`/`motive`; không dùng devices |
 
-(Mỗi vụ có `clock`, `world` (chỉ `arrive`), `confront`; s1 dùng `verdict`, s2 dùng `chain`.)
+(Mỗi vụ có `clock`, `world` (chỉ `arrive`), `confront`; s1 dùng `verdict`, s2 và s3 dùng `chain`. Khóa của các bước `chain` là tự do, chỉ cần đủ ba bước và khác nhau.)
 
 ### Lược đồ một vụ
 ```js
@@ -180,7 +184,7 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
   explanation: "HTML lời giải" }
 ```
 - Mỗi action thuộc **đúng một** vị trí `hs` (trừ `via:"confront"`, không có vị trí). Test kiểm tra điều này.
-- Cảnh Sài Gòn: `sg_lobby`, `sg_secroom`, `sg_garage`, `sg_penthouse`, `sg_street`, `sg_lab` (+ nền menu `menu_sg`); vụ s2: `sg_vani_gate`, `sg_vani_office`, `sg_vani_ceo`, `sg_vani_print`, `sg_vani_dock` (và dùng lại `sg_lab`).
+- Cảnh Sài Gòn: `sg_lobby`, `sg_secroom`, `sg_garage`, `sg_penthouse`, `sg_street`, `sg_lab` (+ nền menu `menu_sg`); vụ s2: `sg_vani_gate`, `sg_vani_office`, `sg_vani_ceo`, `sg_vani_print`, `sg_vani_dock` (và dùng lại `sg_lab`); vụ s3: `sg_btx_pad` (cảnh đầu tiên, cũng là hình thẻ vụ ở menu), `sg_btx_lobby`, `sg_btx_hall`, `sg_btx_lounge`, `sg_btx_ops` (và dùng lại `sg_lab`).
 - **Thêm/sửa vụ phải giữ cho test xanh**: `npm test` có kiểm tra toàn vẹn dữ liệu, tính nhất quán dòng thời gian/đồng hồ, và
   tìm lời giải theo chiều rộng (mọi vụ vẫn thắng được kể cả khi tính hạn mất hồ sơ/nghi phạm rời đi).
 
@@ -198,7 +202,7 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 - `toWorldX(x) = x + OX`. Template đổi sang `%` của thế giới (`pctX`, `pctY`).
 - Cửa: `DOOR_SLOTS = {left:[40,230], right:[2040,2220]}`, `DOOR_W=130`; `doorPlan` xếp xen kẽ trái/phải → 4 cửa
   (5 địa điểm). Địa điểm có 5–6 cửa (vụ 6–7 địa điểm, như vụ Sài Gòn) dùng `DOOR_COMPACT`: cửa hẹp 100, ba khe mỗi bên; `doorPlan` ném lỗi khi quá 6 cửa. Biển tên của khe lẻ nâng lên một hàng (`door-s1`) để không đè nhau. `doorsFor(locations, current)` tạo cửa tới các địa điểm khác.
-- Hai bên thế giới do `widen()` trong art.js dựng: `FLANK[sceneKey]` chọn `room` hoặc `sgstreet` (phố Sài Gòn) (+ màu). Cảnh mới **phải có mục trong `FLANK`**.
+- Hai bên thế giới do `widen()` trong art.js dựng: `FLANK[sceneKey]` chọn `room`, `sgstreet` (phố Sài Gòn) hoặc `roof` (sân thượng có mưa, dùng cho sân đáp tầng 52) (+ màu). Cảnh mới **phải có mục trong `FLANK`**.
 
 ### 6.3 Camera (`ui/stage.js`)
 `scale = max(vh/900, vw/worldW)` (cover). Kéo chuột/chạm, bánh xe, phím, nút mép. Camera = `translate3d` của `#world`;
@@ -211,7 +215,7 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 - Không dùng camera Phaser; `WorldScene.update` tự đặt vị trí ảnh theo `artBox()` (có parallax `ART_PARALLAX` và zoom 1.03,
   phải khớp CSS `#world-art`).
 - Nếu Phaser lỗi → `gl.active()` false → DOM giữ nguyên SVG đầy đủ (fallback).
-- `AMBIENT` trong ambience.js bật hiệu ứng theo cảnh: `sg_street: {rain}` (khói `smoke` còn được hỗ trợ nhưng chưa cảnh nào dùng); bụi + ánh đèn lập lòe luôn có.
+- `AMBIENT` trong ambience.js bật hiệu ứng theo cảnh: `sg_street: {rain}`, `sg_btx_pad: {rain}` (khói `smoke` còn được hỗ trợ nhưng chưa cảnh nào dùng); bụi + ánh đèn lập lòe luôn có.
   Tắt hết khi `prefers-reduced-motion`.
 - `vite.config.js`: import `phaser` được alias về `phaser-core.js` (bỏ vật lý/tilemap, nhỏ hơn ~140 KB gzip), thay các cờ
   `typeof CANVAS_RENDERER`… bằng hằng, `global → globalThis`, stub `phaser3spectorjs`. Cờ phải vá cả ở `optimizeDeps` (dev).
@@ -248,9 +252,9 @@ rồi gọi `notifyLamp()`. `flashlight.js` đăng ký qua `onLampMove`: `.hs.is
 ### 6.8 Minh họa (`art/art.js`, `kit.js`, `sg.js`, `people.js`)
 Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual) }`, toàn bộ là **chuỗi SVG sinh bằng code**
 (helper `rect/path/circle/line/txt/glow/haze/lin/frame`, `figure()` vẽ người, `tube()` nhà ống, `lantern`, `vase`…).
-- Cảnh đã đăng ký trong `SCENES`: các cảnh `sg_*`, `sg_vani_*` và `menu_sg` (cảnh Hà Nội đã gỡ; khóa lạ rơi về `menu_sg`).
+- Cảnh đã đăng ký trong `SCENES`: các cảnh `sg_*`, `sg_vani_*`, `sg_btx_*` và `menu_sg` (cảnh Hà Nội đã gỡ; khóa lạ rơi về `menu_sg`).
 - `scene()` bọc cảnh bằng `widen()` (thế giới 2400, hai bên + cửa) trừ `menu_sg`.
-- `evidence(v)`: `paper` (giấy tờ), `cam` (khung camera, các loại `cam_sg_*`, `cam_vani_*`), `tide`, `skew` (camera chậm 17 phút), `tz` (Thái Bình Dương +15 giờ); `who` dùng `portrait`.
+- `evidence(v)`: `paper` (giấy tờ), `cam` (khung camera, các loại `cam_sg_*`, `cam_vani_*`, `cam_btx_*`), `tide`, `skew` (camera chậm 17 phút), `tz` (Thái Bình Dương +15 giờ); `who` dùng `portrait`.
 - ID gradient/filter phải duy nhất toàn trang (dùng tiền tố cảnh `k` hoặc `uid()`).
 
 ### 6.9 Lớp hình ảnh nâng cao (xem thêm README, mục "Hình ảnh")
@@ -265,7 +269,7 @@ Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual
 
 ## 7. Việc thường làm
 
-**Thêm địa điểm/điểm điều tra**: vẽ cảnh trong `art.js` + đăng ký `SCENES` + thêm `FLANK` → thêm `locations[]` trong `sg.js`/`sg-vani.js`
+**Thêm địa điểm/điểm điều tra**: vẽ cảnh trong `art.js` + đăng ký `SCENES` + thêm `FLANK` → thêm `locations[]` trong `sg.js`/`sg-vani.js`/`sg-bitexco.js`
 → thêm `actions[]` tương ứng và tọa độ `hs` (x trong khoảng 300–1300 để khỏi sát nút xem hai bên) → `npm test`.
 
 **Thêm vụ án mới**: thêm object vào `CASES` đủ các trường ở mục 5 (có `chain` 3 bước, `clock`, `confront`…), cập nhật các test theo từng vụ
@@ -284,7 +288,7 @@ trong `tests/rules.test.js` nếu cần, và số vụ nhắc trong README/help 
 - `busy` là khóa trong lúc chuyển cảnh (`veil`); các hành động trong rules từ chối khi `busy`.
 - Hoạt ảnh vào cảnh dùng `animateEntrance` (GSAP) và bỏ qua `.is-secret` vì độ mờ của chúng do đèn pin điều khiển.
 - Commit dùng thông điệp tiếng Việt, ngắn, mô tả thay đổi (xem `git log`).
-- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (104 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
+- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (125 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
   không yêu cầu mạng, WebGL/đèn thật chạy, focus hộp thoại và sổ tay, khôi phục ván). CI (`.github/workflows/ci.yml`) chạy cả bốn bước. Chưa có formatter.
   `.gitattributes` ép LF cho mọi file văn bản.
 - Trợ năng bàn phím (`ui/overlays.js`): khi hộp thoại mở, `#scene`, `#ui`, `#testimony`, nút xem hai bên **và** sổ tay đều `inert`; đóng thì trả focus về nút đã mở
