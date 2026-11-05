@@ -34,10 +34,10 @@ function play(ids, start = newGame(idx, c)) {
   return g;
 }
 
-test("vùng: chỉ còn vùng Sài Gòn với đúng ba vụ, và s1 là vụ số 1", () => {
+test("vùng: chỉ còn vùng Sài Gòn, mọi vụ đều thuộc vùng đó, và s1 là vụ số 1", () => {
   assert.deepEqual(REGIONS.map((r) => r.id), ["sg"]);
-  assert.equal(casesOf("sg").length, 3);
-  assert.equal(CASES.length, 3, "đã bỏ mọi vụ Hà Nội");
+  assert.ok(casesOf("sg").length >= 3);
+  assert.equal(casesOf("sg").length, CASES.length, "đã bỏ mọi vụ Hà Nội: mọi vụ đều thuộc Sài Gòn");
   assert.equal(c.region, "sg");
   assert.equal(c.no, 1);
   assert.equal(idx, 0);

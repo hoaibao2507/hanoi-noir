@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Xem cảnh của vụ án (công cụ tác giả)</title>
+  <style>
+    body { margin: 0; background: #14110f; color: #e6dcc6; font: 13px/1.4 system-ui, sans-serif; }
+    nav { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 12px; background: #0b0908ee; border-bottom: 1px solid #3a3128; }
+    nav a { color: #f0b35a; text-decoration: none; padding: 2px 6px; border-radius: 4px; }
+    nav a.on { background: #f0b35a; color: #14110f; }
+    nav b { color: #bba98b; font-weight: 500; }
+    .scene { margin: 0 0 18px; }
+    .scene h2 { margin: 8px 12px 4px; font-size: 14px; color: #f0b35a; }
+    .wrap { position: relative; width: 100%; }
+    .wrap svg { display: block; width: 100%; height: auto; }
+    .hs { position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; border: 2px solid #ffe14a; border-radius: 50%; box-sizing: border-box; background: #ffe14a33; }
+    .hs.soi { border-style: dashed; border-color: #8fe0ff; background: #8fe0ff22; }
+    .hs span { position: absolute; left: 30px; top: -2px; white-space: nowrap; font: 11px/1 monospace; color: #ffe14a; background: #000a; padding: 2px 4px; border-radius: 3px; pointer-events: none; }
+    .hs.soi span { color: #8fe0ff; }
+    .seam { position: absolute; top: 0; bottom: 0; width: 1px; background: #ff4fa388; }
+    .grid { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 12px; }
+    .ev { width: 340px; }
+    .ev small { display: block; color: #bba98b; margin-bottom: 2px; }
+    .ev svg { display: block; width: 100%; height: auto; }
+    .note { padding: 6px 12px; color: #bba98b; }
+  </style>
+</head>
+<body>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <script type="module" src="/tools/scenes.js"></script>
+</body>
+</html>

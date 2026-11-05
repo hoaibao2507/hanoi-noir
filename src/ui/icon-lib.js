@@ -8,7 +8,7 @@ import {
   faLink, faLocationDot, faLock, faMagnifyingGlass, faRotateLeft, faRotateRight, faTableCells,
   faTriangleExclamation, faTrophy, faUserSecret, faVideo, faXmark,
   faCity, faDeleteLeft, faHourglassHalf, faLandmark, faLightbulb, faLockOpen,
-  faDoorOpen, faMapLocationDot, faPen, faStar
+  faDoorOpen, faMapLocationDot, faPen, faStar, faExpand, faCompress
 } from "@fortawesome/free-solid-svg-icons";
 import { faClock, faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 
@@ -20,6 +20,6 @@ library.add(
   faLink, faLocationDot, faLock, faMagnifyingGlass, faRotateLeft, faRotateRight, faTableCells,
   faTriangleExclamation, faTrophy, faUserSecret, faVideo, faXmark,
   faCity, faDeleteLeft, faHourglassHalf, faLandmark, faLightbulb, faLockOpen,
-  faDoorOpen, faMapLocationDot, faPen, faStar,
+  faDoorOpen, faMapLocationDot, faPen, faStar, faExpand, faCompress,
   faClock, faStarRegular
 );

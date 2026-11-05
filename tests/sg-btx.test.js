@@ -39,7 +39,7 @@ test("vụ s3 thuộc vùng Sài Gòn, là vụ số 3, có Vũ, Ngân, Thắm, 
   assert.equal(c.region, "sg");
   assert.equal(c.no, 3);
   assert.equal(idx, 2, "s3 nằm cuối danh sách để bản lưu của s1, s2 không đổi chỉ số");
-  assert.deepEqual(casesOf("sg").map((x) => x.id), ["s1", "s2", "s3"]);
+  assert.deepEqual(casesOf("sg").map((x) => x.id).slice(0, 3), ["s1", "s2", "s3"]);
   const names = c.suspects.map((s) => s.name);
   for (const n of ["Vũ", "Ngân", "Thắm", "Trang", "Quân", "Sơn"]) assert.ok(names.includes(n), `${n} phải có trong vụ`);
   assert.equal(c.suspects.length, 6);

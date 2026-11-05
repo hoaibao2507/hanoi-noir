@@ -337,6 +337,9 @@ const ART = (() => {
       return widen(key, SCENES[key](), doors);
     },
     portrait,
+    // Cho công cụ kiểm tra vụ: cảnh và loại khung camera đã đăng ký chưa (khóa lạ rơi về cảnh mặc định một cách im lặng)
+    hasScene: (key) => !!SCENES[key],
+    hasCam: (kind) => !!CAM_KINDS[kind],
     evidence(v) {
       if (v.k === "paper") return paper(v);
       if (v.k === "cam") return camView(v);

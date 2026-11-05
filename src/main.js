@@ -32,3 +32,9 @@ document.addEventListener("click", (e) => {
 });
 
 boot();
+
+// Service worker để Chrome cho "Cài đặt ứng dụng" (bản cài mở toàn màn hình) và chơi lại được khi mất mạng.
+// Chỉ đăng ký trên bản build chạy qua http(s): mở file trực tiếp hay `npm run dev` thì bỏ qua để khỏi dính bản cũ trong bộ nhớ đệm
+if ("serviceWorker" in navigator && import.meta.env.PROD && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}

@@ -15,6 +15,8 @@ npm run build    # tạo dist/index.html: một file duy nhất, mở trực ti�
 npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải ba vụ Sài Gòn (không cần trình duyệt)
 npm run lint     # ESLint: biến chưa khai báo, biến thừa...
 npm run e2e      # build rồi mở dist/index.html bằng Chrome thật, chơi vài bước (cần Chrome hoặc Edge đã cài)
+npm run check-case -- s3 --table   # công cụ tác giả: kiểm tra dữ liệu một vụ (bỏ tên vụ để kiểm tra tất cả)
+npm run scenes   # công cụ tác giả: xem mọi cảnh và hình chứng cứ của vụ (?case=s3&k=<cảnh>&ev=1), không nằm trong bản build
 ```
 
 Font chữ (Be Vietnam Pro, Noto Serif Display), biểu tượng, GSAP, Phaser và CSS đều đã được đóng gói vào một file, nên mở offline vẫn đúng.
@@ -64,8 +66,12 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
 | `tests/render.test.js` | Số đo nhân vật mà `art.js` gắn vào cảnh (lớp Phaser dùng để làm người thở và đổ bóng) |
 | `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
 | `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": múi giờ, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian và hai lối chứng cứ cho mỗi bước |
+| `tests/case-check.test.js` | Công cụ kiểm tra vụ: mọi vụ sạch lỗi và công cụ bắt được các lỗi dữ liệu hay gặp |
 | `tests/sg-btx.test.js` | Kiểm thử vụ "Búp Sen Đen": giờ chết thật, xưng hô "cậu", vòng loại trừ, ngoại phạm, mã điện thoại, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
 | `tests/notebook.test.js` | Sổ tay: tìm hồ sơ không dấu, lọc theo loại, đánh dấu sao, ghi chú, tổng quan địa điểm |
+| `tools/case-check.mjs` | `npm run check-case`: kiểm tra mọi luật dữ liệu chung của một vụ, lộ trình gợi ý và bảng ngoại phạm |
+| `tools/scenes.html`, `tools/scenes.js` | `npm run scenes`: trang xem cảnh của vụ kèm chấm điểm điều tra |
+| `docs/new-case.md`, `docs/cases-index.md` | Hướng dẫn viết vụ mới; tóm tắt các vụ, cơ chế đố đã dùng và ý tưởng chưa dùng |
 
 ## Ghi chú thiết kế
 

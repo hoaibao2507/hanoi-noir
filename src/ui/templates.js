@@ -60,6 +60,7 @@ export function menuHTML(save, regionId = REGIONS[0].id) {
         <div class="text-xs md:text-sm text-ink-2 mt-1.5">${esc(region.tagline)}</div>
       </div>
       <div class="pointer-events-auto flex gap-2">
+        <button class="btn btn-ghost fs-btn" data-action="fullscreen" title="Toàn màn hình" aria-label="Toàn màn hình"><i class="fa-solid fa-expand fs-in"></i><i class="fa-solid fa-compress fs-out"></i><span class="hidden sm:inline">Toàn màn hình</span></button>
         <button class="btn btn-ghost" data-action="help" title="Cách chơi"><i class="fa-solid fa-circle-question"></i><span class="hidden sm:inline">Cách chơi</span></button>
         <button class="btn btn-ghost" data-action="reset-ask" title="Xoá tiến độ"><i class="fa-solid fa-rotate-left"></i><span class="hidden sm:inline">Xoá tiến độ</span></button>
       </div>
@@ -100,6 +101,7 @@ export function hudHTML(game, c, L) {
       <div class="pointer-events-auto flex items-center gap-2">
         <span data-coach="clock" class="glass rounded-full px-3.5 py-2 text-sm font-semibold tabnum flex items-center gap-2 whitespace-nowrap"><i class="fa-regular fa-clock text-lamp"></i>${clockAt(game, c)}<span class="text-ink-2">·</span><span class="hidden sm:inline">Còn&nbsp;</span>${game.hours}/${c.budget}<span class="hidden sm:inline">&nbsp;giờ</span></span>
         <span data-coach="lives" class="glass rounded-full px-3.5 py-2 text-sm flex items-center gap-1.5">${hearts}</span>
+        <button class="btn btn-ghost btn-round fs-btn" data-action="fullscreen" title="Toàn màn hình" aria-label="Toàn màn hình"><i class="fa-solid fa-expand fs-in"></i><i class="fa-solid fa-compress fs-out"></i></button>
       </div>
     </div>
     <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-3 md:p-5">
@@ -493,6 +495,7 @@ export const helpHTML = () => `
     <p><b>Khóa mã và kết quả về muộn:</b> điểm có ổ khóa cần nhập mã bằng bàn phím số; sai ${LOCK_TRIES} lần thì thiết bị tự khóa và bạn mất ${LOCK_PENALTY} giờ. Hồ sơ có nhãn đồng hồ cát chỉ về sau một mốc giờ; bấm vào để chờ, và thời gian chờ cũng tính vào ngân sách giờ.</p>
     <p><b>Phiên xét xử nhiều người (Sài Gòn):</b> với vụ có nhiều người liên đới, bạn chọn người cho từng vai, một hồ sơ làm chứng cứ cho mỗi vai, và trả lời vài câu dựng lại sự việc. Kết luận có giá trị hơn hồ sơ gốc. Sai một phần nào cũng mất một mạng.</p>
     <p><b>Gợi ý:</b> nút bóng đèn ở góc dưới trái. Lần bấm đầu chỉ cho biết nên xem lại nơi nào hoặc làm việc gì; bấm “Chỉ rõ hơn” thì nói đúng điểm điều tra hoặc hồ sơ cần ghép, và điểm đó nhấp nháy trên cảnh. Gợi ý không tốn giờ và không ảnh hưởng số sao, chỉ được đếm ở màn kết thúc.</p>
+    <p><b>Toàn màn hình trên điện thoại:</b> bấm nút mũi tên mở rộng ở góc trên để ẩn thanh địa chỉ; trên Android, game tự xoay ngang. Muốn lần nào mở cũng toàn màn hình: trong Chrome bấm ⋮ ▸ “Cài đặt ứng dụng” (hoặc “Thêm vào Màn hình chính”) rồi mở game từ biểu tượng mới. Nếu trước đó đã thêm lối tắt kiểu cũ thì xóa nó đi và cài lại. iPhone: Chia sẻ ▸ “Thêm vào Màn hình chính”.</p>
     <p><b>Số sao:</b> ★★★ nếu kết tội đúng ngay lần đầu; ★★ nếu sai một lần; ★ nếu sai hai lần.</p>
   </div>
   <div class="row"><button class="btn btn-ghost" data-action="coach-reset"><i class="fa-solid fa-circle-question"></i> Xem lại hướng dẫn</button><button class="btn" data-action="close">Đã hiểu</button></div>`;

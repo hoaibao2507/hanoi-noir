@@ -8,6 +8,7 @@ import { chromium } from "playwright-core";
 import { existsSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import assert from "node:assert/strict";
+import { CASES } from "../../src/data/cases.js";
 
 const dist = fileURLToPath(new URL("../../dist/index.html", import.meta.url));
 assert.ok(existsSync(dist), "Chưa có dist/index.html: chạy npm run build trước");
@@ -52,9 +53,9 @@ const inert = (id) => page.evaluate((i) => document.getElementById(i).inert, id)
 try {
   await page.goto(pathToFileURL(dist).href);
 
-  await run("menu hiện ba vụ Sài Gòn và không có thanh chọn vùng", async () => {
+  await run("menu hiện mọi vụ Sài Gòn và không có thanh chọn vùng", async () => {
     await page.waitForSelector(".case-card", { timeout: 10000 });
-    assert.equal(await page.locator(".case-card").count(), 3, "chỉ còn ba vụ Sài Gòn");
+    assert.equal(await page.locator(".case-card").count(), CASES.length, "menu phải hiện đủ mọi vụ");
     assert.equal(await page.locator(".region-tab").count(), 0, "một vùng thì không hiện thanh chọn vùng");
   });
 

@@ -6,6 +6,14 @@ từ đầu. `README.md` là bản cho người đọc (có thêm ghi chú thi�
 
 Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiếng Việt**. Giữ nguyên phong cách đó.
 
+## 0. Làm việc nhanh (đọc trước)
+
+- **Thêm vụ án mới**: dùng skill `/new-case` hoặc đọc `docs/new-case.md` (quy trình, luật ngầm, lược đồ, cách vẽ cảnh) và `docs/cases-index.md` (tóm tắt từng vụ, cơ chế đố đã dùng, ý tưởng chưa dùng).
+  **Đừng đọc nguyên `sg.js`, `sg-vani.js`, `rules.js`**: Grep theo mã hồ sơ hoặc đọc theo `offset/limit`.
+- `npm run check-case -- <id> --table`: kiểm tra mọi luật dữ liệu chung của một vụ trong vài giây (lỗi, cảnh báo, lộ trình gợi ý, bảng ngoại phạm).
+- `npm run scenes` → `/tools/scenes.html?case=<id>&k=<cảnh>&ev=1`: xem mọi cảnh và hình chứng cứ của vụ kèm chấm vị trí điểm điều tra.
+- Chạy lệnh bằng PowerShell; thông điệp commit nhiều dòng thì ghi vào file rồi `git commit -F` (dấu ngoặc kép làm vỡ lệnh).
+
 ## 1. Tổng quan
 
 - Game điều tra 3 vụ án ở Sài Gòn (`REGIONS` hiện chỉ có `sg`; các vụ Hà Nội đã bị gỡ, menu chỉ hiện thanh chọn vùng khi có từ hai vùng). Cơ chế riêng:
@@ -16,7 +24,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
   Font Awesome SVG core (icon), Preact 11 + htm (Sổ tay), `vite-plugin-singlefile`. Test dùng `preact-render-to-string`.
 - Build ra **một file** `dist/index.html` (JS, CSS, SVG gộp hết), mở trực tiếp bằng trình duyệt được, **không cần mạng**:
   font nhúng từ `@fontsource` (`src/styles/fonts.css`, chỉ woff2, latin + vietnamese; thêm độ đậm mới = thêm khối `@font-face` ở đó).
-- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 125 test, không cần trình duyệt) ·
+- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 129 test, không cần trình duyệt) ·
   `npm run lint` (ESLint) · `npm run e2e` (build + mở bản build bằng Chrome thật qua `playwright-core`, `tests/e2e/smoke.mjs`).
 - Không có router, không backend. Lưu tiến độ bằng `localStorage`.
 - `dist/` và `node_modules/` bị gitignore.
@@ -62,6 +70,13 @@ src/
   styles/main.css     Token @theme + toàn bộ CSS thành phần
   styles/fonts.css    @font-face nhúng (woff2 từ @fontsource), nạp trong main.js
   vendor/spector-stub.js  Module rỗng thay Spector.js mà Phaser nạp
+docs/
+  new-case.md         Hướng dẫn viết vụ mới: quy trình, luật ngầm, lược đồ, vẽ cảnh, danh sách việc
+  cases-index.md      Tóm tắt từng vụ, cơ chế đố đã dùng, ý tưởng chưa dùng
+tools/
+  case-check.mjs      `npm run check-case`: kiểm tra dữ liệu một vụ (cũng xuất checkCase cho test)
+  scenes.html + .js   `npm run scenes`: trang xem cảnh của vụ (không vào bản build)
+.claude/skills/new-case/SKILL.md   Skill /new-case: quy trình thêm vụ, chỉ nạp khi cần
 tests/
   nbhtml.js           Vẽ component Sổ tay ra chuỗi (preact-render-to-string) để các test dùng chung
   fixture.js          Vụ mẫu (không thuộc game) để thử gone/leave, chain, confront, links, spans/alibi
@@ -69,6 +84,7 @@ tests/
   save.test.js        Lưu/đọc ván đang chơi (mock localStorage)
   sg.test.js          Vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải, xét xử nhiều người, giao diện s1
   sg-vani.test.js     Vụ s2: múi giờ PT, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian, lời giải và hai lối chứng cứ mỗi bước
+  case-check.test.js  Công cụ kiểm tra vụ: mọi vụ sạch lỗi, và bắt được các lỗi dữ liệu hay gặp
   sg-btx.test.js      Vụ s3: giờ chết thật, xưng hô "cậu", vòng loại trừ, ngoại phạm, mã 5249, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước, giấy tờ gọn trong khung
   render.test.js      Số đo nhân vật (data-fig) mà people.js gắn vào mọi cảnh
   hints.test.js       Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ trong ngân sách giờ, và buộc tội đúng thắng
@@ -157,32 +173,9 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 (Mỗi vụ có `clock`, `world` (chỉ `arrive`), `confront`; s1 dùng `verdict`, s2 và s3 dùng `chain`. Khóa của các bước `chain` là tự do, chỉ cần đủ ba bước và khác nhau.)
 
 ### Lược đồ một vụ
-```js
-{ id, no, title, place, level, budget,            // budget = tổng giờ điều tra
-  clock: { start: "HH:MM" },
-  region: "sg",
-  world: [{ at, kind: "gone"|"leave"|"arrive", id, text }], // diễn biến theo đồng hồ; vụ trong game chỉ dùng "arrive" (gone/leave chỉ còn trong tests/fixture.js); arrive = hồ sơ chỉ đọc được từ mốc at
-  devices?: { dev: { name, off, by } },              // thiết bị chạy lệch off phút tới khi kết luận by được rút ra
-  intro: "HTML/text mở đầu",
-  suspects: [{ id, name, role, bio, look: {skin, hair, hc, top, acc, ac?} }],
-  //   hair: short|long|bun|bald|hat   acc: glasses|mustache|scarf|tie|none   sex?: "m"|"f" (mặc định suy từ tóc: long/bun = nữ)
-  locations: [{ id, name, time, scene, hs: [[actionId, x, y, "nhãn", "soi"?], ...] }],
-  //   x,y trên khung 1600x900; phần tử thứ 5 "soi" (tùy chọn) = dấu vết ẩn, cần đèn pin quét tới
-  actions: [{ id, cost, type, title, text,
-              visual: {k:"who",id} | {k:"paper",alt,title,rows[],stamp?} | {k:"cam",scene,time,cam,alt} | {k:"lock"} | {k:"box"},
-              via?: "confront"|"deduce",           // mở bằng đưa chứng cứ / là kết luận của suy luận
-              gate?: id, lock?: {code,digits,prompt}, dev?: "dev",
-              spans?: [{who?, needs?[], from, to, at}],
-              alibi?: {who, from, to, at} }],
-  culprit: "id",
-  matrix?: { rows: [suspectId], cols: [{act, label}] },
-  confront: [{ who, clue, reveal?, text }],
-  chain: [{ key, label, ask, ids: [actionId], hint }],   // 3 bước (vụ một thủ phạm)
-  deduce?: [{ needs: [id], gives: id }],
-  verdict?: { roles: [{ key, who, ids }], facts: [...] }, // thay cho chain khi có nhiều người liên đới
-  links?: [{ a, b, kind: "liên hệ"|"mâu thuẫn", about?: suspectId, text }],
-  explanation: "HTML lời giải" }
-```
+Xem `docs/new-case.md` mục 5 (lược đồ đầy đủ) và mục 4 (luật ngầm: alibi/spans, suy luận, gợi ý, đưa chứng cứ, ngân sách).
+Tóm tắt: `{ id, no, region, title, place, level, budget, clock, world(chỉ arrive), devices?, intro, suspects[6], locations[{id,name,time,scene,hs}], actions[], culprit + chain[3] | verdict, confront[], deduce[], explanation }`.
+
 - Mỗi action thuộc **đúng một** vị trí `hs` (trừ `via:"confront"`, không có vị trí). Test kiểm tra điều này.
 - Cảnh Sài Gòn: `sg_lobby`, `sg_secroom`, `sg_garage`, `sg_penthouse`, `sg_street`, `sg_lab` (+ nền menu `menu_sg`); vụ s2: `sg_vani_gate`, `sg_vani_office`, `sg_vani_ceo`, `sg_vani_print`, `sg_vani_dock` (và dùng lại `sg_lab`); vụ s3: `sg_btx_pad` (cảnh đầu tiên, cũng là hình thẻ vụ ở menu), `sg_btx_lobby`, `sg_btx_hall`, `sg_btx_lounge`, `sg_btx_ops` (và dùng lại `sg_lab`).
 - **Thêm/sửa vụ phải giữ cho test xanh**: `npm test` có kiểm tra toàn vẹn dữ liệu, tính nhất quán dòng thời gian/đồng hồ, và
@@ -272,8 +265,7 @@ Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual
 **Thêm địa điểm/điểm điều tra**: vẽ cảnh trong `art.js` + đăng ký `SCENES` + thêm `FLANK` → thêm `locations[]` trong `sg.js`/`sg-vani.js`/`sg-bitexco.js`
 → thêm `actions[]` tương ứng và tọa độ `hs` (x trong khoảng 300–1300 để khỏi sát nút xem hai bên) → `npm test`.
 
-**Thêm vụ án mới**: thêm object vào `CASES` đủ các trường ở mục 5 (có `chain` 3 bước, `clock`, `confront`…), cập nhật các test theo từng vụ
-trong `tests/rules.test.js` nếu cần, và số vụ nhắc trong README/help (`CASES.length` đã tự động ở menu/reset).
+**Thêm vụ án mới**: làm theo `docs/new-case.md` (hoặc skill `/new-case`). Nối vụ **vào cuối** `SG_CASES`, chạy `npm run check-case`, viết `tests/sg-<tên>.test.js`, rồi cập nhật tài liệu. Các test chung không còn pin số vụ.
 
 **Thêm hành động UI**: khóa mới trong `actions` (app.js) + `data-action` ở template. Nếu cần state mới, thêm vào `newGame` (rules.js)
 — nhớ `resumeRun`/`loadRun` đọc ván cũ nên trường mới phải chịu được `undefined`.
@@ -288,7 +280,7 @@ trong `tests/rules.test.js` nếu cần, và số vụ nhắc trong README/help 
 - `busy` là khóa trong lúc chuyển cảnh (`veil`); các hành động trong rules từ chối khi `busy`.
 - Hoạt ảnh vào cảnh dùng `animateEntrance` (GSAP) và bỏ qua `.is-secret` vì độ mờ của chúng do đèn pin điều khiển.
 - Commit dùng thông điệp tiếng Việt, ngắn, mô tả thay đổi (xem `git log`).
-- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (125 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
+- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (129 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
   không yêu cầu mạng, WebGL/đèn thật chạy, focus hộp thoại và sổ tay, khôi phục ván). CI (`.github/workflows/ci.yml`) chạy cả bốn bước. Chưa có formatter.
   `.gitattributes` ép LF cho mọi file văn bản.
 - Trợ năng bàn phím (`ui/overlays.js`): khi hộp thoại mở, `#scene`, `#ui`, `#testimony`, nút xem hai bên **và** sổ tay đều `inert`; đóng thì trả focus về nút đã mở

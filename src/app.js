@@ -18,6 +18,7 @@ import { mountPinboard, wiggle } from "./ui/pinboard.js";
 import { mountNotebook, unmountNotebook } from "./ui/notebook.js";
 import { coachSeen, markCoachSeen, startCoach, skipCoach, coachActive } from "./ui/coach.js";
 import { $, setHTML } from "./ui/dom.js";
+import { toggleFullscreen, initFullscreen } from "./ui/fullscreen.js";
 
 const MENU_W = 1600;
 const regionIds = REGIONS.map((r) => r.id);
@@ -473,12 +474,16 @@ export const actions = {
     O.toast("Hướng dẫn sẽ hiện lại khi bạn vào một vụ án.");
   },
   help: () => O.showSheet(T.helpHTML()),
+  fullscreen: async () => {
+    if (!(await toggleFullscreen())) O.toast("Trình duyệt này không bật được toàn màn hình. Hãy dùng “Thêm vào Màn hình chính”.");
+  },
   "reset-ask": () => O.showSheet(T.resetHTML()),
   "reset-confirm": () => resetProgress()
 };
 
 // Khởi động: dựng sân khấu, vẽ menu, nối phím tắt
 export function boot() {
+  initFullscreen();
   stage.mountStage();
   mountPinboard($("nb-body"), pairLink);
   onLampMove(lightSecrets);

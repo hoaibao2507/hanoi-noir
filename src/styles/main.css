@@ -161,6 +161,26 @@ body[data-screen="menu"] .pan { display: none !important; }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 26px rgba(224, 88, 106, 0.32), 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 .btn-round { width: 46px; height: 46px; padding: 0; border-radius: 15px; }
+
+/* Nút toàn màn hình: hai biểu tượng, chỉ hiện cái hợp trạng thái. Ẩn khi trình duyệt không hỗ trợ (html.no-fs)
+   hoặc khi game đã chạy như ứng dụng cài về máy (đã toàn màn hình, không có gì để bật/tắt) */
+.fs-btn .fs-out { display: none; }
+:root:fullscreen .fs-btn .fs-in { display: none; }
+:root:fullscreen .fs-btn .fs-out { display: inline-block; }
+:root:-webkit-full-screen .fs-btn .fs-in { display: none; }
+:root:-webkit-full-screen .fs-btn .fs-out { display: inline-block; }
+.no-fs .fs-btn { display: none; }
+@media (display-mode: fullscreen), (display-mode: standalone) {
+  .fs-btn { display: none; }
+}
+
+/* Máy có tai thỏ hay camera đục lỗ khi xoay ngang: lớp giao diện lùi vào theo vùng an toàn để nút không nằm dưới khuyết */
+#ui {
+  top: env(safe-area-inset-top, 0px);
+  right: env(safe-area-inset-right, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: env(safe-area-inset-left, 0px);
+}
 .st { color: var(--color-lamp); }
 .st.dim { color: rgba(214, 226, 247, 0.25); }
 
