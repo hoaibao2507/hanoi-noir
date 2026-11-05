@@ -10,6 +10,8 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import assert from "node:assert/strict";
 import { CASES } from "../../src/data/cases.js";
 
+// Runner CI vẽ WebGL bằng CPU nên chậm và dao động (bước smoke từng mất 38 giây đến gần 2 phút): các bước chờ cảnh dựng xong phải rộng rãi
+const SLOW = 60000;
 const dist = fileURLToPath(new URL("../../dist/index.html", import.meta.url));
 assert.ok(existsSync(dist), "Chưa có dist/index.html: chạy npm run build trước");
 
@@ -54,14 +56,14 @@ try {
   await page.goto(pathToFileURL(dist).href);
 
   await run("menu hiện mọi vụ Sài Gòn và không có thanh chọn vùng", async () => {
-    await page.waitForSelector(".case-card", { timeout: 10000 });
+    await page.waitForSelector(".case-card", { timeout: SLOW });
     assert.equal(await page.locator(".case-card").count(), CASES.length, "menu phải hiện đủ mọi vụ");
     assert.equal(await page.locator(".region-tab").count(), 0, "một vùng thì không hiện thanh chọn vùng");
   });
 
   await run("vào vụ án: chuyển cảnh rồi hộp thoại mở đầu giữ focus", async () => {
     await page.click('.case-card[data-i="0"]');
-    await page.waitForSelector("#modal:not(.hidden) .sheet", { timeout: 15000 });
+    await page.waitForSelector("#modal:not(.hidden) .sheet", { timeout: SLOW });
     const a = await active();
     assert.ok(a && a.inModal, "focus phải nằm trong hộp thoại");
     assert.equal(await inert("scene"), true, "cảnh phía sau phải inert khi hộp thoại mở");
@@ -72,15 +74,15 @@ try {
   await run("đóng hộp thoại: cảnh sống lại, đèn thật chạy", async () => {
     await page.click("#modal .btn");
     await page.waitForSelector("#modal.hidden", { state: "attached" });
-    await page.waitForSelector(".hs.is-open", { state: "attached", timeout: 10000 });
+    await page.waitForSelector(".hs.is-open", { state: "attached", timeout: SLOW });
     await page.waitForSelector("#gl canvas");
     if (!process.env.E2E_NO_GL) {
-      await page.waitForFunction(() => document.getElementById("scene").classList.contains("gl-lit"), null, { timeout: 15000 });
+      await page.waitForFunction(() => document.getElementById("scene").classList.contains("gl-lit"), null, { timeout: SLOW });
     }
   });
 
   await run("lần đầu chơi: hướng dẫn hiện ra, khóa phía sau, bấm Tiếp và Bỏ qua, không hiện lại", async () => {
-    await page.waitForSelector("#coach .coach-card", { timeout: 10000 });
+    await page.waitForSelector("#coach .coach-card", { timeout: SLOW });
     assert.equal(await inert("scene"), true, "hướng dẫn chạy thì cảnh phía sau phải inert");
     assert.match(await page.textContent(".coach-k"), /^Hướng dẫn · 1\//);
     await page.click("[data-coach-next]");
@@ -125,7 +127,7 @@ try {
     await page.waitForFunction(
       () => document.getElementById("testimony").classList.contains("on") || !document.getElementById("modal").classList.contains("hidden"),
       null,
-      { timeout: 10000 }
+      { timeout: SLOW }
     );
     const found = await page.evaluate(() => Number(document.querySelector('[data-action="nb-toggle"] .tabnum').textContent));
     assert.equal(found, 1, "sổ tay phải có 1 hồ sơ");
@@ -161,7 +163,7 @@ try {
     await page.waitForSelector("#modal:not(.hidden) .ov-list");
     await page.click('#modal .ov-row[data-action="ov-go"]');
     await page.waitForSelector("#modal.hidden", { state: "attached" });
-    await page.waitForFunction((b) => [...document.querySelectorAll(".hs")].map((h) => h.getAttribute("aria-label")).join("|") !== b, before, { timeout: 15000 });
+    await page.waitForFunction((b) => [...document.querySelectorAll(".hs")].map((h) => h.getAttribute("aria-label")).join("|") !== b, before, { timeout: SLOW });
   });
 
   await run("sổ tay: tìm hồ sơ, đánh dấu, ghi chú mà ô nhập không mất focus", async () => {
@@ -223,7 +225,7 @@ try {
       window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
     });
     await page.click('[data-action="nb-toggle"]');
-    await page.waitForSelector("#notebook.is-open", { timeout: 3000 });
+    await page.waitForSelector("#notebook.is-open", { timeout: 10000 });
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => !document.getElementById("notebook").classList.contains("is-open"));
   });
@@ -265,7 +267,7 @@ try {
     const lite = await browser.newPage({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
     lite.on("pageerror", (e) => problems.push(`pageerror (lite): ${e.message}`));
     await lite.goto(pathToFileURL(dist).href + "?lite=1");
-    await lite.waitForSelector(".case-card", { timeout: 10000 });
+    await lite.waitForSelector(".case-card", { timeout: SLOW });
     const st = await lite.evaluate(() => ({
       lite: document.documentElement.classList.contains("lite"),
       blur: getComputedStyle(document.querySelector(".btn-ghost")).backdropFilter,
@@ -280,7 +282,7 @@ try {
 
   await run("tải lại trang: ván đang chơi, đánh dấu và ghi chú được khôi phục", async () => {
     await page.reload();
-    await page.waitForSelector('[data-action="nb-toggle"]', { timeout: 15000 });
+    await page.waitForSelector('[data-action="nb-toggle"]', { timeout: SLOW });
     const found = await page.evaluate(() => Number(document.querySelector('[data-action="nb-toggle"] .tabnum').textContent));
     assert.equal(found, 1, "hồ sơ đã thu phải còn sau khi tải lại");
     await page.click('[data-action="nb-toggle"]');
