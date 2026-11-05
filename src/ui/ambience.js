@@ -5,6 +5,7 @@
    Tắt hết khi người dùng bật giảm chuyển động.
    ===================================================================== */
 import { OX } from "../world/layout.js";
+import { LITE } from "./device.js";
 
 export const AMBIENT = {
   sg_street: { rain: true },
@@ -111,7 +112,7 @@ export function createAmbience(scene, lit = false) {
   function rainDrops(dt, W, H) {
     drops.clear();
     if (!rainOn) return;
-    if (!rain.length) rain = Array.from({ length: Math.round(clamp((W * H) / 9000, 40, 150)) }, () => newDrop(W, H, true));
+    if (!rain.length) rain = Array.from({ length: Math.round(clamp((W * H) / 9000, 40, LITE ? 70 : 150)) }, () => newDrop(W, H, true));
     drops.lineStyle(1.2, RAIN, 0.32);
     for (const d of rain) {
       d.y += d.v * dt;
@@ -125,7 +126,7 @@ export function createAmbience(scene, lit = false) {
     const key = `${W}x${H}`;
     if (key !== moteKey) {
       moteKey = key;
-      const n = Math.round(clamp((W * H) / 26000, 18, 70));
+      const n = Math.round(clamp((W * H) / 26000, 18, LITE ? 26 : 70));
       for (const m of motes) m.img.destroy();
       // Mỗi hạt bụi là một sprite chấm sáng mờ (cùng texture "puff" với khói): cả đàn được gộp thành vài lượt vẽ,
       // không phải dựng lại đường vẽ Graphics cho từng hạt ở mỗi khung hình

@@ -23,6 +23,19 @@ Font chữ (Be Vietnam Pro, Noto Serif Display), biểu tượng, GSAP, Phaser v
 Font lấy từ gói `@fontsource` (giấy phép OFL), chỉ nạp tập ký tự latin và vietnamese ở định dạng woff2 (xem `src/styles/fonts.css`).
 GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm thử trình duyệt mỗi lần push lên `main` và mỗi pull request.
 
+### Hiệu năng trên điện thoại
+
+Màn cảm ứng (`pointer: coarse`) tự vào **chế độ nhẹ** (`src/ui/device.js`; thử trên máy tính bằng `?lite=1`): tắt làm mờ nền và hạt phim, chỉ thắp 3 đèn trong tranh, bớt bụi và mưa, bỏ chỉnh màu toàn khung, và tạm dừng cảnh WebGL khi hộp thoại hay sổ tay đang che màn hình. Máy tính không đổi gì. Phiên xét xử và bàn phím khóa mã cập nhật tại chỗ (`updateSheet`), không dựng lại cả hộp thoại.
+
+### Chơi toàn màn hình trên điện thoại
+
+Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai cách bỏ nó:
+
+- **Nút "Toàn màn hình"** (menu và góc phải HUD, `src/ui/fullscreen.js`): Fullscreen API ẩn thanh địa chỉ, Android còn tự khóa ngang. Ẩn khi trình duyệt không hỗ trợ (iPhone Safari) hoặc khi game đã chạy như ứng dụng cài.
+- **Cài như ứng dụng (PWA)**: `public/manifest.webmanifest` khai `display: fullscreen` + `orientation: landscape`, `public/sw.js` là service worker tối thiểu (Chrome cần nó để cho "Cài đặt ứng dụng", đồng thời cho chơi offline sau lần mở đầu). Cần phục vụ qua https (Vercel đã đủ). Lối tắt "Thêm vào Màn hình chính" cũ tạo trước khi có manifest vẫn mở bằng trình duyệt: phải xóa rồi cài lại.
+- Icon PNG trong `public/` sinh bằng `node tools/make-icons.mjs` (dùng Chrome thật); đổi hình thì chạy lại.
+- Bản `dist/index.html` mở trực tiếp bằng `file://` vẫn chạy bình thường, chỉ không có service worker.
+
 ## Cấu trúc
 
 | Đường dẫn | Vai trò |

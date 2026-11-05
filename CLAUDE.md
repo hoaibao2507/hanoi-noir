@@ -34,6 +34,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
 ```
 index.html            Khung trang (id cố định, xem mục 6)
 vite.config.js        Alias Phaser core, vá cờ build Phaser, singlefile
+public/               PWA, chép nguyên sang dist/: manifest.webmanifest (display fullscreen, orientation landscape), sw.js (network-first, chỉ đăng ký khi build chạy qua http(s)), icon PNG (sinh bằng tools/make-icons.mjs)
 src/
   main.js             Điểm vào: đăng ký icon FA, chặn click sau khi kéo, ủy quyền data-action, gọi boot()
   app.js              Bộ điều khiển: store + render + luồng chơi + bảng actions
@@ -60,6 +61,8 @@ src/
   ui/icon-lib.js      Đăng ký biểu tượng Font Awesome (import một lần; thêm icon mới ở đây)
   ui/pinboard.js      Bảng ghim kéo thả của tab Liên kết (sợi chỉ SVG, vẽ tay; Notebook gọi syncPinboard sau mỗi lần cập nhật)
   ui/coach.js         Hướng dẫn lần đầu chơi: chuỗi thẻ làm sáng từng nút (cờ `hanoi-noir-coach-v1`)
+  ui/device.js        `LITE` (chế độ nhẹ): bật khi `pointer: coarse` (điện thoại/máy bảng), hoặc `?lite=1` / `?lite=0` để ép; gắn class `lite` lên `<html>`
+  ui/fullscreen.js    Nút toàn màn hình: Fullscreen API + khóa ngang (Android); `initFullscreen` gắn `html.no-fs` khi không hỗ trợ
   ui/stage.js         Camera panorama (kéo, bánh xe, phím), nối DOM với Phaser
   ui/cursor.js        Đèn pin theo con trỏ + độ nghiêng parallax
   ui/flashlight.js    Hiện/mờ "dấu vết ẩn" theo khoảng cách tới đèn pin
@@ -213,6 +216,13 @@ Tóm tắt: `{ id, no, region, title, place, level, budget, clock, world(chỉ a
 - `vite.config.js`: import `phaser` được alias về `phaser-core.js` (bỏ vật lý/tilemap, nhỏ hơn ~140 KB gzip), thay các cờ
   `typeof CANVAS_RENDERER`… bằng hằng, `global → globalThis`, stub `phaser3spectorjs`. Cờ phải vá cả ở `optimizeDeps` (dev).
 
+### 6.4b Hiệu năng điện thoại (chế độ nhẹ, `ui/device.js`)
+- Phaser 4.2.1 **không có** tùy chọn `resolution` (canvas luôn bằng kích thước CSS); đừng thêm lại. CSS build chỉ giữ `-webkit-backdrop-filter` nên Chrome gần như không thấy blur (trừ `.hs-tag`); đừng kỳ vọng blur chạy trên Chrome.
+- `LITE` làm: `html.lite` tắt mọi `backdrop-filter` và hạt phim `#scene::before` (CSS cuối main.css); `lighting.js` chỉ 3 đèn trong tranh và bỏ chỉnh màu camera; `ambience.js` bớt bụi (26) và mưa (70); `world.js` bỏ MSAA, raster nền mỏng hơn (`quality()` 0.6–1.2) và **ngủ vòng lặp** (`setPaused`, gọi từ `syncInert` trong overlays.js) khi hộp thoại mở hoặc sổ tay che màn hình <768px; nền mới vẽ xong hay đổi cỡ khi đang ngủ thì `refreshWhilePaused` cho chạy ngắn để canvas có hình.
+- PC không đổi. Đo A/B (Chrome headless, tương đối): vòng lặp Phaser 27 → 47 fps lúc đứng yên khi bật chế độ nhẹ.
+- `cursor.js` chỉ ghi biến CSS khi giá trị đổi và bỏ `--lx/--ly` khi đã `gl-lit` (biến CSS kế thừa: mỗi lần ghi tính lại style cả cây điểm điều tra); `flashlight.js` đọc hết vị trí rồi mới ghi class.
+- `stage.js`: cờ `dragged` xóa ở mọi `pointerdown` (capture). Cảm ứng không bắn click sau khi kéo, cờ từng treo và nuốt cú chạm kế tiếp vào nút ngoài cảnh.
+
 ### 6.5 Đèn pin & dấu vết ẩn
 `cursor.js` làm mượt vị trí con trỏ → CSS var `--lx --ly` (đèn) và `--px --py` (nghiêng parallax, chỉ với chuột),
 rồi gọi `notifyLamp()`. `flashlight.js` đăng ký qua `onLampMove`: `.hs.is-secret` (chưa làm) có `is-lit` khi cách đèn <140px,
@@ -221,6 +231,7 @@ rồi gọi `notifyLamp()`. `flashlight.js` đăng ký qua `onLampMove`: `.hs.is
 ### 6.6 Bố cục màn hình
 - **Menu**: tiêu đề + nút Cách chơi / Xóa tiến độ (trên); dưới là thanh chọn vùng `.region-bar` (chỉ hiện khi có từ hai vùng; hiện chỉ có Sài Gòn nên ẩn) rồi dải thẻ vụ án `.case-card`
   của vùng đó, cuộn ngang. Nền menu đổi theo vùng (`menu` / `menu_sg`).
+- **Toàn màn hình** (`.fs-btn`, action `fullscreen`): nút ở menu (cạnh Cách chơi) và HUD (cạnh số mạng). Hai biểu tượng `fs-in`/`fs-out` đổi bằng CSS `:root:fullscreen`; ẩn bằng `html.no-fs` hoặc `@media (display-mode: fullscreen|standalone)`. `#ui` lùi theo `env(safe-area-inset-*)` cho máy có tai thỏ. Menu có luật riêng cho màn hình ngang thấp (`max-height: 500px`): thẻ vụ án thu gọn, ẩn `.menu-note`/`.case-place`, nếu không thẻ che mất tiêu đề và nút phía trên.
 - **Màn điều tra** (4 góc): trên trái = nút về menu + tên vụ; giữa = địa điểm; trên phải = đồng hồ, giờ còn lại, 3 mạng (tim);
   dưới trái = Sổ tay (kèm số hồ sơ), Gợi ý, Địa điểm (tổng quan, phím M); dưới giữa = gợi ý còn bao nhiêu điểm; dưới phải = Buộc tội.
 - **Điểm điều tra** `.hs`: chip vàng 54px (xanh khi `is-done`, xám khi `is-off`) + nhãn; tốn >1 giờ thì nhãn ghi giờ.
@@ -258,7 +269,7 @@ Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual
 - `phaser-core` không có `LightsPlugin`: alias `phaser-lights` trong `vite.config.js` + `plugins.scene` trong cấu hình game. Mất một trong hai là `scene.lights` undefined và đèn thật tắt (CSS vẫn chạy).
 - `#scene` là vùng `overflow:hidden`: focus bàn phím vào nút ngoài khung nhìn từng làm nó cuộn lệch, nên `stage.js` luôn trả `scrollLeft/Top` về 0.
 - `overlays.js`: `veil(kicker, title, sub, swap, origin)` (mống mắt qua biến CSS `--r`, `--cx`, `--cy`; `--r` âm nghĩa là đen kín), `pushIn/pushOut`, `shake`, `bars`,
-  `showSheet(html, {cinema})`, `showTestimony/hideTestimony`, `flyToNotebook`. Tất cả bỏ qua khi giảm chuyển động.
+  `showSheet(html, {cinema})`, **`updateSheet(html)`** (vẽ lại hộp thoại đang mở sau một lựa chọn: giữ vị trí cuộn và focus theo thứ tự nút, không phát lại hoạt ảnh; dùng cho chọn nghi phạm/hồ sơ ở phiên xét xử và bàn phím khóa mã; mở lần đầu vẫn dùng `showSheet`), `showTestimony/hideTestimony`, `flyToNotebook`. Tất cả bỏ qua khi giảm chuyển động.
 
 ## 7. Việc thường làm
 

@@ -211,6 +211,73 @@ try {
     await page.waitForFunction(() => !document.getElementById("notebook").classList.contains("is-open"));
   });
 
+  await run("kéo cảnh bằng cảm ứng rồi chạm nút HUD: cú chạm đầu tiên không bị nuốt", async () => {
+    // Cảm ứng không bắn click sau khi kéo, nên cờ "vừa kéo" từng treo lại và nuốt cú chạm kế tiếp vào nút ngoài cảnh
+    await page.evaluate(async () => {
+      const scene = document.getElementById("scene");
+      scene.dispatchEvent(new PointerEvent("pointerdown", { clientX: 700, clientY: 300, pointerType: "touch", bubbles: true, button: 0 }));
+      for (let i = 0; i < 12; i++) {
+        window.dispatchEvent(new PointerEvent("pointermove", { clientX: 700 - i * 20, clientY: 300, pointerType: "touch", bubbles: true }));
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+      window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+    });
+    await page.click('[data-action="nb-toggle"]');
+    await page.waitForSelector("#notebook.is-open", { timeout: 3000 });
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => !document.getElementById("notebook").classList.contains("is-open"));
+  });
+
+  await run("buộc tội: chọn một mục chỉ cập nhật tại chỗ, giữ vị trí cuộn và focus, không phát lại hoạt ảnh", async () => {
+    await page.click('[data-action="accuse"]');
+    await page.waitForSelector("#modal:not(.hidden) .sheet");
+    await page.waitForTimeout(900); // chờ tờ giấy rơi xong, nếu không vị trí các nút còn đang trôi
+    const picked = await page.evaluate(() => {
+      const sh = document.querySelector("#modal .sheet");
+      window.__sheet = sh;
+      sh.scrollTop = 260;
+      const r = sh.getBoundingClientRect();
+      const ok = [...sh.querySelectorAll("button.pick, button.lkc")].filter((b) => {
+        const q = b.getBoundingClientRect();
+        return q.top > r.top + 20 && q.bottom < r.bottom - 20;
+      });
+      const b = ok[ok.length - 1];
+      b.setAttribute("data-probe", "1");
+      return { top: sh.scrollTop, idx: [...sh.querySelectorAll("button")].indexOf(b) };
+    });
+    assert.ok(picked.top > 100, "hộp thoại phải đủ dài để cuộn");
+    await page.click("#modal [data-probe]");
+    const after = await page.evaluate(() => {
+      const sh = document.querySelector("#modal .sheet");
+      const btns = [...sh.querySelectorAll("button")];
+      return { top: sh.scrollTop, same: sh === window.__sheet, focus: btns.indexOf(document.activeElement), on: sh.querySelectorAll("button.on").length, transform: getComputedStyle(sh).transform };
+    });
+    assert.ok(Math.abs(after.top - picked.top) <= 2, `vị trí cuộn bị nhảy: ${picked.top} -> ${after.top}`);
+    assert.equal(after.same, true, "tờ giấy không được dựng lại");
+    assert.equal(after.transform, "none", "không được phát lại hoạt ảnh tờ giấy rơi");
+    assert.equal(after.focus, picked.idx, "focus phải còn ở nút vừa chọn");
+    assert.ok(after.on >= 1, "mục vừa chọn phải sáng lên");
+    await page.click('#modal [data-action="close"]');
+    await page.waitForSelector("#modal.hidden", { state: "attached" });
+  });
+
+  await run("chế độ nhẹ (?lite=1): bỏ làm mờ nền và hạt phim, cảnh vẫn sáng đèn thật", async () => {
+    const lite = await browser.newPage({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+    lite.on("pageerror", (e) => problems.push(`pageerror (lite): ${e.message}`));
+    await lite.goto(pathToFileURL(dist).href + "?lite=1");
+    await lite.waitForSelector(".case-card", { timeout: 10000 });
+    const st = await lite.evaluate(() => ({
+      lite: document.documentElement.classList.contains("lite"),
+      blur: getComputedStyle(document.querySelector(".btn-ghost")).backdropFilter,
+      grain: getComputedStyle(document.getElementById("scene"), "::before").display
+    }));
+    assert.equal(st.lite, true);
+    assert.equal(st.blur, "none");
+    assert.equal(st.grain, "none");
+    assert.equal(await page.evaluate(() => document.documentElement.classList.contains("lite")), false, "máy tính không tự vào chế độ nhẹ");
+    await lite.close();
+  });
+
   await run("tải lại trang: ván đang chơi, đánh dấu và ghi chú được khôi phục", async () => {
     await page.reload();
     await page.waitForSelector('[data-action="nb-toggle"]', { timeout: 15000 });

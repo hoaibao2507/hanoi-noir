@@ -6,6 +6,7 @@
    ===================================================================== */
 import LightsPlugin from "phaser-lights";
 import { ensurePuff } from "../ui/ambience.js";
+import { LITE } from "../ui/device.js";
 
 // Bản phaser-core không kèm plugin ánh sáng; world.js đăng ký nó vào cấu hình game
 export const lightsPluginEntry = { key: "LightsPlugin", plugin: LightsPlugin, mapping: "lights" };
@@ -15,7 +16,7 @@ const AMBIENT = 0x7a7066;   // ánh sáng nền: vùng đèn không với tới 
 const BEAM_COLOR = 0xffdcae;
 const COLD = [0xcb, 0xdc, 0xff];
 const FIRE = [0xff, 0xb0, 0x5a];
-const POOL = 6;
+const POOL = LITE ? 3 : 6; // số đèn trong tranh được thắp thật; mỗi đèn là một vòng lặp trong shader chạy cho từng điểm ảnh
 
 const lerp = (a, b, k) => a + (b - a) * k;
 const mix = (k) => (Math.round(lerp(COLD[0], FIRE[0], k)) << 16) | (Math.round(lerp(COLD[1], FIRE[1], k)) << 8) | Math.round(lerp(COLD[2], FIRE[2], k));
@@ -30,12 +31,15 @@ export function createLighting(scene, glOn) {
   const halos = Array.from({ length: POOL }, () => scene.add.image(0, 0, "puff").setBlendMode("ADD").setDepth(6).setVisible(false));
   const beamHalo = scene.add.image(0, 0, "puff").setBlendMode("ADD").setDepth(6).setTint(BEAM_COLOR).setAlpha(0.08);
 
-  // Chỉnh màu cả khung hình: bớt rực, thêm tương phản cho đúng chất phim đen
-  try {
-    const grade = scene.cameras.main.filters.external.addColorMatrix();
-    grade.colorMatrix.saturate(-0.1).contrast(0.1, true);
-  } catch (err) {
-    console.warn("Không bật được chỉnh màu toàn khung.", err);
+  // Chỉnh màu cả khung hình: bớt rực, thêm tương phản cho đúng chất phim đen.
+  // Bộ lọc camera bắt cả khung hình đi qua một lượt vẽ phụ, nên chế độ nhẹ bỏ qua
+  if (!LITE) {
+    try {
+      const grade = scene.cameras.main.filters.external.addColorMatrix();
+      grade.colorMatrix.saturate(-0.1).contrast(0.1, true);
+    } catch (err) {
+      console.warn("Không bật được chỉnh màu toàn khung.", err);
+    }
   }
 
   let lamps = [];

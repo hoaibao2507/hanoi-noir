@@ -164,6 +164,7 @@ body[data-screen="menu"] .pan { display: none !important; }
 
 /* Nút toàn màn hình: hai biểu tượng, chỉ hiện cái hợp trạng thái. Ẩn khi trình duyệt không hỗ trợ (html.no-fs)
    hoặc khi game đã chạy như ứng dụng cài về máy (đã toàn màn hình, không có gì để bật/tắt) */
+.fs-btn.btn-round { width: 40px; height: 40px; border-radius: 13px; }
 .fs-btn .fs-out { display: none; }
 :root:fullscreen .fs-btn .fs-in { display: none; }
 :root:fullscreen .fs-btn .fs-out { display: inline-block; }
@@ -538,6 +539,20 @@ body[data-screen="menu"] .pan { display: none !important; }
 .case-card.locked { filter: grayscale(0.85); opacity: 0.55; cursor: not-allowed; }
 .case-card .thumb { display: block; aspect-ratio: 16 / 9; overflow: hidden; border-bottom: 1px solid var(--line); }
 .case-card .thumb svg { width: 100%; height: 100%; display: block; }
+/* "safe center": căn giữa khi vừa, còn tràn thì bắt đầu từ mép trái (center thường làm thẻ đầu bị cắt, kéo không tới) */
+#menu-cards { justify-content: safe center; }
+
+/* Điện thoại xoay ngang (cao dưới ~500px): thẻ vụ án thu gọn để không đè lên tiêu đề và nút phía trên */
+@media (max-height: 500px) and (orientation: landscape) {
+  .menu-dock { padding-top: 1.5rem; padding-bottom: 0.75rem; }
+  .menu-note { display: none; }
+  .case-card { width: min(250px, 38vw); border-radius: 16px; }
+  .case-card .thumb { aspect-ratio: 2 / 1; }
+  .case-card .block.p-4 { padding: 0.6rem 0.8rem; }
+  .case-card .font-display { font-size: 1.05rem; line-height: 1.2; margin-top: 0.15rem; }
+  .case-place { display: none; }
+  .case-info { margin-top: 0.35rem; }
+}
 .hscroll { scrollbar-width: none; }
 .hscroll::-webkit-scrollbar { display: none; }
 
@@ -1095,3 +1110,16 @@ button.ov-row:hover { border-color: #8a5a14; background: rgba(255, 255, 255, 0.6
   background: linear-gradient(to bottom, rgba(240, 179, 90, 0.55), rgba(240, 179, 90, 0));
   pointer-events: none;
 }
+
+/* =====================================================================
+   Chế độ nhẹ (điện thoại, máy bảng cảm ứng; xem ui/device.js, thử trên máy tính bằng ?lite=1)
+   - backdrop-filter bắt trình duyệt làm mờ lại phần nằm sau MỖI khung hình; phía sau lại là canvas WebGL luôn chuyển động
+   - hạt phim là lớp phủ toàn màn hình có mix-blend-mode và đổi vị trí liên tục
+   Lưu ý: khi build, bộ nén CSS chỉ giữ bản -webkit-backdrop-filter, nên Chrome gần như không thấy các lớp blur này
+   (trừ .hs-tag viết không tiền tố, mà trên màn cảm ứng nhãn nào cũng hiện); Safari iOS thì có. Tắt hết để cả hai nơi đều nhẹ.
+   ===================================================================== */
+html.lite *, html.lite *::before, html.lite *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html.lite #scene::before { display: none; animation: none; }

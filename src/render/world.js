@@ -12,6 +12,7 @@ import { createLighting, lightsPluginEntry } from "./lighting.js";
 import { createActors, parseFigures } from "./actors.js";
 import { analyze } from "./analyze.js";
 import { OX, WORLD_H } from "../world/layout.js";
+import { LITE } from "../ui/device.js";
 
 // Phóng nhẹ lớp nền để parallax không lộ mép. Khớp với #world-art trong main.css
 const ART_ZOOM = 1.03;
@@ -38,7 +39,8 @@ export function mount() {
       backgroundColor: "#070a12",
       banner: false,
       audio: { noAudio: true },
-      resolution: Math.min(window.devicePixelRatio || 1, 2),
+      // Phaser 4 không có tùy chọn resolution: canvas luôn bằng kích thước CSS. Điện thoại thì bỏ MSAA của canvas cho đỡ băng thông
+      render: { antialiasGL: !LITE },
       scale: { mode: Phaser.Scale.RESIZE },
       input: { keyboard: false, mouse: false, touch: false, gamepad: false }, // chuột, chạm, phím do DOM lo; Phaser không cần nghe
       plugins: { scene: [lightsPluginEntry] },
@@ -78,8 +80,40 @@ export function flicker(strength) {
   if (scene && scene.lighting) scene.lighting.flicker(strength);
 }
 
+/* Tạm dừng vòng lặp vẽ khi một hộp thoại hay sổ tay che gần hết màn hình (chỉ chế độ nhẹ): đèn thật, bụi và mưa phía sau
+   không ai thấy mà vẫn ngốn GPU, làm hộp thoại cuộn giật. Ngủ chậm một nhịp để canvas kịp có hình trước khi dừng. */
+let paused = false;
+let sleepTimer = 0;
+
+function wakeLoop() {
+  clearTimeout(sleepTimer);
+  if (game && !game.loop.running) game.loop.wake(true);
+}
+
+function sleepSoon(ms) {
+  clearTimeout(sleepTimer);
+  sleepTimer = setTimeout(() => {
+    if (paused && game) game.loop.sleep();
+  }, ms);
+}
+
+export function setPaused(p) {
+  if (!LITE || !game || p === paused) return;
+  paused = p;
+  if (p) sleepSoon(450);
+  else wakeLoop();
+}
+
+// Đang ngủ mà nền mới vẽ xong hoặc khung đổi cỡ (canvas bị xóa): cho chạy ngắn để canvas có hình rồi ngủ lại
+function refreshWhilePaused() {
+  if (!paused || !game) return;
+  wakeLoop();
+  sleepSoon(450);
+}
+
 export function setView(v) {
   view = v;
+  if (paused) refreshWhilePaused();
   if (!scene || !latest || !rasterQ) return;
   // Đổi cỡ màn hình nhiều: vẽ lại nền ở độ phân giải mới, gộp các lần kéo liên tiếp
   if (Math.abs(quality() - rasterQ) / rasterQ > 0.3) {
@@ -89,9 +123,10 @@ export function setView(v) {
 }
 
 function quality() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // Canvas của Phaser vốn 1×, nên điện thoại không cần raster dày hơn một texel mỗi điểm màn hình (đỡ bộ nhớ GPU, phân tích pháp tuyến nhanh hơn)
+  const dpr = LITE ? 1 : Math.min(window.devicePixelRatio || 1, 2);
   const s = view ? view.scale : 1;
-  return Math.min(1.7, Math.max(1, s * dpr));
+  return Math.min(LITE ? 1.2 : 1.7, Math.max(LITE ? 0.6 : 1, s * dpr));
 }
 
 // Hình chữ nhật nơi nền được vẽ trên màn hình, đã tính parallax và phóng nhẹ
@@ -196,6 +231,7 @@ class WorldScene extends Phaser.Scene {
         if (import.meta.env && import.meta.env.DEV) {
           console.debug(`[nền] ${job.sceneKey}: raster ${Math.round(t1 - t0)} ms, phân tích + dựng ${Math.round(performance.now() - t1)} ms, ${W}×${H}`);
         }
+        refreshWhilePaused();
         if (job.onReady) job.onReady();
       })
       .catch((err) => {

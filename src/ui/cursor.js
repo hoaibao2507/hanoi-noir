@@ -41,6 +41,13 @@ function onHover(e) {
   if (!state.raf) state.raf = requestAnimationFrame(ease);
 }
 
+const written = {};
+function setVar(name, value) {
+  if (written[name] === value) return;
+  written[name] = value;
+  host.style.setProperty(name, value);
+}
+
 function ease() {
   const k = REDUCED_MOTION ? 1 : 0.14; // đèn bám theo con trỏ
   const p = REDUCED_MOTION ? 1 : 0.08; // độ nghiêng chậm hơn để có cảm giác nặng
@@ -50,10 +57,14 @@ function ease() {
   state.y += (state.gy - state.y) * k;
   state.px += (tx - state.px) * p;
   state.py += (ty - state.py) * p;
-  host.style.setProperty("--lx", `${state.x.toFixed(1)}px`);
-  host.style.setProperty("--ly", `${state.y.toFixed(1)}px`);
-  host.style.setProperty("--px", state.px.toFixed(4));
-  host.style.setProperty("--py", state.py.toFixed(4));
+  // Biến CSS được kế thừa: mỗi lần ghi, trình duyệt tính lại style của cả cây (mọi điểm điều tra, cửa). Chỉ ghi khi giá trị đổi,
+  // và bỏ --lx/--ly khi đã có đèn thật của Phaser (lớp CSS đó không còn dùng chúng)
+  if (!host.classList.contains("gl-lit")) {
+    setVar("--lx", `${state.x.toFixed(1)}px`);
+    setVar("--ly", `${state.y.toFixed(1)}px`);
+  }
+  setVar("--px", state.px.toFixed(4));
+  setVar("--py", state.py.toFixed(4));
   notifyLamp();
   const settled =
     Math.abs(state.gx - state.x) < 0.3 && Math.abs(state.gy - state.y) < 0.3 &&

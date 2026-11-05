@@ -171,15 +171,18 @@ function waitDo(id) {
 }
 
 /* ---------- Khóa mã ---------- */
-function showLock(msg = "") {
+function showLock(msg = "", fresh = false) {
   const g = game(), c = CASES[g.idx], a = c.actions.find((x) => x.id === lockEntry.id);
   lockEntry.msg = msg;
-  O.showSheet(T.lockHTML(c, a, lockEntry.code, g.lockTries[a.id] || 0, msg));
+  const html = T.lockHTML(c, a, lockEntry.code, g.lockTries[a.id] || 0, msg);
+  // Mở lần đầu thì tờ giấy rơi xuống; mỗi lần gõ số chỉ cập nhật tại chỗ
+  if (fresh) O.showSheet(html);
+  else O.updateSheet(html);
 }
 
 function openLock(id) {
   lockEntry = { id, code: "", msg: "" };
-  showLock();
+  showLock("", true);
 }
 
 function lockKey(k) {
@@ -240,18 +243,18 @@ function openAccuse() {
 // Phiên xét xử nhiều người: chọn người cho một vai, chứng cứ cho một vai, đáp án một câu dựng lại sự việc
 function vdPick(field, key, id) {
   accuse[field][key] = accuse[field][key] === id ? null : id;
-  O.showSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
+  O.updateSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
 }
 
 function pickCulprit(id) {
   accuse.culprit = id;
-  O.showSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
+  O.updateSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
 }
 
 // Chọn hồ sơ cho một bước; bấm lại hồ sơ đang chọn để bỏ chọn
 function pickStep(key, id) {
   accuse.steps[key] = accuse.steps[key] === id ? null : id;
-  O.showSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
+  O.updateSheet(T.accuseHTML(game(), CASES[game().idx], accuse));
 }
 
 function submitVerdict() {

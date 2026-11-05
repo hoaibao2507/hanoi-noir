@@ -1,7 +1,7 @@
 /* Lớp phủ: chuyển cảnh điện ảnh, thông báo, lời khai cận cảnh và hộp thoại kiểu hồ sơ giấy. */
 import gsap from "gsap";
 import { $, icons } from "./dom.js";
-import { flicker } from "../render/world.js";
+import { flicker, setPaused } from "../render/world.js";
 
 const REDUCED = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HAS_GSAP = typeof gsap !== "undefined";
@@ -142,10 +142,14 @@ let nbOpen = false;
 let coachOn = false; // hướng dẫn lần đầu đang chạy: khóa phần phía sau như khi có hộp thoại
 let returnTo = null; // selector của phần tử giữ focus trước khi mở hộp thoại
 
+// Sổ tay trên điện thoại là tấm 82dvh che gần hết cảnh; từ 768px trở lên chỉ là ngăn kéo bên trái nên cảnh vẫn cần chạy
+const nbCovers = () => typeof matchMedia === "function" && matchMedia("(max-width: 767px)").matches;
+
 function syncInert() {
   const lock = sheetOpen() || coachOn;
   for (const id of BEHIND) $(id).inert = lock;
   $("notebook").inert = lock || !nbOpen;
+  setPaused(sheetOpen() || (nbOpen && nbCovers())); // chỉ có tác dụng ở chế độ nhẹ
 }
 
 // Bật hoặc tắt khóa phía sau trong lúc chạy hướng dẫn (coach.js)
@@ -216,6 +220,25 @@ export function showSheet(html, opts = {}) {
       flicker(1);
       bars(true, 0.4);
     }
+  }
+}
+
+// Vẽ lại nội dung hộp thoại ĐANG MỞ sau một lựa chọn (chọn nghi phạm, chọn hồ sơ, gõ số khóa...): giữ nguyên vị trí cuộn và nút đang focus,
+// không phát lại hoạt ảnh tờ giấy rơi. showSheet đưa hộp về đầu trang, nên dùng nó cho mỗi lần chọn thì người chơi bị giật lên đầu liên tục.
+export function updateSheet(html) {
+  const sheet = $("modal").querySelector(".sheet");
+  if (!sheetOpen() || !sheet) return showSheet(html);
+  const top = sheet.scrollTop;
+  // Nút được nhận ra theo thứ tự (không theo data-id: một hồ sơ có thể xuất hiện ở nhiều bước)
+  const focusAt = [...sheet.querySelectorAll("button")].indexOf(document.activeElement);
+  sheet.innerHTML = html;
+  icons(sheet);
+  const title = sheet.querySelector("h2");
+  if (title) title.id = "sheet-title";
+  sheet.scrollTop = top;
+  if (focusAt >= 0) {
+    const b = sheet.querySelectorAll("button")[focusAt];
+    if (b) b.focus({ preventScroll: true });
   }
 }
 

@@ -27,6 +27,9 @@ export function mountStage() {
 
   gl.mount();
   mountCursor(scene);
+  // Cờ "vừa kéo" chặn click ngay sau khi nhả chuột. Cảm ứng thì sau một cú kéo trình duyệt KHÔNG bắn click, nên cờ treo lại và nuốt
+  // cú chạm kế tiếp vào nút ngoài cảnh (Sổ tay, Buộc tội...). Mọi lần chạm mới đều xóa cờ trước khi click của nó tới
+  window.addEventListener("pointerdown", () => { dragged = false; }, true);
   scene.addEventListener("pointerdown", onDown);
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);

@@ -36,8 +36,8 @@ export function menuHTML(save, regionId = REGIONS[0].id) {
       <span class="block p-4 text-left">
         <span class="kicker block">Vụ ${c.no} · ${c.level}</span>
         <span class="block font-display text-xl mt-1">${esc(c.title)}</span>
-        <span class="block text-xs text-ink-2 mt-1">${esc(c.place)}</span>
-        <span class="block mt-3 text-sm">${info}</span>
+        <span class="case-place block text-xs text-ink-2 mt-1">${esc(c.place)}</span>
+        <span class="case-info block mt-3 text-sm">${info}</span>
       </span>
     </button>`;
   }).join("");
@@ -65,9 +65,9 @@ export function menuHTML(save, regionId = REGIONS[0].id) {
         <button class="btn btn-ghost" data-action="reset-ask" title="Xoá tiến độ"><i class="fa-solid fa-rotate-left"></i><span class="hidden sm:inline">Xoá tiến độ</span></button>
       </div>
     </div>
-    <div class="absolute inset-x-0 bottom-0 pt-24 pb-4 md:pb-7 bg-gradient-to-t from-[#05070d] via-[#05070d]/75 to-transparent">
+    <div class="menu-dock absolute inset-x-0 bottom-0 pt-24 pb-4 md:pb-7 bg-gradient-to-t from-[#05070d] via-[#05070d]/75 to-transparent">
       ${tabs ? `<div class="pointer-events-auto region-bar mb-3">${tabs}</div>` : ""}
-      <div class="text-center mb-3 pointer-events-none px-4">${finale}</div>
+      <div class="menu-note text-center mb-3 pointer-events-none px-4">${finale}</div>
       <div id="menu-cards" class="pointer-events-auto flex gap-4 overflow-x-auto snap-x snap-mandatory px-5 pb-2 hscroll md:justify-center">${cards}</div>
     </div>`;
 }
