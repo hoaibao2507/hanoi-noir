@@ -35,7 +35,7 @@ export function mount() {
     game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: "gl",
-      backgroundColor: "#0c0907",
+      backgroundColor: "#070a12",
       banner: false,
       audio: { noAudio: true },
       resolution: Math.min(window.devicePixelRatio || 1, 2),

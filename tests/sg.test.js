@@ -8,6 +8,7 @@ import {
   nowMinutes, clockAt, isGone, departed, remainingAt, MAX_DEDUCE, arrivalOf
 } from "../src/game/rules.js";
 import * as T from "../src/ui/templates.js";
+import { notebookHTML } from "./nbhtml.js";
 
 const idx = CASES.findIndex((c) => c.id === "s1");
 const c = CASES[idx];
@@ -33,13 +34,13 @@ function play(ids, start = newGame(idx, c)) {
   return g;
 }
 
-test("vùng: mỗi vùng có vụ, vụ Sài Gòn thuộc vùng sg và là vụ số 1 của vùng", () => {
-  assert.deepEqual(REGIONS.map((r) => r.id), ["hn", "sg"]);
-  assert.equal(casesOf("hn").length, 5);
+test("vùng: chỉ còn vùng Sài Gòn với đúng hai vụ, và s1 là vụ số 1", () => {
+  assert.deepEqual(REGIONS.map((r) => r.id), ["sg"]);
   assert.equal(casesOf("sg").length, 2);
+  assert.equal(CASES.length, 2, "đã bỏ mọi vụ Hà Nội");
   assert.equal(c.region, "sg");
   assert.equal(c.no, 1);
-  assert.ok(CASES.slice(0, 5).every((x) => x.region === "hn"), "thứ tự vụ Phố cổ không đổi");
+  assert.equal(idx, 0);
 });
 
 test("bốn nhân vật chính Vũ, Ngân, Thắm, Trang có trong vụ, kèm hai nhân vật do tác giả đặt", () => {
@@ -149,7 +150,7 @@ test("kết luận làm đầu vào cho suy luận sau: k_lech rồi k_cua_so, k
 test("gate: nhật ký đầu ghi và sao kê Gia Hòa ẩn cho tới khi có kết luận mở khóa", () => {
   const g0 = newGame(idx, c);
   assert.equal(gated(g0, c, "dvr_log"), true);
-  assert.equal(isOpen({ ...g0, hours: 13 }, c, "dvr_log"), false);
+  assert.equal(isOpen({ ...g0, hours: c.budget }, c, "dvr_log"), false);
   const L = c.locations.find((x) => x.hs.some((h) => h[0] === "dvr_log"));
   assert.ok(!remainingAt(g0, c, L).some(([id]) => id === "dvr_log"), "chưa mở thì không tính là còn điểm điều tra");
   assert.ok(!T.hotspotsHTML(g0, c, L).includes('data-id="dvr_log"'), "chưa mở thì không hiện trên cảnh");
@@ -254,26 +255,25 @@ test("hồ sơ về muộn: chưa tới mốc thì không làm được, chờ t
   assert.equal(waitFor({ ...g0, hours: 6 }, c, "cdr_tham").hours, 6, "còn 6 giờ: đủ chờ nhưng không đủ đọc hồ sơ");
   assert.equal(waitFor({ ...g0, busy: true }, c, "cdr_tham").hours, g0.hours, "đang bận thì không chờ");
   // Làm việc khác trước, rồi hồ sơ tự về khi đồng hồ chạy qua mốc
-  const later = { ...g0, hours: 7 };
+  const later = { ...g0, hours: c.budget - 6 };
   assert.equal(isPending(later, c, "cdr_tham"), false, "sau 6 giờ làm việc khác, 03:00 đã qua mốc 02:30");
 });
 
-test("diễn biến: hiện trường bị rửa lúc 23h, Trang nhập viện lúc 00h30, camera bị ghi đè đúng giờ", () => {
-  const at = (spent) => ({ ...newGame(idx, c), hours: c.budget - spent });
-  assert.ok(isOpen(at(1), c, "hien_truong"), "22h còn kịp đo hiện trường");
-  assert.ok(isGone(at(2), c, "hien_truong"), "23h hầm bị rửa");
-  assert.equal(departed(at(3), c, "trang"), false);
-  assert.equal(departed(at(4), c, "trang"), true, "01h Trang đã nhập viện");
-  assert.ok(isOpen(at(5), c, "cam_ham") && isGone(at(6), c, "cam_ham"), "camera hầm mất lúc 03h");
-  assert.ok(isOpen(at(6), c, "cam_sanh") && isGone(at(8), c, "cam_sanh"), "camera sảnh mất lúc 04h30");
-  assert.ok(isGone(at(9), c, "cam_bv"));
-  assert.ok(isGone(at(10), c, "ls_gala"));
-  // Hồ sơ đã thu không bị mất theo
-  const kept = { ...at(10), done: { cam_ham: true }, found: ["cam_ham"] };
-  assert.equal(isGone(kept, c, "cam_ham"), false);
+test("hồ sơ và nghi phạm không biến mất theo thời gian: tới hết ngân sách giờ vẫn hỏi và xem được như lúc đầu", () => {
+  assert.ok((c.world || []).every((w) => w.kind === "arrive"), "chỉ còn diễn biến hồ sơ về muộn");
+  const end = { ...newGame(idx, c), hours: 0 };
+  const start = newGame(idx, c);
+  for (const a of c.actions.filter((x) => !x.via)) {
+    assert.equal(isGone(start, c, a.id), false, `${a.id}: mất ngay từ đầu`);
+    assert.equal(isGone(end, c, a.id), false, `${a.id}: mất theo thời gian`);
+  }
+  for (const s of c.suspects) assert.equal(departed(end, c, s.id), false, `${s.id}: rời đi theo thời gian`);
+  // Làm điểm tốn nhiều giờ nhất sau khi đã gần hết ngân sách: không có hồ sơ nào hết hạn
+  const late = { ...newGame(idx, c), hours: c.budget - 12 };
+  for (const id of ["hien_truong", "cam_ham", "cam_sanh", "cam_bv", "ls_gala", "loi_trang"]) assert.ok(isOpen(late, c, id), `${id}: vẫn làm được sau 12 giờ`);
 });
 
-// Lời giải dự kiến: ba phần chứng cứ đều rút ra được trong ngân sách giờ, kể cả khi bị hạn của camera và hiện trường
+// Lời giải dự kiến: ba phần chứng cứ đều rút ra được trong ngân sách giờ
 const PLAN = ["cam_sanh", "nk_ravao", "cam_ham", "cua_thangbo", "dkkd", "hop_dong_vay"];
 const GOOD = {
   who: { mastermind: "ngan", killer: "tham", tech: "hai" },
@@ -294,7 +294,7 @@ test("lời giải ngắn nhất đi được và còn dư giờ; thiếu một 
   assert.ok(!c.verdict.roles.find((r) => r.key === "killer").ids.some((i) => miss.done[i]));
 });
 
-test("mỗi vai đều có ít nhất hai lối chứng cứ độc lập, đều đi được trong ngân sách giờ và qua các hạn", () => {
+test("mỗi vai đều có ít nhất hai lối chứng cứ độc lập, đều đi được trong ngân sách giờ", () => {
   const routes = {
     mastermind: [["dkkd", "hop_dong_vay"], ["loi_ngan", "dt_nan_nhan"], ["dkkd", "ket_sat", "thuy_trieu", "note_ket", "hop_dong_vay"]],
     killer: [["cam_sanh", "nk_ravao", "cam_ham"], ["cdr_tham", "loi_lanh"], ["hien_truong", "quan_cafe", "loi_tham"], ["phap_y", "cua_thangbo", "cam_sanh"]],
@@ -354,7 +354,6 @@ test("không có lối tắt đoán mò: chọn nhầm một chứng cứ, một
 
 test("những người bị kết tội đúng là ba vai; người ngoài cuộc bị loại bằng hồ sơ độc lập, không bằng lời khai", () => {
   assert.deepEqual(culpritIds(c).sort(), ["hai", "ngan", "tham"]);
-  assert.deepEqual(culpritIds(CASES[0]), ["quyen"], "vụ cũ vẫn một thủ phạm");
   // Ba người ngoài cuộc đều có chứng cứ loại trừ không phải lời khai của chính họ
   const outsiders = { vu: "grab_food", trang: "grab_food", lanh: "cam_sanh" };
   for (const [who, ev] of Object.entries(outsiders)) {
@@ -373,15 +372,15 @@ test("giao diện vụ Sài Gòn dựng được: HUD, sổ tay mọi tab, xét 
   const L = c.locations[0];
   assert.match(T.hudHTML(g, c, L), /Sài Gòn · Vụ 1/);
   for (const tab of ["sus", "ho", "dd", "tl"]) {
-    const html = T.notebookHTML({ ...g, tab }, c);
+    const html = notebookHTML({ ...g, tab }, c);
     assert.ok(html.length > 200, `tab ${tab} có nội dung`);
   }
-  const nb = T.notebookHTML({ ...g, tab: "dd" }, c);
+  const nb = notebookHTML({ ...g, tab: "dd" }, c);
   assert.match(nb, /Suy luận \(\d+\/\d+\)/);
   assert.match(nb, /Rút ra từ/);
   assert.match(nb, /Đã mở điểm điều tra: <b>Nhật ký hệ thống đầu ghi hình<\/b>/);
-  assert.match(T.notebookHTML({ ...g, tab: "tl" }, c), /đã hiệu chỉnh/);
-  assert.match(T.notebookHTML({ ...withDone(["cam_sanh"]), tab: "tl" }, c), /chưa hiệu chỉnh/);
+  assert.match(notebookHTML({ ...g, tab: "tl" }, c), /đã hiệu chỉnh/);
+  assert.match(notebookHTML({ ...withDone(["cam_sanh"]), tab: "tl" }, c), /chưa hiệu chỉnh/);
   assert.match(T.accuseHTML(g, c, { who: {}, evid: {}, facts: {} }), /Phiên xét xử/);
   assert.match(T.accuseHTML(g, c, { who: {}, evid: {}, facts: {} }), /Chủ mưu/);
   const lock = T.lockHTML(c, act("ket_sat"), "19", 1);
@@ -394,7 +393,6 @@ test("giao diện vụ Sài Gòn dựng được: HUD, sổ tay mọi tab, xét 
   assert.match(T.verdictWinHTML(c, idx, 0, { stars: { s1: 3 }, unlocked: 0 }), /Chủ mưu: <b>Ngân<\/b>/);
   assert.match(T.verdictWinHTML(c, idx, 0, { stars: {}, unlocked: 0 }), new RegExp(`data-i="${idx + 1}"`), "sau vụ s1 là vụ s2 của cùng vùng");
   assert.equal((T.verdictWinHTML(CASES[idx + 1], idx + 1, 0, { stars: {}, unlocked: 0 }).match(/data-action="start"/g) || []).length, 0, "vụ cuối vùng Sài Gòn chưa có vụ kế tiếp");
-  assert.match(T.verdictWinHTML(CASES[0], 0, 0, { stars: {}, unlocked: 0 }), /data-i="1"/, "vụ Phố cổ vẫn sang vụ kế tiếp");
 });
 
 test("điểm điều tra đang chờ hiện đúng trạng thái và bấm được để chờ", () => {

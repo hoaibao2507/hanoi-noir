@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CASES } from "../src/data/cases.js";
+import { FX } from "./fixture.js";
 import { newGame, performAct } from "../src/game/rules.js";
 import { loadRun, storeRun, clearRun } from "../src/game/save.js";
 
@@ -15,9 +15,9 @@ globalThis.localStorage = {
     mem.delete(k);
   }
 };
-const RUN_KEY = "hanoi-noir-run-v1";
+const RUN_KEY = "hanoi-noir-run-v2";
 
-const c1 = CASES[0];
+const c1 = FX;
 
 test("ván đang chơi được lưu và đọc lại đúng sau khi tải lại trang", () => {
   clearRun();

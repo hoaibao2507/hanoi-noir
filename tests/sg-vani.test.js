@@ -8,6 +8,7 @@ import {
 } from "../src/game/rules.js";
 import { ART } from "../src/art/art.js";
 import * as T from "../src/ui/templates.js";
+import { notebookHTML } from "./nbhtml.js";
 
 const idx = CASES.findIndex((c) => c.id === "s2");
 const c = CASES[idx];
@@ -140,7 +141,7 @@ test("mã điện thoại ông Hiếu là ngày sinh của đứa chị: 03/09 l
   assert.equal(attemptLock(g0, c, "dt_hieu", "0309").status, "open");
 });
 
-test("hồ sơ về muộn, cổng mở khóa và hạn mất hồ sơ", () => {
+test("hồ sơ về muộn và cổng mở khóa", () => {
   const g0 = newGame(idx, c);
   for (const [id, h] of [["grab_vu", 2], ["zoom_log", 4], ["br_report", 6]]) {
     assert.ok(isPending(g0, c, id), `${id} chưa về lúc đầu`);
@@ -149,14 +150,18 @@ test("hồ sơ về muộn, cổng mở khóa và hạn mất hồ sơ", () => {
   }
   assert.equal(gated(g0, c, "sao_ke_hang"), true);
   assert.equal(gated(closeDeductions(withDone(["br_report", "ho_so_vu"]), c), c, "sao_ke_hang"), false);
-  assert.ok(isOpen(at(1), c, "hien_truong") && isGone(at(2), c, "hien_truong"), "0h30 kho mực được dọn");
-  assert.ok(isOpen(at(3), c, "cam_ngo") && isGone(at(4), c, "cam_ngo"), "camera ngõ sau mất lúc 2h30");
-  assert.ok(isOpen(at(4), c, "cam_nha_an") && isGone(at(5), c, "cam_nha_an"));
-  assert.ok(isOpen(at(6), c, "thung_rac") && isGone(at(7), c, "thung_rac"), "xe rác lúc 5h30");
-  assert.ok(isOpen(at(8), c, "so_mau") && isGone(at(9), c, "so_mau"), "sổ áo mẫu bị hủy lúc 7h30");
-  assert.equal(departed(at(2), c, "trang"), false);
-  assert.equal(departed(at(3), c, "trang"), true, "2h Trang đã về Đà Lạt");
-  assert.equal(isGone(at(3), c, "loi_trang"), true);
+});
+
+test("hồ sơ và nghi phạm không biến mất theo thời gian, dù đồng hồ đã chạy hết ngân sách giờ", () => {
+  assert.ok((c.world || []).every((w) => w.kind === "arrive"), "chỉ còn diễn biến hồ sơ về muộn");
+  for (const a of c.actions.filter((x) => !x.via)) {
+    assert.equal(isGone(at(0), c, a.id), false, `${a.id}: mất ngay từ đầu`);
+    assert.equal(isGone(at(c.budget), c, a.id), false, `${a.id}: mất theo thời gian`);
+  }
+  for (const s of c.suspects) assert.equal(departed(at(c.budget), c, s.id), false, `${s.id}: rời đi theo thời gian`);
+  for (const id of ["hien_truong", "cam_ngo", "cam_nha_an", "thung_rac", "so_mau", "loi_trang"]) {
+    assert.ok(isOpen(at(c.budget - 2), c, id), `${id}: vẫn làm được khi gần hết giờ`);
+  }
 });
 
 // Lời giải ngắn nhất cho từng bước, và lối thứ hai độc lập
@@ -170,7 +175,7 @@ test("lời giải ngắn nhất đi được, còn dư ít nhất 4 giờ, và 
   assert.equal(judge(c, "vu", GOOD).win, true);
 });
 
-test("mỗi bước có ít nhất hai lối chứng cứ độc lập, đi được trong ngân sách và qua các hạn", () => {
+test("mỗi bước có ít nhất hai lối chứng cứ độc lập, đi được trong ngân sách", () => {
   const routes = {
     opportunity: [["cam_ngo", "grab_vu"], ["zoom_log", "loi_vu"]],
     means: [["thung_rac", "so_mau"], ["phap_y", "may_dtf2", "so_mau"]],
@@ -248,11 +253,11 @@ test("gợi ý đi được tới đủ chứng cứ", () => {
 test("giao diện vụ s2 dựng được: HUD, sổ tay mọi tab, chuỗi chứng minh, thắng; mọi cảnh và khung camera vẽ được", () => {
   let g = play(PLAN);
   assert.match(T.hudHTML(g, c, c.locations[0]), /Sài Gòn · Vụ 2/);
-  for (const tab of ["sus", "ho", "dd", "tl"]) assert.ok(T.notebookHTML({ ...g, tab }, c).length > 200, tab);
-  assert.match(T.notebookHTML({ ...g, tab: "tl" }, c), /đã hiệu chỉnh|chưa hiệu chỉnh|Thái Bình Dương/);
-  const raw = T.notebookHTML({ ...withDone(["zoom_log"]), tab: "tl" }, c);
+  for (const tab of ["sus", "ho", "dd", "tl"]) assert.ok(notebookHTML({ ...g, tab }, c).length > 200, tab);
+  assert.match(notebookHTML({ ...g, tab: "tl" }, c), /đã hiệu chỉnh|chưa hiệu chỉnh|Thái Bình Dương/);
+  const raw = notebookHTML({ ...withDone(["zoom_log"]), tab: "tl" }, c);
   assert.match(raw, /chưa hiệu chỉnh/);
-  const fixed = T.notebookHTML({ ...closeDeductions(withDone(["zoom_log", "loi_vu"]), c), tab: "tl" }, c);
+  const fixed = notebookHTML({ ...closeDeductions(withDone(["zoom_log", "loi_vu"]), c), tab: "tl" }, c);
   assert.match(fixed, /giờ thật = giờ máy \+ 15 giờ/);
   assert.match(T.accuseHTML(g, c, { culprit: null, steps: {} }), /Cơ hội/);
   for (const L of c.locations) {

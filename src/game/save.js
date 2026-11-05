@@ -31,7 +31,8 @@ export function clearSave() {
 
 // Ván đang chơi (vụ, địa điểm, hồ sơ đã thu, giờ còn lại...) lưu riêng với khóa khác để không ảnh hưởng số sao.
 // Chỉ dữ liệu đúng dạng mới được dùng; dữ liệu hỏng thì coi như không có ván nào.
-const RUN_KEY = "hanoi-noir-run-v1";
+// v2: bỏ các vụ Hà Nội nên chỉ số vụ đổi; ván lưu theo khóa v1 không còn khớp và bị bỏ qua
+const RUN_KEY = "hanoi-noir-run-v2";
 
 export function loadRun() {
   try {

@@ -29,7 +29,7 @@ export function markCoachSeen(seen = true) {
 const STEPS = [
   { sel: ".hs.is-open .hs-chip", title: "Điều tra", text: "Bấm vào các thẻ vàng trên cảnh để hỏi cung, khám nghiệm hoặc tra cứu. Mỗi lần tốn giờ điều tra; kết quả được ghi vào Sổ tay." },
   { sel: null, title: "Đèn pin", text: "Rê chuột như cầm đèn pin. Có những dấu vết nằm trong bóng tối, chỉ hiện ra khi ánh sáng chạm tới." },
-  { sel: '[data-coach="clock"]', title: "Đồng hồ và giờ điều tra", text: "Mỗi lần điều tra là một giờ trôi qua, và giờ điều tra có hạn. Tới một số mốc, hồ sơ có thể biến mất hoặc nghi phạm rời đi. Di chuyển giữa các địa điểm thì không tốn giờ." },
+  { sel: '[data-coach="clock"]', title: "Đồng hồ và giờ điều tra", text: "Mỗi lần điều tra là một giờ trôi qua, và giờ điều tra có hạn. Hồ sơ không biến mất theo thời gian, nhưng vài kết quả (sao kê, báo cáo) chỉ về sau một mốc giờ. Di chuyển giữa các địa điểm thì không tốn giờ." },
   { sel: '[data-coach="lives"]', title: "Ba mạng", text: "Buộc tội sai thì mất một mạng. Hết ba mạng, hồ sơ đóng lại." },
   { sel: ".door .door-sign", title: "Cửa", text: "Cửa dẫn tới địa điểm khác. Kéo màn hình hoặc dùng mũi tên ◀ ▶ để xem hai bên cảnh." },
   { sel: '[data-coach="notebook"]', title: "Sổ tay", text: "Nơi gom mọi hồ sơ, nghi phạm, mốc thời gian và các liên kết bạn tìm ra. Đừng tin ngay lời khai: hãy đối chiếu với vật chứng và camera." },

@@ -1,33 +1,13 @@
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./styles/fonts.css";
 import "./styles/main.css";
-import { config, dom, library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faArrowLeft, faArrowRight, faBookOpen, faCheck, faChevronLeft, faChevronRight,
-  faCircleCheck, faCircleQuestion, faCircleXmark, faComments, faFileCircleCheck,
-  faFileLines, faFolderOpen, faForward, faGavel, faHeart, faHourglassEnd,
-  faLink, faLocationDot, faLock, faMagnifyingGlass, faRotateLeft, faRotateRight, faTableCells,
-  faTriangleExclamation, faTrophy, faUserSecret, faVideo, faXmark,
-  faCity, faDeleteLeft, faHourglassHalf, faLandmark, faLightbulb, faLockOpen,
-  faDoorOpen, faMapLocationDot, faPen, faStar
-} from "@fortawesome/free-solid-svg-icons";
-import { faClock, faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
+import { dom } from "@fortawesome/fontawesome-svg-core";
+import "./ui/icon-lib.js";
 import { boot, actions } from "./app.js";
 import { consumeDrag } from "./ui/stage.js";
 import { ripple } from "./ui/overlays.js";
 
-// Chỉ đóng gói các biểu tượng thật sự dùng; thẻ <i> được đổi thành SVG khi vẽ
-config.autoAddCss = false;
-library.add(
-  faArrowLeft, faArrowRight, faBookOpen, faCheck, faChevronLeft, faChevronRight,
-  faCircleCheck, faCircleQuestion, faCircleXmark, faComments, faFileCircleCheck,
-  faFileLines, faFolderOpen, faForward, faGavel, faHeart, faHourglassEnd,
-  faLink, faLocationDot, faLock, faMagnifyingGlass, faRotateLeft, faRotateRight, faTableCells,
-  faTriangleExclamation, faTrophy, faUserSecret, faVideo, faXmark,
-  faCity, faDeleteLeft, faHourglassHalf, faLandmark, faLightbulb, faLockOpen,
-  faDoorOpen, faMapLocationDot, faPen, faStar,
-  faClock, faStarRegular
-);
+// Thẻ <i> có sẵn trong index.html được đổi thành SVG; các thẻ vẽ sau đó tự đổi khi vẽ
 dom.i2svg();
 
 // Kéo sân khấu không được coi là một lần bấm nút

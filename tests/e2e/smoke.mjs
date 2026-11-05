@@ -52,13 +52,10 @@ const inert = (id) => page.evaluate((i) => document.getElementById(i).inert, id)
 try {
   await page.goto(pathToFileURL(dist).href);
 
-  await run("menu hiện các vụ án và chuyển vùng", async () => {
+  await run("menu hiện hai vụ Sài Gòn và không có thanh chọn vùng", async () => {
     await page.waitForSelector(".case-card", { timeout: 10000 });
-    assert.equal(await page.locator(".case-card").count(), 5, "vùng Hà Nội phải có 5 vụ");
-    await page.click('.region-tab[data-id="sg"]');
-    await page.waitForFunction(() => document.querySelectorAll(".case-card").length === 2);
-    await page.click('.region-tab[data-id="hn"]');
-    await page.waitForFunction(() => document.querySelectorAll(".case-card").length === 5);
+    assert.equal(await page.locator(".case-card").count(), 2, "chỉ còn hai vụ Sài Gòn");
+    assert.equal(await page.locator(".region-tab").count(), 0, "một vùng thì không hiện thanh chọn vùng");
   });
 
   await run("vào vụ án: chuyển cảnh rồi hộp thoại mở đầu giữ focus", async () => {
@@ -98,8 +95,9 @@ try {
     await page.waitForSelector("#modal:not(.hidden) .expl");
     assert.equal(await page.evaluate(() => document.querySelectorAll(".hs.is-hint").length), 0, "mức 1 chưa chỉ rõ điểm nào");
     await page.click('[data-action="hint-more"]');
-    await page.waitForFunction(() => document.querySelectorAll(".hs.is-hint").length === 1);
-    assert.match(await page.textContent("#modal .muted"), /Đã dùng: 2/);
+    // Điểm được gợi ý có thể nằm ở địa điểm khác (nhấp nháy khi tới đó), nên chỉ kiểm tra số lần dùng
+    await page.waitForFunction(() => /Đã dùng: 2/.test(document.querySelector("#modal .muted")?.textContent || ""));
+    assert.ok((await page.evaluate(() => document.querySelectorAll(".hs.is-hint").length)) <= 1, "tối đa một điểm nhấp nháy");
     await page.click("#modal .btn");
     await page.waitForSelector("#modal.hidden", { state: "attached" });
   });
@@ -180,15 +178,34 @@ try {
     await page.click(".clue .fav");
     await page.waitForSelector(".clue .fav.on");
     assert.equal(await page.inputValue("[data-find]"), "loi khai", "bộ lọc còn nguyên sau khi vẽ lại");
-    await page.click('.clue [data-action="note-open"]');
+    // Preact giữ nguyên nút đang bấm khi vẽ lại: bấm đánh dấu sao xong thì focus vẫn ở đúng nút đó
+    assert.equal(await page.evaluate(() => document.activeElement.classList.contains("fav")), true, "focus còn ở nút sao sau khi đánh dấu");
+    await page.click(".clue .note-add");
     await page.waitForSelector(".clue textarea[data-note]");
     assert.equal((await active()).tag, "TEXTAREA", "mở ô ghi chú thì focus vào ô");
     await page.keyboard.type("Quyên khai mâu thuẫn mmm");
     assert.equal((await active()).tag, "TEXTAREA", "gõ ghi chú không được vẽ lại ô");
     assert.equal(await page.inputValue("textarea[data-note]"), "Quyên khai mâu thuẫn mmm");
     assert.equal(await page.evaluate(() => document.getElementById("modal").classList.contains("hidden")), true, "chữ m trong ô ghi chú không mở tổng quan");
-    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("hanoi-noir-run-v1")).game.notes);
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("hanoi-noir-run-v2")).game.notes);
     assert.ok(Object.values(saved).includes("Quyên khai mâu thuẫn mmm"), "ghi chú phải được lưu vào ván");
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => !document.getElementById("notebook").classList.contains("is-open"));
+  });
+
+  await run("sổ tay: chuyển qua mọi tab, nút tab giữ focus, nội dung dựng được", async () => {
+    await page.click('[data-action="nb-toggle"]');
+    await page.waitForSelector("#notebook.is-open");
+    const tabs = await page.$$eval('#nb-body [data-action="nb-tab"]', (els) => els.map((e) => e.dataset.tab));
+    assert.ok(tabs.includes("sus") && tabs.includes("ho") && tabs.includes("dd") && tabs.includes("tl"), `thiếu tab: ${tabs}`);
+    for (const tab of [...tabs.filter((t) => t !== "ho"), "ho"]) {
+      await page.click(`#nb-body [data-action="nb-tab"][data-tab="${tab}"]`);
+      await page.waitForSelector(`#nb-body [data-action="nb-tab"][data-tab="${tab}"][aria-pressed="true"]`);
+      const st = await page.evaluate(() => ({ tab: document.activeElement.dataset.tab, text: document.getElementById("nb-body").textContent.length }));
+      assert.equal(st.tab, tab, `bấm tab ${tab} không được làm mất focus của nút`);
+      assert.ok(st.text > 60, `tab ${tab} phải có nội dung`);
+    }
+    assert.ok(await page.locator("#nb-body .sus").count() === 0, "tab Hồ sơ không còn thẻ nghi phạm");
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => !document.getElementById("notebook").classList.contains("is-open"));
   });

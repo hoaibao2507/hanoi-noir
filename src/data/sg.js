@@ -15,19 +15,13 @@ import { VANI } from "./sg-vani.js";
 export const SG_CASES = [
 {
   id: "s1", no: 1, region: "sg", title: "Đỉnh Triều Bến Vân Đồn", place: "Chung cư Sao Mai Riverside · bến Vân Đồn, Quận 4",
-  level: "★★★★★★★ Hốc búa", budget: 13,
+  level: "★★★★★★★ Hốc búa", budget: 15,
   clock: { start: "21:00" },
   // Hệ thống camera của tòa nhà chạy chậm 17 phút: giờ thật = giờ máy + 17 phút, sau khi rút ra kết luận "k_lech"
   devices: { dvr: { name: "camera tòa nhà", off: 17, by: "k_lech" } },
   world: [
-    { at: "23:00", kind: "gone", id: "hien_truong", text: "Ban quản lý xả cạn nước và rửa sàn hầm B1 lúc 23h. Vị trí thi thể, vạch nước và vết bùn bị cuốn trôi; không còn đo lại được." },
-    { at: "00:30", kind: "leave", id: "trang", text: "Trang ngất xỉu khi nghe kết quả sơ bộ và được đưa vào bệnh viện theo dõi. Bác sĩ không cho ai tiếp xúc; cô không thể bị hỏi thêm." },
     { at: "02:30", kind: "arrive", id: "cdr_tham", text: "Nhà mạng gửi sao kê khẩn của số điện thoại Thắm theo yêu cầu của cơ quan điều tra." },
-    { at: "03:00", kind: "gone", id: "cam_ham", text: "Đầu ghi của tòa nhà ghi đè vòng sau tám giờ: đoạn camera hầm B1 không còn trích xuất được." },
     { at: "04:00", kind: "arrive", id: "sao_ke_gh", text: "Ngân hàng phản hồi yêu cầu khẩn: sao kê tài khoản Gia Hòa Capital đã có." },
-    { at: "04:30", kind: "gone", id: "cam_sanh", text: "Đoạn camera sảnh buổi tối bị ghi đè vòng; không còn trích xuất được." },
-    { at: "06:00", kind: "gone", id: "cam_bv", text: "Đoạn camera phòng bảo vệ bị ghi đè vòng; không còn trích xuất được." },
-    { at: "07:00", kind: "gone", id: "ls_gala", text: "Ban tổ chức gỡ video livestream buổi tiệc khỏi trang chính thức." }
   ],
   intro: "Tối thứ Bảy, triều cường đạt đỉnh lúc 19h20. Đường bến Vân Đồn ngập tới bắp chân, hầm B1 của chung cư Sao Mai Riverside ngập hơn nửa mét. Lúc 20h06, bác Bảy Lành, thợ điện nước của tòa nhà, xuống kiểm tra máy bơm thì thấy ông Đoàn Văn Châu — chủ tịch Châu Phát Logistics, ở căn penthouse tầng 27 — nổi sấp trong nước cạnh chiếc Mercedes của ông. Ban quản lý nói ông xuống hầm xem xe lúc nước dâng rồi trượt chân: một tai nạn do triều cường. Cho đến khi pháp y gọi điện cho cảnh sát. Bạn đến lúc 21h. Camera, nhật ký thẻ, sao kê cuộc gọi — ai cũng mang theo giấy tờ chứng minh mình ở nơi khác, và có những giấy tờ không thể cùng đúng. Không phải con số nào trong tòa nhà này cũng đáng tin.",
   suspects: [

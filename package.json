@@ -1,7 +1,7 @@
 {
   "name": "hanoi-noir",
   "version": "2.0.0",
-  "description": "Trò chơi điều tra vụ án phố cổ Hà Nội và Sài Gòn",
+  "description": "Trò chơi điều tra vụ án Sài Gòn",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,7 +19,9 @@
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "gsap": "^3.15.0",
-    "phaser": "4.2.1"
+    "htm": "^3.1.1",
+    "phaser": "4.2.1",
+    "preact": "^11.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -27,6 +29,7 @@
     "eslint": "^9.39.5",
     "globals": "^17.14.0",
     "playwright-core": "^1.64.1",
+    "preact-render-to-string": "^6.8.2",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.5",
     "vite-plugin-singlefile": "^2.3.4"

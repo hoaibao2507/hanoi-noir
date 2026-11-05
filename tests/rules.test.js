@@ -10,8 +10,11 @@ import {
 import { doorPlan, DOOR_SLOTS, DOOR_W, OX, COMP_W, WORLD_W } from "../src/world/layout.js";
 import { doorsFor } from "../src/world/doors.js";
 import { menuHTML } from "../src/ui/templates.js";
+import { FX } from "./fixture.js";
 
-const c1 = CASES[0];
+// Các luật hồ sơ mất, nghi phạm rời đi, đưa chứng cứ, chuỗi chứng minh được kiểm thử bằng vụ mẫu (tests/fixture.js);
+// hai vụ Sài Gòn không dùng "gone"/"leave" nên không thể dùng để thử các luật đó.
+const c1 = FX;
 
 test("performAct trừ giờ, ghi hồ sơ và không đổi trạng thái gốc", () => {
   const g0 = newGame(0, c1);
@@ -80,7 +83,7 @@ test("starsFor và recordWin giữ số sao tốt nhất và mở vụ kế ti�
 });
 
 test("đổi nhãn nghi phạm và ô đối chiếu quay vòng 0→1→2→0", () => {
-  let g = newGame(2, CASES[2]);
+  let g = newGame(0, c1);
   g = cycleMark(g, "tung");
   g = cycleMark(g, "tung");
   g = cycleMark(g, "tung");
@@ -321,74 +324,7 @@ test("vụ 1: Quyên bị bác qua camera chỉ khi đã có đăng ký xe, ho�
   assert.equal(alibisOf(confessed, c1)[0].by.clue, "quyen_thu");
 });
 
-test("vụ 2: Thảo được xác nhận bởi sổ khách; Phong bị bác bởi camera hành lang; Tuấn cần hai chứng cứ mới gắn được vào hẻm", () => {
-  const c2 = CASES[1];
-  const thao = alibisOf({ ...newGame(1, c2), done: { hoi_thao: true, so_cong: true } }, c2)[0];
-  assert.equal(thao.status, "proof");
-
-  const phong = alibisOf({ ...newGame(1, c2), done: { hoi_phong: true, cam_kt: true } }, c2)[0];
-  assert.equal(phong.status, "clash");
-
-  const tuan = { ...newGame(1, c2), done: { hoi_tuan: true, cam_hem: true } };
-  const byTuan = (g) => alibisOf(g, c2).find((a) => a.who === "tuan");
-  assert.equal(byTuan(tuan).status, "open", "thiếu hai chứng cứ thì camera hẻm chưa gắn được Tuấn");
-  const tuanOk = { ...tuan, done: { ...tuan.done, hoi_nga: true, quay_do: true } };
-  assert.equal(byTuan(tuanOk).status, "clash");
-  assert.equal(byTuan(tuanOk).by.clue, "cam_hem");
-});
-
-test("vụ 3: alibi của Phúc bị bác sau khi thú nhận quay lại phòng thờ", () => {
-  const c3 = CASES[2];
-  const g = { ...newGame(2, c3), done: { loi_phuc: true, ngan_bimat: true } };
-  assert.equal(alibisOf(g, c3)[0].status, "open");
-  const r = alibisOf({ ...g, done: { ...g.done, phuc_thu: true } }, c3)[0];
-  assert.equal(r.status, "clash");
-  assert.equal(r.by.clue, "phuc_thu");
-});
-
-test("vụ 4: Đạt bị bác khi nhật ký cửa hông đã gắn với sổ cấp thẻ; Long được xác nhận bởi sổ bàn quán", () => {
-  const c4 = CASES[3];
-  const base = { ...newGame(3, c4), done: { loi_dat: true, the_tu: true } };
-  assert.equal(alibisOf(base, c4).find((a) => a.who === "dat").status, "open", "chưa biết thẻ số 3 là của ai");
-  const r = alibisOf({ ...base, done: { ...base.done, phieu_khach: true } }, c4).find((a) => a.who === "dat");
-  assert.equal(r.status, "clash");
-  assert.equal(r.by.clue, "the_tu");
-
-  const long = alibisOf({ ...newGame(3, c4), done: { loi_long: true, cafe_log: true } }, c4).find((a) => a.who === "long");
-  assert.equal(long.status, "proof");
-});
-
-test("vụ 5: Kim bị bác bằng lời thú nhận, bằng chị Ngân, hoặc bằng camera khi đã có đăng ký xe", () => {
-  const c5 = CASES[4];
-  const kimOf = (g) => alibisOf(g, c5).find((a) => a.who === "kim");
-  assert.equal(kimOf({ ...newGame(4, c5), done: { loi_kim: true, kim_thu: true } }).by.clue, "kim_thu");
-  assert.equal(kimOf({ ...newGame(4, c5), done: { loi_kim: true, ngan_thu: true } }).by.clue, "ngan_thu");
-  const cam = kimOf({ ...newGame(4, c5), done: { loi_kim: true, cam_ngo: true, dang_ky_xe: true } });
-  assert.equal(cam.status, "clash");
-  assert.equal(cam.by.clue, "cam_ngo");
-  assert.equal(kimOf({ ...newGame(4, c5), done: { loi_kim: true, cam_ngo: true } }).status, "open", "camera chưa gắn được người khi chưa có đăng ký xe");
-});
-
-test("vụ 5: năm người còn lại đều được xác nhận hoặc bị bác bằng hồ sơ ngoài lời khai", () => {
-  const c5 = CASES[4];
-  const status = (done, who) => alibisOf({ ...newGame(4, c5), done }, c5).find((a) => a.who === who).status;
-  assert.equal(status({ loi_thang: true, hoa_don_hb: true }, "thang"), "proof");
-  assert.equal(status({ loi_han: true, phieu_cam: true }, "han"), "clash", "Hân khai dối, và phiếu cầm đồ bao trọn khung 21h00–21h24 ở nơi khác");
-  assert.equal(status({ loi_tien: true, ghi_quan_tra: true }, "tien"), "proof");
-  assert.equal(status({ loi_ngan: true, ghi_quan_tra: true }, "ngan"), "proof");
-  assert.equal(status({ loi_quang: true, ve_tau: true }, "quang"), "proof");
-});
-
-test("vụ 5: chỉ chuỗi chứng minh đúng mới buộc tội được Kim, và biên bản không cho biết ai có chìa", () => {
-  const c5 = CASES[4];
-  const good = { motive: "so_nhap", opportunity: "cam_ngo", means: "tu_dung_cu" };
-  assert.equal(judge(c5, "kim", good).win, true);
-  assert.equal(judge(c5, "kim", { ...good, means: "hien_truong" }).win, false, "biên bản không cho biết ai có chìa");
-  assert.equal(judge(c5, "han", good).win, false, "sai người thì không thắng");
-  assert.equal(judge(c5, "kim", { ...good, opportunity: "ve_tau" }).win, false, "vé tàu của Quang không chứng minh cơ hội của Kim");
-});
-
-test("mọi vụ đều mở từ đầu: menu của mỗi vùng không khóa vụ nào, kể cả khi chưa thắng vụ trước", () => {
+test("mọi vụ đều mở từ đầu: menu không khóa vụ nào; chỉ một vùng thì không hiện thanh chọn vùng", () => {
   let total = 0;
   for (const r of REGIONS) {
     const html = menuHTML(emptySave(), r.id);
@@ -397,10 +333,11 @@ test("mọi vụ đều mở từ đầu: menu của mỗi vùng không khóa v�
     assert.equal((html.match(/data-action="start"/g) || []).length, n, `${r.id}: mọi thẻ vụ của vùng đều bấm được`);
     assert.equal(html.includes("locked"), false, "không còn lớp khóa");
     assert.equal(html.includes("disabled"), false, "không còn nút bị vô hiệu");
-    assert.equal((html.match(/data-action="region"/g) || []).length, REGIONS.length, "có nút chọn mọi vùng");
+    assert.equal((html.match(/data-action="region"/g) || []).length, REGIONS.length > 1 ? REGIONS.length : 0, "thanh chọn vùng chỉ hiện khi có từ hai vùng");
   }
   assert.equal(total, CASES.length, "mỗi vụ thuộc đúng một vùng");
   assert.ok(CASES.every((c) => REGIONS.some((r) => r.id === c.region)), "mọi vụ có vùng hợp lệ");
+  assert.equal(CASES.some((c) => c.region === "hn"), false, "không còn vụ Hà Nội");
 });
 
 test("dữ liệu dòng thời gian nhất quán: người, hồ sơ điều kiện và khoảng giờ đều hợp lệ", () => {
@@ -426,6 +363,16 @@ test("dữ liệu dòng thời gian nhất quán: người, hồ sơ điều ki�
   }
 });
 
+// Biến thể bắt đầu lúc 22h để thử diễn biến qua nửa đêm
+const night = {
+  ...c1,
+  clock: { start: "22:00" },
+  world: [
+    { at: "23:00", kind: "leave", id: "khai", text: "Khải rời thành phố." },
+    { at: "00:00", kind: "gone", id: "camera", text: "Camera bị ghi đè." }
+  ]
+};
+
 // Trạng thái vụ khi đã dùng "spent" giờ điều tra (di chuyển không tính)
 const after = (c, idx, spent) => ({ ...newGame(idx, c), hours: c.budget - spent });
 
@@ -434,8 +381,7 @@ test("đồng hồ: giờ hiện tại theo số giờ đã dùng, đổi địa
   const g = performAct(newGame(0, c1), c1, "khamtu");
   assert.equal(clockAt(g, c1), "09:00");
   assert.equal(clockAt({ ...g, loc: 1 }, c1), "09:00", "đổi địa điểm không tốn giờ");
-  const c3 = CASES[2];
-  assert.equal(clockAt(after(c3, 2, 2), c3), "00:00", "22h cộng hai giờ là 00h");
+  assert.equal(clockAt(after(night, 0, 2), night), "00:00", "22h cộng hai giờ là 00h");
 });
 
 test("hồ sơ mất: không làm được khi đồng hồ đã tới mốc, nhưng vẫn làm được trước mốc", () => {
@@ -459,29 +405,16 @@ test("nghi phạm rời đi: không hỏi thêm và không đưa chứng cứ đ
   assert.ok(confrontOptions(still, c1, "khai").includes("xe"), "trước khi rời đi thì vẫn đưa được");
 });
 
-test("vụ 5: túi vải bị đổ lúc 23h, camera ghi đè lúc 00h30, và Thắng rời đi lúc 23h30", () => {
-  const c5 = CASES[4];
-  assert.equal(isOpen(after(c5, 4, 0), c5, "tui_vai"), true, "22h còn kịp");
-  assert.equal(isOpen(after(c5, 4, 1), c5, "tui_vai"), false, "23h thùng rác đã bị đổ");
-  assert.equal(isOpen(after(c5, 4, 2), c5, "cam_ngo"), true, "0h còn kịp xem camera");
-  assert.equal(isOpen(after(c5, 4, 3), c5, "cam_ngo"), false, "1h camera đã ghi đè");
-  assert.equal(departed(after(c5, 4, 1), c5, "thang"), false, "23h còn ở thành phố");
-  assert.equal(departed(after(c5, 4, 2), c5, "thang"), true, "0h đã rời đi");
-});
-
 test("diễn biến: báo đúng một lần theo thứ tự, và qua nửa đêm vẫn đúng", () => {
-  const c3 = CASES[2];
-  assert.deepEqual(eventsDone(after(c3, 2, 0), c3), []);
-  assert.deepEqual(eventsDone(after(c3, 2, 1), c3).map((w) => w.id), ["tung"]);
-  assert.deepEqual(eventsDone(after(c3, 2, 2), c3).map((w) => w.id), ["tung", "camera_ngo"]);
-  const fresh = eventsBetween(c3, nowMinutes(after(c3, 2, 1), c3), nowMinutes(after(c3, 2, 2), c3));
-  assert.deepEqual(fresh.map((w) => w.id), ["camera_ngo"], "chỉ báo diễn biến vừa xảy ra");
+  assert.deepEqual(eventsDone(after(night, 0, 0), night), []);
+  assert.deepEqual(eventsDone(after(night, 0, 1), night).map((w) => w.id), ["khai"]);
+  assert.deepEqual(eventsDone(after(night, 0, 2), night).map((w) => w.id), ["khai", "camera"]);
+  const fresh = eventsBetween(night, nowMinutes(after(night, 0, 1), night), nowMinutes(after(night, 0, 2), night));
+  assert.deepEqual(fresh.map((w) => w.id), ["camera"], "chỉ báo diễn biến vừa xảy ra");
 });
 
-test("mọi vụ vẫn có lời giải đi được khi tính cả hạn của hồ sơ và việc nghi phạm rời đi", () => {
-  CASES.forEach((c, ci) => {
-    // Vụ nhiều người và vụ có suy luận (kết luận không đặt trên bản đồ, tìm theo chiều rộng sẽ nổ) có kiểm thử lời giải riêng trong tests/sg*.test.js
-    if (!c.chain || c.deduce) return;
+test("vụ mẫu có hạn hồ sơ và nghi phạm rời đi vẫn có lời giải đi được", () => {
+  [FX].forEach((c, ci) => {
     const acts = c.actions.filter((a) => !a.via);
     const stateOf = (mask) => {
       const done = {};
@@ -517,12 +450,12 @@ test("mọi vụ vẫn có lời giải đi được khi tính cả hạn của 
   });
 });
 
-test("dữ liệu đồng hồ và diễn biến nhất quán: giờ đúng dạng, nằm trong thời gian điều tra, hồ sơ mất là hồ sơ thật", () => {
+test("dữ liệu đồng hồ và diễn biến nhất quán: giờ đúng dạng, nằm trong thời gian điều tra, hồ sơ về muộn là hồ sơ thật", () => {
   const toMin = (t) => {
     const [h, m] = t.split(":").map(Number);
     return h * 60 + m;
   };
-  for (const c of CASES) {
+  for (const c of [...CASES, FX]) {
     const start = toMin(c.clock.start);
     const toAbs = (t) => (toMin(t) < start ? toMin(t) + 1440 : toMin(t));
     assert.ok(/^\d{2}:\d{2}$/.test(c.clock.start), `${c.id}: giờ bắt đầu dạng HH:MM`);
@@ -548,5 +481,19 @@ test("dữ liệu đồng hồ và diễn biến nhất quán: giờ đúng dạ
       }
     }
     assert.equal(new Set(goneIds).size, goneIds.length, `${c.id}: một hồ sơ chỉ mất một lần`);
+  }
+});
+
+test("vụ trong trò chơi: hồ sơ và chứng cứ không mất theo thời gian, chỉ có hồ sơ về muộn", () => {
+  for (const c of CASES) {
+    const bad = (c.world || []).filter((w) => w.kind !== "arrive");
+    assert.deepEqual(bad, [], `${c.id}: còn diễn biến làm mất hồ sơ hoặc khiến nghi phạm rời đi`);
+  }
+});
+
+test("thời gian phá án tối thiểu bằng nửa số điểm điều tra (28 điểm thì ít nhất 14 giờ)", () => {
+  for (const c of CASES) {
+    const points = c.locations.reduce((n, L) => n + L.hs.length, 0);
+    assert.ok(c.budget * 2 >= points, `${c.id}: ${points} điểm điều tra nhưng chỉ có ${c.budget} giờ (cần tối thiểu ${Math.ceil(points / 2)})`);
   }
 });

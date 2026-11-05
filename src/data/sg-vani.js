@@ -12,20 +12,14 @@
 
 export const VANI = {
   id: "s2", no: 2, region: "sg", title: "Mực Chưa Khô", place: "Vani Ecommerce · 59 Võ Văn Hát, Long Trường, TP. Hồ Chí Minh",
-  level: "★★★★★★ Mực lem", budget: 12,
+  level: "★★★★★★ Mực lem", budget: 15,
   clock: { start: "23:10" },
   // Báo cáo Zoom và thư của Amazon ghi theo giờ Thái Bình Dương (UTC−8): giờ Việt Nam = giờ máy + 15 giờ, sau khi rút ra kết luận "k_pst"
   devices: { pt: { name: "báo cáo Zoom và Amazon (giờ Thái Bình Dương)", off: 900, by: "k_pst" } },
   world: [
-    { at: "00:30", kind: "gone", id: "hien_truong", text: "Ban điều hành lâm thời cho dọn kho mực lúc 0h30 để xưởng chạy ca đêm kịp đơn Black Friday. Vũng mực, vết kéo và tư thế thi thể không còn đo lại được." },
     { at: "01:00", kind: "arrive", id: "grab_vu", text: "Công ty gọi xe công nghệ gửi lịch sử chuyến đi của số điện thoại Vũ theo yêu cầu khẩn của cơ quan điều tra." },
-    { at: "01:30", kind: "leave", id: "trang", text: "Trang kiệt sức sau cú sốc và được gia đình đón về Đà Lạt bằng chuyến xe 1h30. Cô tắt máy; không thể hỏi thêm." },
-    { at: "02:30", kind: "gone", id: "cam_ngo", text: "Đầu ghi camera ngõ sau ghi đè vòng sau ba giờ: đoạn 20h–21h tối qua không còn trích xuất được." },
     { at: "03:30", kind: "arrive", id: "zoom_log", text: "Zoom gửi báo cáo tham dự cuộc họp “Black Friday Ads Sync” theo yêu cầu của cơ quan điều tra." },
-    { at: "04:00", kind: "gone", id: "cam_nha_an", text: "Đầu ghi camera nhà ăn ghi đè vòng: đoạn tối qua không còn trích xuất được." },
     { at: "05:00", kind: "arrive", id: "br_report", text: "Amazon phản hồi yêu cầu khẩn: bản sao thư trả lời của Brand Registry gửi ông Hiếu đã có." },
-    { at: "05:30", kind: "gone", id: "thung_rac", text: "Xe rác khu công nghiệp thu gom thùng rác cuối hẻm lúc 5h30. Chiếc áo trong thùng không còn." },
-    { at: "07:30", kind: "gone", id: "so_mau", text: "Kho kiểm kê đầu giờ: sổ áo mẫu giấy bị nhập vào file chung rồi hủy bản giấy." }
   ],
   intro: "Đêm thứ Tư, hai ngày trước Black Friday. Vani Ecommerce — xưởng in áo thun theo đơn, bán trên Amazon, Etsy và TikTok Shop — đang chạy hết công suất cho 14.000 đơn tồn. Cái tên “Vani” ghép từ tên hai cô con gái sinh đôi của người sáng lập Lý Quang Hiếu: Vân và Ni. 22h48, bác Sáu bảo vệ đi tuần thì thấy ông Hiếu nằm trong kho mực ở cuối xưởng, bên cạnh một vũng mực trắng đổ loang. Biên bản đầu tiên ghi: tai nạn lao động, trượt chân va đầu. Cho đến khi pháp y gọi điện cho cảnh sát. Bạn đến lúc 23h10 và yêu cầu mọi người có mặt tại văn phòng. Ai cũng có một tấm giấy chứng minh mình ở nơi khác, và hầu hết giờ giấc trong chứng cứ đều đúng — trừ những tờ giấy được in ra từ phía bên kia Thái Bình Dương.",
   suspects: [

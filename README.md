@@ -1,7 +1,8 @@
-# Hanoi Noir · Vụ Án Phố Cổ và Sài Gòn
+# Hanoi Noir · Vụ Án Sài Gòn
 
-Trò chơi điều tra chạy trên trình duyệt, chia thành hai vùng phá án: 5 vụ ở phố cổ Hà Nội và hai vụ ở Sài Gòn
-(*Đỉnh Triều Bến Vân Đồn*: ba kẻ liên đới, một án mạng được dựng thành tai nạn bằng đồng hồ). Menu có bộ chọn vùng.
+Trò chơi điều tra chạy trên trình duyệt, hiện có hai vụ ở Sài Gòn: *Đỉnh Triều Bến Vân Đồn* (ba kẻ liên đới, một án mạng được dựng
+thành tai nạn bằng đồng hồ) và *Mực Chưa Khô* (Vani Ecommerce). Các vụ ở phố cổ Hà Nội đã được gỡ bỏ. Hồ sơ và chứng cứ không biến mất theo
+thời gian, và ngân sách giờ của mỗi vụ tối thiểu bằng nửa số điểm điều tra (30 điểm thì ít nhất 15 giờ). Menu có bộ chọn vùng, chỉ hiện khi có từ hai vùng trở lên.
 Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc dùng mũi tên để xem hai bên,
 đi qua cửa để sang địa điểm khác, nút chức năng nằm ở bốn góc.
 
@@ -45,21 +46,22 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
 | `src/ui/overlays.js` | Chuyển cảnh mống mắt, thanh đen phim, đẩy máy quay, lời khai cận cảnh, hộp thoại, hồ sơ bay vào sổ tay |
 | `src/ui/ambience.js` | Hiệu ứng môi trường trong Phaser: bụi trong đèn pin, mưa, khói hương, ánh đèn lập lòe; bật theo cảnh qua `AMBIENT` |
 | `src/ui/dom.js` | Tiện ích DOM; đổi `<i>` thành SVG biểu tượng |
-| `src/art/art.js` | Minh họa SVG: cảnh Hà Nội, hai bên thế giới, camera, tài liệu, bảng đăng ký cảnh |
+| `src/art/art.js` | Minh họa SVG: hai bên thế giới, camera, tài liệu, bảng đăng ký cảnh |
 | `src/art/kit.js` | Đồ nghề vẽ SVG dùng chung (rect, path, gradient, glow, đèn lồng, nhà ống, bình...) |
 | `src/art/sg.js` | Cảnh vùng Sài Gòn |
 | `src/art/sg-vani.js` | Cảnh vụ "Mực Chưa Khô" (cổng, văn phòng, phòng giám đốc, xưởng in, hẻm sau) |
 | `src/ui/coach.js` | Hướng dẫn lần đầu chơi |
 | `src/art/people.js` | Người trong cảnh (`figure`) và chân dung (`portrait`) dùng chung một bộ vẽ: tỉ lệ 6,9 đầu, vai, tay, bàn tay, giày, nét mặt, tóc, kính, ria |
-| `src/data/cases.js` | Danh sách vùng (`REGIONS`), loại hồ sơ, và dữ liệu 5 vụ phố cổ; gộp cả các vụ Sài Gòn thành danh sách phẳng `CASES` |
+| `src/data/cases.js` | Danh sách vùng (`REGIONS`, hiện chỉ có Sài Gòn), loại hồ sơ; gộp các vụ Sài Gòn thành danh sách phẳng `CASES` |
 | `src/data/sg.js` | Vùng Sài Gòn: vụ "Đỉnh Triều Bến Vân Đồn" (nghi phạm, hồ sơ, kết luận, phiên xét xử nhiều người) |
 | `src/data/sg-vani.js` | Vụ "Mực Chưa Khô" (Vani Ecommerce): một thủ phạm, báo cáo Zoom và Amazon ghi giờ Thái Bình Dương, điện thoại có mã, hồ sơ về muộn |
 | `src/styles/main.css` | Token thiết kế (`@theme`) và các thành phần giao diện |
-| `tests/rules.test.js` | Kiểm thử đơn vị và dữ liệu các vụ (`npm test`) |
+| `tests/rules.test.js` | Kiểm thử đơn vị luật chơi và dữ liệu các vụ (`npm test`), gồm ngân sách giờ ≥ nửa số điểm và không có hồ sơ mất theo thời gian |
+| `tests/fixture.js` | Vụ mẫu (không nằm trong trò chơi) để thử các luật `gone`/`leave`, chuỗi chứng minh ba bước, đưa chứng cứ |
 | `tests/hints.test.js` | Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ và thắng được |
 | `tests/render.test.js` | Số đo nhân vật mà `art.js` gắn vào cảnh (lớp Phaser dùng để làm người thở và đổ bóng) |
 | `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
-| `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": múi giờ, khung giờ bị hại, ngoại phạm, mã điện thoại, hạn hồ sơ và hai lối chứng cứ cho mỗi bước |
+| `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": múi giờ, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian và hai lối chứng cứ cho mỗi bước |
 | `tests/notebook.test.js` | Sổ tay: tìm hồ sơ không dấu, lọc theo loại, đánh dấu sao, ghi chú, tổng quan địa điểm |
 
 ## Ghi chú thiết kế
@@ -67,7 +69,7 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
 - Tọa độ điểm điều tra vẫn dùng khung 1600 × 900 gốc. `art.js` đặt khung đó vào giữa thế giới
   rộng 2400 và dựng hai bên là phòng hoặc phố; `layout.js` xếp cửa vào các khe đó.
 - Luật chơi là hàm thuần trả về trạng thái mới, nên có thể kiểm thử bằng Node mà không cần trình duyệt.
-- Tiến độ lưu dưới khóa `hanoi-noir-save-v2`; bản cũ dùng khóa khác nên không tự chuyển sang.
+- Tiến độ lưu dưới khóa `hanoi-noir-save-v2` (số sao theo mã vụ); ván đang chơi dưới `hanoi-noir-run-v2` (bản v1 bị bỏ vì chỉ số vụ đã đổi sau khi gỡ các vụ Hà Nội).
 - Nền cảnh được Phaser 4 vẽ từ ảnh raster của SVG. Chữ, cửa và điểm điều tra vẫn là DOM để dùng đúng phông chữ và nhận chuột.
   Camera không dùng của Phaser: `stage.js` đưa scale, x và top sang `render/world.js`, nên hai lớp luôn khớp.
   Nếu Phaser không chạy, DOM tự giữ SVG đầy đủ.
@@ -88,10 +90,11 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
   (người, khoảng giờ, nơi khai). Tab Thời gian trong Sổ tay đối chiếu từng alibi với mốc của đúng người đó: "Bị bác" nếu có
   mốc chồng giờ ở nơi khác, "Được xác nhận" nếu có mốc bao trọn khoảng khai ở đúng nơi đó. Việc này không tốn giờ.
 - Đồng hồ và diễn biến: mỗi vụ có `clock.start` (giờ bắt đầu) và mảng `world`. Mỗi giờ điều tra là một giờ trôi qua; di chuyển
-  không tốn giờ nên không làm đồng hồ chạy. Diễn biến `gone` làm mất một hồ sơ chưa thu khi tới mốc. Diễn biến `leave` khiến
-  một nghi phạm rời thành phố: lời khai chưa thu của người đó mất theo, và không còn đưa chứng cứ được cho họ. Hồ sơ đã thu
-  không bị ảnh hưởng. Diễn biến được báo ngay khi đồng hồ tới mốc và ghi trong tab Thời gian. Kiểm thử tìm lời giải theo chiều
-  rộng bảo đảm mỗi vụ vẫn đi được tới lời giải khi tính cả hạn.
+  không tốn giờ nên không làm đồng hồ chạy. Engine vẫn hỗ trợ diễn biến `gone` (mất một hồ sơ chưa thu) và `leave` (nghi phạm rời thành phố), nhưng
+  **hai vụ Sài Gòn không dùng chúng**: `tests/rules.test.js` bắt buộc mọi vụ trong trò chơi chỉ có diễn biến `arrive` (hồ sơ về muộn). Các luật `gone`/`leave`
+  được kiểm thử bằng vụ mẫu `tests/fixture.js`. Diễn biến được báo ngay khi đồng hồ tới mốc và ghi trong tab Thời gian.
+- Ngân sách giờ: `budget` của mỗi vụ phải tối thiểu bằng nửa số điểm điều tra trên bản đồ (`test` kiểm tra `budget * 2 >= tổng số hs`).
+  Hiện s1 có 30 điểm, 15 giờ; s2 có 29 điểm, 15 giờ.
 
 ## Hình ảnh: ánh sáng, nhân vật và chuyển cảnh
 
@@ -131,9 +134,9 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy lint, test, build và kiểm 
 
 ## Vùng Sài Gòn: các cơ chế mới
 
-Các cơ chế này đều theo dữ liệu: vụ nào khai báo thì mới dùng, nên các vụ phố cổ không đổi.
+Các cơ chế này đều theo dữ liệu: vụ nào khai báo thì mới dùng.
 
-- **Vùng.** Mỗi vụ có `region` (`"hn"` hoặc `"sg"`); `REGIONS` đặt tên, biểu tượng, cảnh nền menu và câu giới thiệu. Chỉ số trong `CASES`
+- **Vùng.** Mỗi vụ có `region` (hiện chỉ còn `"sg"`); `REGIONS` đặt tên, biểu tượng, cảnh nền menu và câu giới thiệu. Chỉ số trong `CASES`
   vẫn là chỉ số vụ dùng cho bản lưu; nút "Vụ tiếp theo" chỉ đi trong cùng vùng.
 - **Suy luận.** `deduce: [{ needs: [id, ...], gives: id }]`. Người chơi chọn 2 đến 4 hồ sơ trong tab Suy luận; đúng tập hồ sơ (không phân
   biệt thứ tự, thừa hoặc thiếu đều không được) thì nhận kết luận `gives`, không tốn giờ. Kết luận là một hành động `via: "deduce"`, loại
@@ -153,16 +156,16 @@ Các cơ chế này đều theo dữ liệu: vụ nào khai báo thì mới dùn
   cố ý chỉ báo mỗi vai "vững" hay "chưa vững" và số câu dựng lại đúng, để không dò từng phần bằng cách thử lại.
 
 Vụ s1 được kiểm thử như một câu đố: `tests/sg.test.js` chơi lại lời giải ngắn nhất (còn dư giờ), kiểm tra mỗi vai có ít nhất hai lối chứng cứ độc lập,
-các hạn của camera và hiện trường không chặn lời giải, và mọi lựa chọn sai (đảo vai, chứng cứ sai vai, đáp án sai) đều thua.
+không có hồ sơ nào hết hạn, và mọi lựa chọn sai (đảo vai, chứng cứ sai vai, đáp án sai) đều thua.
 
 Vụ s2 "Mực Chưa Khô" (`src/data/sg-vani.js`) dùng lại các cơ chế trên nhưng chỉ có một thủ phạm (`chain` ba bước, mỗi bước chọn một kết luận).
-`tests/sg-vani.test.js` kiểm tra đổi múi giờ, khung giờ bị hại, trạng thái ngoại phạm của từng người, mã điện thoại, hạn của hồ sơ và hai lối chứng cứ mỗi bước.
-Tìm lời giải theo chiều rộng của `tests/rules.test.js` bỏ qua vụ có suy luận, vì kết luận không đặt trên bản đồ.
+`tests/sg-vani.test.js` kiểm tra đổi múi giờ, khung giờ bị hại, trạng thái ngoại phạm của từng người, mã điện thoại, hồ sơ về muộn và hai lối chứng cứ mỗi bước.
+Tìm lời giải theo chiều rộng của `tests/rules.test.js` chạy trên vụ mẫu, vì kết luận của hai vụ Sài Gòn không đặt trên bản đồ (đã có kiểm thử lời giải riêng).
 
 ## Thêm địa điểm hoặc điểm điều tra
 
 1. Vẽ cảnh trong `src/art/art.js` (hàm trả về SVG, khung 1600 × 900) và đăng ký trong `SCENES`.
-2. Thêm phong cách hai bên trong `FLANK` (phòng `room`, phố Hà Nội `street` hoặc phố Sài Gòn `sgstreet`).
-3. Thêm địa điểm vào `locations` của vụ trong `src/data/cases.js` với `scene` tương ứng.
+2. Thêm phong cách hai bên trong `FLANK` (phòng `room` hoặc phố Sài Gòn `sgstreet`).
+3. Thêm địa điểm vào `locations` của vụ trong `src/data/sg.js` hoặc `src/data/sg-vani.js` với `scene` tương ứng.
 4. Đặt điểm điều tra bằng `[mã hành động, x, y, nhãn]` trên khung 1600 × 900. Giữ `x` trong khoảng 300–1300
    để không sát mép, nơi có nút xem hai bên.

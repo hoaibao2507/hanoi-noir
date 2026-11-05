@@ -1,12 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CASES } from "../src/data/cases.js";
+import { FX } from "./fixture.js";
 import {
   newGame, performAct, MAX_NOTE, noteKey, setNote, toggleFav, fold, filterClues, overviewOf, remainingAt
 } from "../src/game/rules.js";
-import { notebookHTML, clueListHTML, findCountText, overviewHTML, hudHTML } from "../src/ui/templates.js";
+import { overviewHTML, hudHTML } from "../src/ui/templates.js";
+import { notebookHTML, clueListHTML, findCountText } from "./nbhtml.js";
 
-const c1 = CASES[0];
+const c1 = FX;
 const s1 = CASES.find((c) => c.id === "s1");
 
 // Vụ 1 đã làm vài việc: Khám tủ (vật chứng), Bà Lan (lời khai), Sổ ghi danh (hồ sơ), Quyên (lời khai)
@@ -177,11 +179,11 @@ test("tab Hồ sơ có ô tìm, chip loại, nút đánh dấu và ghi chú", ()
   const g = { ...toggleFav(played(), "khamtu"), tab: "ho" };
   const html = notebookHTML(g, c1, { q: "", type: "", fav: false, open: new Set() });
   assert.ok(html.includes('data-find'));
-  assert.ok(html.includes('data-action="nb-type" data-type="Lời khai"'));
-  assert.ok(html.includes('data-action="nb-fav-only"'));
+  assert.ok(html.includes("Lời khai (2)"), "chip lọc theo loại kèm số hồ sơ");
+  assert.ok(html.includes("Đã đánh dấu (1)"), "chip chỉ xem hồ sơ đã đánh dấu");
   assert.ok(html.includes('data-action="fav" data-id="khamtu"'));
   assert.ok(html.includes('aria-pressed="true" aria-label="Đánh dấu hồ sơ'), "hồ sơ đã đánh dấu báo aria-pressed");
-  assert.ok(html.includes('data-action="note-open" data-key="a:khamtu"'), "chưa có ghi chú thì chỉ có nút nhỏ");
+  assert.ok(html.includes("note-add") && html.includes('aria-label="Thêm ghi chú cho'), "chưa có ghi chú thì chỉ có nút nhỏ");
   assert.ok(!html.includes("<textarea"));
 });
 
@@ -191,8 +193,8 @@ test("hồ sơ đã có ghi chú, hoặc đang mở ô, thì hiện ô soạn v�
   assert.ok(html.includes('data-note="a:khamtu"'));
   assert.ok(html.includes("Ổ khóa có vết xước"));
   assert.ok(html.includes('data-note="a:giod"'), "ô đang mở dù trống");
-  // Dòng trống đầu textarea để HTML không nuốt xuống dòng đầu tiên của ghi chú
-  assert.match(html, /data-note="a:khamtu"[^>]*>\nỔ khóa/);
+  // Preact đặt nội dung ghi chú đúng nguyên văn trong textarea, không cần dòng trống đầu như khi ghép chuỗi HTML
+  assert.match(html, /data-note="a:khamtu"[^>]*>Ổ khóa/);
 });
 
 test("nội dung ghi chú và từ khóa được escape, không chèn được HTML", () => {
@@ -202,7 +204,7 @@ test("nội dung ghi chú và từ khóa được escape, không chèn được 
   assert.ok(!html.includes("<img src=x"));
   assert.ok(!html.includes("<script>1"));
   assert.ok(html.includes("&lt;img src=x"));
-  assert.ok(html.includes("&lt;/textarea&gt;"));
+  assert.ok(html.includes("&lt;/textarea"), "không đóng được textarea để thoát ra ngoài");
 });
 
 test("danh sách lọc: hiện số hồ sơ khớp, và gợi ý xóa bộ lọc khi không có gì", () => {
@@ -211,7 +213,7 @@ test("danh sách lọc: hiện số hồ sơ khớp, và gợi ý xóa bộ lọ
   assert.equal(findCountText(g, c1, { type: "Lời khai" }), "Hiện 2/4 hồ sơ");
   const none = clueListHTML(g, c1, { q: "xyz-khong-co" });
   assert.ok(none.includes("Không có hồ sơ nào khớp"));
-  assert.ok(none.includes('data-action="nb-find-clear"'));
+  assert.ok(none.includes("Xóa bộ lọc"));
   const some = clueListHTML(g, c1, { q: "so ghi" });
   assert.ok(some.includes("no-rise"), "đang lọc thì tắt hiệu ứng nổi lên");
   assert.equal(some.split("<article").length - 1, 1);
@@ -230,7 +232,7 @@ test("tab Nghi phạm có ô ghi chú cho từng nghi phạm", () => {
   assert.ok(html.includes('data-note="s:quyen"'));
   assert.ok(html.includes("Nói dối về giờ về"));
   for (const s of c1.suspects) {
-    if (s.id !== "quyen") assert.ok(html.includes(`data-key="s:${s.id}"`), `${s.name} có nút Ghi chú`);
+    if (s.id !== "quyen") assert.ok(html.includes(`aria-label="Thêm ghi chú cho ${s.name}"`), `${s.name} có nút Ghi chú`);
   }
 });
 

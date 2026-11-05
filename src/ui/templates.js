@@ -6,11 +6,11 @@ import { CASES, TYPES, REGIONS, casesOf } from "../data/cases.js";
 import { ART } from "../art/art.js";
 import { OX, WORLD_W, WORLD_H, DOOR_W } from "../world/layout.js";
 import {
-  isOpen, remainingAt, starsFor, allSolved, totalStars, linksOf,
-  CONFRONT_COST, questioned, confrontOptions, alibisOf, timelineEvents, hasTimeline,
-  isGone, clockAt, eventsDone, departed, gated, isPending, arrivalOf, waitHours, unlocksOf,
-  LOCK_TRIES, LOCK_PENALTY, MAX_DEDUCE, spotOf, actionOf,
-  MAX_NOTE, noteKey, filterClues, overviewOf
+  isOpen, remainingAt, starsFor, allSolved, totalStars,
+  CONFRONT_COST, confrontOptions,
+  isGone, clockAt, gated, isPending, arrivalOf, waitHours, unlocksOf,
+  LOCK_TRIES, LOCK_PENALTY, spotOf, actionOf,
+  overviewOf
 } from "../game/rules.js";
 import { esc } from "./dom.js";
 
@@ -23,7 +23,7 @@ const starsHTML = (n, max = 3) =>
 /* ---------- Màn hình chính ---------- */
 export const regionOf = (c) => REGIONS.find((r) => r.id === c.region) || REGIONS[0];
 
-export function menuHTML(save, regionId = "hn") {
+export function menuHTML(save, regionId = REGIONS[0].id) {
   const region = REGIONS.find((r) => r.id === regionId) || REGIONS[0];
   const list = casesOf(region.id);
   const cards = list.map((c) => {
@@ -42,7 +42,8 @@ export function menuHTML(save, regionId = "hn") {
     </button>`;
   }).join("");
 
-  const tabs = REGIONS.map((r) => {
+  // Chỉ hiện thanh chọn vùng khi có từ hai vùng trở lên
+  const tabs = REGIONS.length < 2 ? "" : REGIONS.map((r) => {
     const n = casesOf(r.id).length;
     return `<button class="region-tab${r.id === region.id ? " on" : ""}" data-action="region" data-id="${r.id}" aria-pressed="${r.id === region.id}">
         <i class="fa-solid ${r.icon}"></i><span><b>${esc(r.name)}</b><small>${n} vụ</small></span></button>`;
@@ -63,8 +64,8 @@ export function menuHTML(save, regionId = "hn") {
         <button class="btn btn-ghost" data-action="reset-ask" title="Xoá tiến độ"><i class="fa-solid fa-rotate-left"></i><span class="hidden sm:inline">Xoá tiến độ</span></button>
       </div>
     </div>
-    <div class="absolute inset-x-0 bottom-0 pt-24 pb-4 md:pb-7 bg-gradient-to-t from-[#070403] via-[#070403]/75 to-transparent">
-      <div class="pointer-events-auto region-bar mb-3">${tabs}</div>
+    <div class="absolute inset-x-0 bottom-0 pt-24 pb-4 md:pb-7 bg-gradient-to-t from-[#05070d] via-[#05070d]/75 to-transparent">
+      ${tabs ? `<div class="pointer-events-auto region-bar mb-3">${tabs}</div>` : ""}
       <div class="text-center mb-3 pointer-events-none px-4">${finale}</div>
       <div id="menu-cards" class="pointer-events-auto flex gap-4 overflow-x-auto snap-x snap-mandatory px-5 pb-2 hscroll md:justify-center">${cards}</div>
     </div>`;
@@ -169,143 +170,6 @@ export function testimonyHTML(c, a) {
   </div>`;
 }
 
-/* ---------- Sổ tay ---------- */
-function visualHTML(c, a) {
-  const v = a.visual;
-  if (v.k === "who") {
-    const s = c.suspects.find((x) => x.id === v.id);
-    return `<div class="who flex items-center gap-3 mb-3">${portraitOf(s)}<span class="text-sm text-ink-2">${esc(s.name)} · ${esc(s.role)}</span></div>`;
-  }
-  return `<div class="vis">${ART.evidence(v)}</div>`;
-}
-
-// Nút đưa chứng cứ chỉ hiện với người đã bị hỏi; hết hồ sơ để đưa thì nút tắt
-function confrontButton(game, c, s) {
-  if (!questioned(game, c, s.id)) return "";
-  const n = confrontOptions(game, c, s.id).length;
-  return `<button class="mark confront" data-action="confront-open" data-who="${s.id}" ${n ? "" : "disabled"}
-            aria-label="Đưa chứng cứ cho ${esc(s.name)}"><i class="fa-solid fa-file-lines"></i> Đưa chứng cứ${n ? ` (${n})` : ""}</button>`;
-}
-
-// Ghi chú tự do của người chơi. Đã có chữ, hoặc người chơi vừa bấm mở (ui.open) thì hiện ô soạn; chưa thì chỉ có nút nhỏ.
-// Nội dung textarea bắt đầu bằng một dòng trống vì HTML luôn bỏ dòng xuống đầu tiên, nên ghi chú mở đầu bằng xuống dòng vẫn nguyên vẹn
-function noteHTML(game, ui, key, label) {
-  const text = (game.notes || {})[key] || "";
-  if (!text && !(ui.open && ui.open.has(key))) {
-    return `<button class="mark note-add" data-action="note-open" data-key="${esc(key)}" aria-label="Thêm ghi chú cho ${esc(label)}"><i class="fa-solid fa-pen"></i> Ghi chú</button>`;
-  }
-  return `<label class="note"><span class="note-l"><i class="fa-solid fa-pen"></i> Ghi chú của bạn</span>
-    <textarea data-note="${esc(key)}" rows="2" maxlength="${MAX_NOTE}" placeholder="Ghi điều bạn nghĩ, chỉ bạn thấy…" aria-label="Ghi chú cho ${esc(label)}">
-${esc(text)}</textarea></label>`;
-}
-
-function susHTML(game, c, ui) {
-  const labels = ["Chưa rõ", "Nghi ngờ", "Loại trừ"];
-  const icons = ["fa-circle-question", "fa-triangle-exclamation", "fa-circle-xmark"];
-  return c.suspects
-    .map((s) => {
-      const m = game.marks[s.id];
-      return `<div class="sus m${m}">
-        ${portraitOf(s)}
-        <div class="min-w-0">
-          <h4 class="text-base">${esc(s.name)}</h4>
-          <small class="text-ink-2 text-xs">${esc(s.role)}</small>${departed(game, c, s.id) ? `<span class="ltag k-mt">Đã rời đi</span>` : ""}
-          <p class="text-[13px] text-ink-2 leading-snug mt-1 mb-2">${esc(s.bio)}</p>
-          ${linkTags(game, c, s.id)}
-          <button class="mark m${m}" data-action="mark" data-id="${s.id}" aria-label="Đánh dấu ${esc(s.name)}: ${labels[m]}">
-            <i class="fa-solid ${icons[m]}"></i> ${labels[m]}</button>
-          ${confrontButton(game, c, s)}
-          ${noteHTML(game, ui, noteKey("s", s.id), s.name)}
-        </div>
-      </div>`;
-    })
-    .join("");
-}
-
-/* ---------- Tab Hồ sơ: tìm, lọc theo loại, đánh dấu sao, ghi chú ---------- */
-// ui = { q, type, fav, open }: bộ lọc và các ô ghi chú đang mở, do app.js giữ (không nằm trong ván lưu)
-const isFiltering = (ui) => !!((ui.q || "").trim() || ui.type || ui.fav);
-
-export function findCountText(game, c, ui = {}) {
-  const n = filterClues(game, c, ui).length;
-  return isFiltering(ui) ? `Hiện ${n}/${game.found.length} hồ sơ` : `${game.found.length} hồ sơ`;
-}
-
-function clueCard(game, c, ui, id) {
-  const a = actionOf(c, id);
-  const t = TYPES[a.type];
-  const fav = !!(game.fav || {})[id];
-  // Đang lọc thì bỏ hiệu ứng nổi lên: danh sách vẽ lại sau mỗi phím gõ, hiệu ứng sẽ nhấp nháy
-  return `<article class="clue tone-${t.cls}${isFiltering(ui) ? " no-rise" : ""}">
-    <div class="flex items-center justify-between gap-2">
-      <div class="text-xs text-ink-2 flex items-center gap-2"><i class="fa-solid ${t.icon}"></i>${esc(a.type)}</div>
-      <button class="fav${fav ? " on" : ""}" data-action="fav" data-id="${id}" aria-pressed="${fav}" aria-label="Đánh dấu hồ sơ ${esc(a.title)}" title="${fav ? "Bỏ đánh dấu" : "Đánh dấu hồ sơ quan trọng"}"><i class="fa-${fav ? "solid" : "regular"} fa-star"></i></button>
-    </div>
-    ${visualHTML(c, a)}
-    <h4 class="text-[15px] mt-1 mb-1">${esc(a.title)}</h4>
-    <p class="text-[13.5px] leading-relaxed">${esc(a.text)}</p>
-    <div class="mt-2">${noteHTML(game, ui, noteKey("a", id), a.title)}</div>
-  </article>`;
-}
-
-// Danh sách thẻ hồ sơ khớp bộ lọc. app.js vẽ lại riêng vùng này khi gõ tìm kiếm, để ô tìm không bị thay mất focus
-export function clueListHTML(game, c, ui = {}) {
-  const ids = filterClues(game, c, ui);
-  if (!ids.length) {
-    return `<p class="text-ink-2 italic text-sm">Không có hồ sơ nào khớp. <button class="mark" data-action="nb-find-clear">Xóa bộ lọc</button></p>`;
-  }
-  return ids.map((id) => clueCard(game, c, ui, id)).join("");
-}
-
-function finderHTML(game, c, ui) {
-  const kinds = Object.keys(TYPES).filter((k) => game.found.some((id) => actionOf(c, id).type === k));
-  const count = (k) => game.found.filter((id) => actionOf(c, id).type === k).length;
-  const favs = game.found.filter((id) => (game.fav || {})[id]).length;
-  const chip = (on, attrs, label) => `<button class="chip${on ? " on" : ""}" aria-pressed="${on}" ${attrs}>${label}</button>`;
-  return `<div class="finder">
-    <label class="find"><i class="fa-solid fa-magnifying-glass"></i>
-      <input type="search" data-find value="${esc(ui.q || "")}" placeholder="Tìm hồ sơ, tên người, từ khóa…" aria-label="Tìm trong hồ sơ" autocomplete="off" spellcheck="false"></label>
-    <div class="chips">
-      ${chip(!ui.type, `data-action="nb-type" data-type=""`, "Tất cả")}
-      ${kinds.map((k) => chip(ui.type === k, `data-action="nb-type" data-type="${esc(k)}"`, `${esc(k)} (${count(k)})`)).join("")}
-      ${chip(!!ui.fav, `data-action="nb-fav-only"${favs || ui.fav ? "" : " disabled"}`, `<i class="fa-solid fa-star"></i> Đã đánh dấu (${favs})`)}
-    </div>
-    <p class="find-n" data-find-n role="status">${findCountText(game, c, ui)}</p>
-  </div>`;
-}
-
-function cluesHTML(game, c, ui) {
-  if (!game.found.length) {
-    return `<p class="text-ink-2 italic text-sm">Chưa có hồ sơ nào. Hãy đến từng địa điểm và bấm vào các điểm điều tra trên cảnh.</p>`;
-  }
-  return `${finderHTML(game, c, ui)}<div data-clues>${clueListHTML(game, c, ui)}</div>`;
-}
-
-function matrixHTML(game, c) {
-  const m = c.matrix;
-  const head = m.cols
-    .map((col) => `<th class="px-1 py-1.5 font-semibold whitespace-nowrap">${game.done[col.act] ? "Lời " + col.label : `<i class="fa-solid fa-lock text-ink-2"></i> ${col.label}`}</th>`)
-    .join("");
-  const rows = m.rows
-    .map((rid) => {
-      const s = c.suspects.find((x) => x.id === rid);
-      let n = 0;
-      const cells = m.cols
-        .map((col) => {
-          const v = game.mx[rid + "|" + col.act] || 0;
-          if (v === 1) n++;
-          const open = !!game.done[col.act];
-          return `<td class="p-1"><button class="mx v${v}" ${open ? "" : "disabled"} data-action="mx" data-rid="${rid}" data-act="${col.act}"
-              aria-label="Nếu ${esc(s.name)} là thủ phạm, lời ${col.label} đúng hay sai">${["·", "✓", "✗"][v]}</button></td>`;
-        })
-        .join("");
-      return `<tr><th class="text-left px-2 whitespace-nowrap">${esc(s.name)}</th>${cells}<td class="tot">${n}</td></tr>`;
-    })
-    .join("");
-  return `<p class="text-[13px] text-ink-2 mb-3">Giả sử từng người là thủ phạm, lời khai của mỗi người đúng (✓) hay sai (✗)? Bấm ô để đổi. Lời khai chỉ mở sau khi bạn nghe. Đếm số ✓ rồi đối chiếu với biên bản.</p>
-    <div class="mxwrap"><table class="mxt"><thead><tr><th class="text-left px-2">Nếu thủ phạm là</th>${head}<th>Số ✓</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-}
-
 /* ---------- Đưa chứng cứ cho người đã bị hỏi ---------- */
 export function confrontHTML(game, c, who) {
   const s = c.suspects.find((x) => x.id === who);
@@ -359,9 +223,6 @@ export function reactionHTML(c, who, clueId, r, reveal, news = []) {
 }
 
 /* ---------- Suy luận: ghép hồ sơ thành kết luận ---------- */
-const conclusionIds = (c) => [...new Set(c.deduce.map((d) => d.gives))];
-const conclusionsOf = (game, c) => conclusionIds(c).filter((id) => game.done[id]);
-
 // Tên địa điểm có điểm điều tra này
 const placeOf = (c, id) => (c.locations.find((L) => L.hs.some((h) => h[0] === id)) || {}).name || "";
 
@@ -375,54 +236,6 @@ function effectsHTML(c, id) {
   return rows.join("");
 }
 
-function conclusionCard(game, c, id) {
-  const a = c.actions.find((x) => x.id === id);
-  const from = (game.ddFrom || {})[id];
-  const names = from ? from.map((n) => esc(c.actions.find((x) => x.id === n).title)).join(" + ") : "";
-  return `<article class="clue tone-kl">
-      <div class="text-xs text-ink-2 flex items-center gap-2"><i class="fa-solid fa-lightbulb"></i>Kết luận</div>
-      <h4 class="text-[15px] mt-1 mb-1">${esc(a.title)}</h4>
-      <p class="text-[13.5px] leading-relaxed">${esc(a.text)}</p>
-      ${names ? `<p class="text-xs text-ink-2 mt-2">Rút ra từ: ${names}</p>` : ""}
-      ${effectsHTML(c, id)}
-    </article>`;
-}
-
-function deduceTabHTML(game, c) {
-  const items = game.found.slice().reverse().map((id) => c.actions.find((a) => a.id === id));
-  const picks = items.length
-    ? items
-        .map((a) => {
-          const on = game.dpick.includes(a.id);
-          return `<button class="lkc${on ? " on" : ""}${a.via === "deduce" ? " is-k" : ""}" aria-pressed="${on}" data-action="dd-pick" data-id="${a.id}">
-              <i class="fa-solid ${TYPES[a.type].icon}"></i><span>${esc(a.title)}</span></button>`;
-        })
-        .join("")
-    : `<p class="italic text-sm">Chưa có hồ sơ nào để ghép. Hãy thu thập hồ sơ trước.</p>`;
-  const r = game.ddResult;
-  const msg = !r
-    ? ""
-    : r.status === "none"
-      ? `<p class="lkmsg">Những hồ sơ này chưa cho ra kết luận nào. Có thể thiếu một hồ sơ, thừa một hồ sơ, hoặc chúng chưa liên quan tới nhau.</p>`
-      : r.status === "known"
-        ? `<p class="lkmsg">Kết luận này đã có trong sổ tay.</p>`
-        : `<p class="lkmsg ok">Kết luận mới đã được ghi lại.</p>`;
-  const done = conclusionsOf(game, c);
-  const chosen = game.dpick.map((id) => esc(c.actions.find((a) => a.id === id).title));
-  return `
-    <p class="text-[13px] text-ink-2 mb-3">Chọn từ 2 đến ${MAX_DEDUCE} hồ sơ có liên quan tới nhau rồi bấm Suy luận. Chỉ đúng tập hồ sơ mới cho ra kết luận; thừa hay thiếu một hồ sơ đều không được. Suy luận không tốn giờ. Kết luận cũng là hồ sơ, nên ghép tiếp được với hồ sơ khác, và có kết luận mở ra điểm điều tra mới.</p>
-    <div class="lkgrid">${picks}</div>
-    <p class="text-xs text-ink-2 mt-3">${chosen.length ? `Đang chọn (${chosen.length}): ${chosen.join(" + ")}` : "Chưa chọn hồ sơ nào."}</p>
-    <div class="row mt-3">
-      <button class="btn btn-ghost" data-action="dd-clear" ${chosen.length ? "" : "disabled"}>Bỏ chọn</button>
-      <button class="btn" data-action="dd-try" ${game.dpick.length >= 2 ? "" : "disabled"}><i class="fa-solid fa-lightbulb"></i> Suy luận</button>
-    </div>
-    ${msg}
-    ${game.ddTries ? `<p class="text-xs text-ink-2 mt-1">Đã thử chưa ra: ${game.ddTries} lần</p>` : ""}
-    <h4 class="mt-4 mb-2">Kết luận đã rút ra: ${done.length}/${conclusionIds(c).length}</h4>
-    ${done.length ? done.map((id) => conclusionCard(game, c, id)).join("") : `<p class="text-ink-2 italic text-sm">Chưa có kết luận nào.</p>`}`;
-}
-
 // Hộp thoại khi vừa rút ra một kết luận mới
 export function deduceResultHTML(c, id) {
   const a = c.actions.find((x) => x.id === id);
@@ -433,170 +246,6 @@ export function deduceResultHTML(c, id) {
     <div class="expl"><p>${esc(a.text)}</p></div>
     ${effectsHTML(c, id)}
     <div class="row"><button class="btn" data-action="close">Tiếp tục</button></div>`;
-}
-
-/* ---------- Liên kết hồ sơ ---------- */
-const isMistake = (kind) => kind === "mâu thuẫn";
-
-// Nhãn ngắn trên thẻ nghi phạm: các kết nối đã tìm nói về người này
-function linkTags(game, c, sid) {
-  return linksOf(game, c)
-    .filter((l) => l.about === sid)
-    .map((l) => `<span class="ltag ${isMistake(l.kind) ? "k-mt" : "k-lh"}"><i class="fa-solid ${isMistake(l.kind) ? "fa-triangle-exclamation" : "fa-link"}"></i> ${esc(l.kind)}</span>`)
-    .join("");
-}
-
-function linkCard(c, l) {
-  const who = c.suspects.find((s) => s.id === l.about);
-  return `<article class="linkc ${isMistake(l.kind) ? "k-mt" : "k-lh"}">
-      <div class="text-xs text-ink-2 flex items-center gap-2"><i class="fa-solid ${isMistake(l.kind) ? "fa-triangle-exclamation" : "fa-link"}"></i>${esc(l.kind)}${who ? ` · về ${esc(who.name)}` : ""}</div>
-      <p class="text-[13.5px] leading-relaxed mt-1">${esc(l.text)}</p>
-    </article>`;
-}
-
-// Độ nghiêng ổn định của mỗi tấm ghim (cùng một hồ sơ luôn nghiêng như nhau)
-const tiltOf = (id) => ([...id].reduce((n, ch) => n + ch.charCodeAt(0), 0) % 7 - 3) * 0.9;
-
-// Tấm ghim trên bảng: chân dung (lời khai) hoặc biểu tượng (loại hồ sơ) cùng tiêu đề
-function pinHTML(game, c, a) {
-  const on = game.pick.includes(a.id);
-  const t = TYPES[a.type];
-  const face = a.visual && a.visual.k === "who"
-    ? `<span class="pin-face">${portraitOf(c.suspects.find((x) => x.id === a.visual.id))}</span>`
-    : `<span class="pin-icon"><i class="fa-solid ${t.icon}"></i></span>`;
-  return `<button class="pin tone-${t.cls}${on ? " on" : ""}" aria-pressed="${on}" data-action="lk-pick" data-id="${a.id}" data-pin="${a.id}" style="--tilt:${tiltOf(a.id)}deg">
-      <span class="pin-nail"></span>${face}<span class="pin-title">${esc(a.title)}</span></button>`;
-}
-
-function linksHTML(game, c) {
-  const clues = game.found.slice().reverse().map((id) => c.actions.find((a) => a.id === id));
-  const found = linksOf(game, c);
-  const threads = found.map((l) => [l.a, l.b, isMistake(l.kind) ? "mt" : "lh"]);
-  const board = clues.length
-    ? `<div class="pinboard" data-board data-threads="${esc(JSON.stringify(threads))}">
-        <svg class="threads" aria-hidden="true"></svg>
-        <div class="pins">${clues.map((a) => pinHTML(game, c, a)).join("")}</div>
-      </div>`
-    : `<p class="italic text-sm">Chưa có hồ sơ nào để đối chiếu. Hãy thu thập hồ sơ trước.</p>`;
-  const r = game.lkResult;
-  const msg = !r
-    ? ""
-    : r.status === "none"
-      ? `<p class="lkmsg">Hai hồ sơ này chưa cho thấy điều gì. Thử cặp khác.</p>`
-      : r.status === "known"
-        ? `<p class="lkmsg">Kết nối này đã có trong sổ tay.</p>`
-        : `<p class="lkmsg ok">Kết nối mới đã được ghi lại.</p>`;
-  return `
-    <p class="text-[13px] text-ink-2 mb-3">Kéo một hồ sơ thả lên hồ sơ khác để nối bằng sợi chỉ, hoặc bấm chọn hai hồ sơ rồi bấm Đối chiếu. Đối chiếu không tốn giờ, nhưng chỉ cặp đúng mới giữ được sợi chỉ.</p>
-    ${board}
-    <div class="row mt-3"><button class="btn" data-action="lk-check" ${game.pick.length === 2 ? "" : "disabled"}><i class="fa-solid fa-link"></i> Đối chiếu</button></div>
-    ${msg}
-    <h4 class="mt-4 mb-2">Kết nối đã tìm: ${found.length}/${c.links.length}</h4>
-    ${found.length ? found.map((l) => linkCard(c, l)).join("") : `<p class="text-ink-2 italic text-sm">Chưa có kết nối nào.</p>`}`;
-}
-
-/* ---------- Dòng thời gian: mốc giờ và lời khai về nơi ở ---------- */
-const nameOf = (c, id) => c.suspects.find((s) => s.id === id).name;
-
-// Nhãn và màu cho từng kết quả đối chiếu lời khai về nơi ở
-const ALIBI_STATUS = {
-  clash: { cls: "k-mt", icon: "fa-triangle-exclamation", label: "Bị bác" },
-  proof: { cls: "k-lh", icon: "fa-circle-check", label: "Được xác nhận" },
-  open: { cls: "", icon: "fa-circle-question", label: "Chưa có chứng cứ" }
-};
-
-function alibiHTML(c, a) {
-  const st = ALIBI_STATUS[a.status];
-  const by = a.by
-    ? `<p class="text-sm text-ink-2 mt-1">${a.status === "clash" ? "Mâu thuẫn với" : "Xác nhận bởi"}: ${esc(a.by.title)}, ${esc(a.by.from)}–${esc(a.by.to)} tại ${esc(a.by.at)}</p>`
-    : "";
-  return `<div class="linkc ${st.cls}">
-    <p class="text-sm"><b>${esc(nameOf(c, a.who))}</b> khai ở <b>${esc(a.at)}</b>, ${esc(a.from)}–${esc(a.to)}</p>
-    <p class="text-xs text-ink-2 mt-0.5">Từ hồ sơ “${esc(a.title)}”</p>
-    <span class="ltag ${st.cls}"><i class="fa-solid ${st.icon}"></i> ${st.label}</span>
-    ${by}
-  </div>`;
-}
-
-// Nhãn giờ máy: mốc lấy từ thiết bị lệch giờ. Chưa hiệu chỉnh thì cảnh báo, đã hiệu chỉnh thì ghi giờ máy gốc
-function devBadge(e) {
-  if (!e.dev) return "";
-  return e.dev.fixed
-    ? `<span class="ltag k-lh"><i class="fa-regular fa-clock"></i> đã hiệu chỉnh · giờ máy ${esc(e.dev.rawFrom)}–${esc(e.dev.rawTo)}</span>`
-    : `<span class="ltag k-mt"><i class="fa-regular fa-clock"></i> giờ máy ${esc(e.dev.name)} · chưa hiệu chỉnh</span>`;
-}
-
-function eventHTML(c, e) {
-  const who = e.who ? ` · <b>${esc(nameOf(c, e.who))}</b>` : e.pending ? ` · <i class="text-ink-2">Chưa rõ là ai</i>` : "";
-  return `<div class="tl-row${e.dev && !e.dev.fixed ? " raw" : ""}">
-    <span class="tl-time">${esc(e.from)}–${esc(e.to)}</span>
-    <div>
-      <p class="text-sm">${esc(e.at)}${who}</p>
-      <p class="text-xs text-ink-2">${esc(e.title)}</p>
-      ${devBadge(e)}
-    </div>
-  </div>`;
-}
-
-// Cảnh báo giờ máy ở đầu tab Thời gian: nêu thiết bị nào đã hiệu chỉnh, thiết bị nào còn chưa
-// Độ lệch giờ máy: tròn giờ thì ghi bằng giờ (múi giờ), còn lại ghi bằng phút
-const offLabel = (off) => {
-  const a = Math.abs(off);
-  return a >= 60 && a % 60 === 0 ? `${a / 60} giờ` : `${a} phút`;
-};
-
-function devicesNote(game, c) {
-  const devs = Object.values(c.devices || {});
-  if (!devs.length) return "";
-  return devs
-    .map((d) => game.done[d.by]
-      ? `<div class="banner mb-3"><i class="fa-regular fa-clock"></i> Giờ ${esc(d.name)} đã được hiệu chỉnh: giờ thật = giờ máy ${d.off >= 0 ? "+" : "−"} ${offLabel(d.off)}.</div>`
-      : `<div class="banner warn mb-3"><i class="fa-solid fa-triangle-exclamation"></i> Các mốc có nhãn “giờ máy” lấy từ ${esc(d.name)}. Chưa chắc giờ trên thiết bị này đúng: hãy đối chiếu với các nguồn giờ khác.</div>`)
-    .join("");
-}
-
-// Diễn biến đã xảy ra theo đồng hồ, kèm giờ hiện tại
-function worldHTML(game, c) {
-  const done = eventsDone(game, c);
-  const rows = done.length
-    ? done.map((w) => `<div class="tl-row"><span class="tl-time">${esc(w.at)}</span><p class="text-sm">${esc(w.text)}</p></div>`).join("")
-    : `<p class="text-ink-2 italic text-sm">Chưa có diễn biến nào. Đồng hồ đang chạy.</p>`;
-  return `<h4 class="mt-2 mb-1">Diễn biến · đồng hồ ${clockAt(game, c)}</h4>${rows}`;
-}
-
-function timelineHTML(game, c) {
-  const alibis = alibisOf(game, c);
-  const events = timelineEvents(game, c);
-  return `
-    ${devicesNote(game, c)}
-    ${worldHTML(game, c)}
-    <p class="text-[13px] text-ink-2 mb-3 mt-4">Lời khai về nơi ở được đối chiếu với các mốc cùng giờ của chính người đó. Mốc có “chưa rõ là ai” sẽ được gắn khi bạn thu đủ hồ sơ liên quan.</p>
-    <h4 class="mt-2 mb-1">Lời khai về nơi ở</h4>
-    ${alibis.length ? alibis.map((a) => alibiHTML(c, a)).join("") : `<p class="text-ink-2 italic text-sm">Chưa có lời khai nào về nơi ở. Hỏi nghi phạm để nghe họ khai.</p>`}
-    <h4 class="mt-4 mb-1">Mốc thời gian</h4>
-    ${events.length ? events.map((e) => eventHTML(c, e)).join("") : `<p class="text-ink-2 italic text-sm">Chưa có mốc nào. Mốc xuất hiện khi bạn thu thập hồ sơ có ghi giờ.</p>`}`;
-}
-
-export function notebookHTML(game, c, ui = {}) {
-  const tabs = [
-    ["sus", "fa-user-secret", "Nghi phạm"],
-    ["ho", "fa-folder-open", `Hồ sơ (${game.found.length})`]
-  ];
-  if (c.matrix) tabs.push(["mx", "fa-table-cells", "Đối chiếu"]);
-  if (c.links) tabs.push(["lk", "fa-link", `Liên kết (${linksOf(game, c).length}/${c.links.length})`]);
-  if (c.deduce) tabs.push(["dd", "fa-lightbulb", `Suy luận (${conclusionsOf(game, c).length}/${conclusionIds(c).length})`]);
-  if (hasTimeline(c)) tabs.push(["tl", "fa-clock", "Thời gian"]);
-  const bar = `<div class="flex gap-2 mb-4">${tabs
-    .map(([k, ic, l]) => `<button class="tab${game.tab === k ? " on" : ""}" aria-pressed="${game.tab === k}" data-action="nb-tab" data-tab="${k}"><i class="fa-solid ${ic}"></i> ${l}</button>`)
-    .join("")}</div>`;
-  let content;
-  if (game.tab === "sus") content = susHTML(game, c, ui);
-  else if (game.tab === "mx" && c.matrix) content = matrixHTML(game, c);
-  else if (game.tab === "lk" && c.links) content = linksHTML(game, c);
-  else if (game.tab === "dd" && c.deduce) content = deduceTabHTML(game, c);
-  else if (game.tab === "tl" && hasTimeline(c)) content = timelineHTML(game, c);
-  else content = cluesHTML(game, c, ui);
-  return bar + content;
 }
 
 /* ---------- Hộp thoại kiểu hồ sơ giấy ---------- */
@@ -820,8 +469,8 @@ export const helpHTML = () => `
     <p><b>Không gian điều tra:</b> mỗi cảnh là một thế giới rộng, phủ kín màn hình. Bốn góc có nút chức năng: ← quay về danh sách (trên trái), giờ và mạng (trên phải), Sổ tay (dưới trái), Buộc tội (dưới phải).</p>
     <p><b>Xem và di chuyển:</b> kéo màn hình, dùng mũi tên ◀ ▶ hoặc phím ← → để xem hai bên. Cửa có biển tên dẫn tới các địa điểm khác; đi qua cửa không tốn giờ.</p>
     <p><b>Điểm điều tra:</b> bấm vào các thẻ trên cảnh để hỏi cung, khám nghiệm hoặc tra cứu. Mỗi điểm thường tốn một giờ; điểm nào tốn nhiều hơn sẽ ghi rõ trên nhãn. Kết quả được lưu vào Hồ sơ.</p>
-    <p><b>Giờ điều tra:</b> mỗi vụ có ngân sách giờ hữu hạn. Hãy cân nhắc việc nào cần làm trước.</p>
-    <p><b>Đồng hồ và diễn biến:</b> giờ trên thanh đầu là giờ hiện tại của vụ án. Mỗi giờ điều tra là một giờ trôi qua, còn di chuyển thì không. Khi đồng hồ tới một mốc, một hồ sơ chưa thu có thể bị xóa hoặc một nghi phạm có thể rời khỏi thành phố. Diễn biến được báo ngay và ghi trong tab Thời gian của Sổ tay.</p>
+    <p><b>Giờ điều tra:</b> mỗi vụ có ngân sách giờ hữu hạn, tối thiểu bằng nửa số điểm điều tra. Hãy cân nhắc việc nào cần làm trước.</p>
+    <p><b>Đồng hồ và diễn biến:</b> giờ trên thanh đầu là giờ hiện tại của vụ án. Mỗi giờ điều tra là một giờ trôi qua, còn di chuyển thì không. Hồ sơ và chứng cứ không biến mất theo thời gian; chỉ có vài kết quả (sao kê, báo cáo) về muộn sau một mốc giờ. Diễn biến được báo ngay và ghi trong tab Thời gian của Sổ tay.</p>
     <p><b>Lời khai có thể dối:</b> đừng tin ngay. Hãy đối chiếu lời khai với camera, sổ sách và vật chứng.</p>
     <p><b>Đưa chứng cứ:</b> sau khi hỏi một người, mở Sổ tay ▸ Nghi phạm và bấm “Đưa chứng cứ” để đưa một hồ sơ cho họ xem. Mỗi lần tốn một giờ. Phản ứng có thể mở thêm một lời khai mới.</p>
     <p><b>Sổ tay:</b> gồm Nghi phạm (bấm thẻ để đánh dấu chưa rõ, nghi ngờ hoặc loại trừ; đây chỉ là ghi chú của bạn), Hồ sơ (mọi chứng cứ đã thu) và Đối chiếu nếu vụ có bảng này.</p>
@@ -831,7 +480,7 @@ export const helpHTML = () => `
     <p><b>Dấu vết trong bóng tối:</b> vài dấu vết không hiện ngay. Đưa đèn pin (con trỏ) quét qua vùng nghi ngờ; khi ánh sáng chạm tới, điểm đó sáng lên.</p>
     <p><b>Liên kết hồ sơ:</b> tab Liên kết trong Sổ tay. Chọn hai hồ sơ rồi bấm Đối chiếu. Đối chiếu không tốn giờ, nhưng chỉ cặp đúng mới ghi được một kết nối: mâu thuẫn trong lời khai, hoặc một quan hệ giữa các hồ sơ.</p>
     <p><b>Dòng thời gian:</b> tab Thời gian trong Sổ tay ghi các mốc giờ theo thứ tự và đối chiếu lời khai về nơi ở của từng người. “Bị bác” nghĩa là có chứng cứ đặt người đó ở nơi khác cùng giờ; “Được xác nhận” nghĩa là có chứng cứ đặt họ đúng nơi đã khai.</p>
-    <p><b>Vùng phá án:</b> ở menu có hai vùng, Phố cổ Hà Nội và Sài Gòn. Mỗi vùng có các vụ riêng; vùng Sài Gòn dùng thêm các cơ chế dưới đây.</p>
+    <p><b>Các vụ án:</b> trò chơi có hai vụ ở Sài Gòn. Cả hai dùng các cơ chế dưới đây.</p>
     <p><b>Suy luận (Sài Gòn):</b> tab Suy luận trong Sổ tay. Chọn từ 2 đến 4 hồ sơ có liên quan tới nhau rồi bấm Suy luận. Chỉ đúng tập hồ sơ mới cho ra một kết luận, không tốn giờ. Kết luận cũng là hồ sơ nên ghép tiếp được với hồ sơ khác, và có kết luận mở ra điểm điều tra mới. Game chỉ xác nhận sự kiện, không bao giờ nói ai là thủ phạm: bước đó là của bạn.</p>
     <p><b>Giờ máy lệch:</b> không phải mọi đồng hồ đều đúng. Mốc nào lấy từ một thiết bị có thể sai giờ sẽ có nhãn “giờ máy” trong tab Thời gian. Hãy đối chiếu cùng một sự kiện giữa các nguồn giờ khác nhau; khi tìm ra độ lệch, mọi mốc của thiết bị đó tự được hiệu chỉnh và ngoại phạm của mọi người được so lại.</p>
     <p><b>Khóa mã và kết quả về muộn:</b> điểm có ổ khóa cần nhập mã bằng bàn phím số; sai ${LOCK_TRIES} lần thì thiết bị tự khóa và bạn mất ${LOCK_PENALTY} giờ. Hồ sơ có nhãn đồng hồ cát chỉ về sau một mốc giờ; bấm vào để chờ, và thời gian chờ cũng tính vào ngân sách giờ.</p>
