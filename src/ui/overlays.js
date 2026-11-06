@@ -1,7 +1,8 @@
 /* Lớp phủ: chuyển cảnh điện ảnh, thông báo, lời khai cận cảnh và hộp thoại kiểu hồ sơ giấy. */
 import gsap from "gsap";
 import { $, icons } from "./dom.js";
-import { flicker, setPaused } from "../render/world.js";
+import { flicker, setPaused, whenArtReady } from "../render/world.js";
+import { LITE } from "./device.js";
 
 const REDUCED = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const HAS_GSAP = typeof gsap !== "undefined";
@@ -52,11 +53,20 @@ export function shake(power = 1) {
 }
 
 // Hai thanh đen kiểu phim màn ảnh rộng
+// Trượt bằng transform (chạy trên GPU) thay vì đổi height: đổi height bắt trình duyệt tính lại bố cục mỗi khung hình
+let barsReady = false;
 export function bars(on, seconds = 0.45) {
   if (!HAS_GSAP) return Promise.resolve();
   const els = document.querySelectorAll("#bars i");
-  return tween(els, { height: on ? "10.5vh" : "0vh", duration: dur(seconds), ease: on ? "power2.out" : "power2.inOut", overwrite: "auto" });
+  if (!barsReady) {
+    gsap.set(els, { y: 0, yPercent: (i) => (i ? 101 : -101) });
+    barsReady = true;
+  }
+  return tween(els, { yPercent: on ? 0 : (i) => (i ? 101 : -101), duration: dur(seconds), ease: on ? "power2.out" : "power2.inOut", overwrite: "auto" });
 }
+
+// Đợi hai khung hình để trình duyệt kịp vẽ xong cảnh mới dưới màn đen
+const settleFrames = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
 /* ---------- Chuyển cảnh ---------- */
 
@@ -77,6 +87,8 @@ export async function veil(kicker, title, sub, swap, origin) {
     await anim(card, { opacity: 1, y: 0 }, dur(0.4));
     await wait(REDUCED ? 120 : 650);
     if (swap) swap();
+    await whenArtReady();
+    await settleFrames();
     await anim(card, { opacity: 0, y: -6 }, dur(0.25));
     await anim(cur, { opacity: 0 }, dur(0.4));
     cur.classList.remove("on");
@@ -88,34 +100,48 @@ export async function veil(kicker, title, sub, swap, origin) {
     ? { x: Math.min(innerWidth, Math.max(0, origin.x)), y: Math.min(innerHeight, Math.max(0, origin.y)) }
     : { x: innerWidth / 2, y: innerHeight / 2 };
   const R = Math.hypot(innerWidth, innerHeight) + 90; // đủ lớn để phủ cả màn hình kể cả mép mờ
+  // Mống mắt vẽ lại một gradient toàn màn hình ở mỗi khung hình (tốn trên điện thoại): chế độ nhẹ thay bằng
+  // màn đen mờ dần (chỉ đổi opacity, chạy trên GPU). Cú thu phóng vào cửa và hai thanh đen vẫn giữ.
   const iris = { r: R };
   const paint = () => cur.style.setProperty("--r", `${iris.r.toFixed(1)}px`);
-  cur.style.opacity = "1";
   cur.style.setProperty("--cx", `${o.x}px`);
   cur.style.setProperty("--cy", `${o.y}px`);
-  paint();
+  if (LITE) {
+    cur.style.setProperty("--r", "-90px");
+    cur.style.opacity = "0";
+  } else {
+    cur.style.opacity = "1";
+    paint();
+  }
 
   flicker(0.8);
   bars(true, 0.4);
   pushIn(o.x, o.y, 1.09, 0.7);
-  await tween(iris, { r: -90, duration: 0.65, ease: "power2.in", onUpdate: paint });
+  if (LITE) await tween(cur, { opacity: 1, duration: 0.55, ease: "power1.in" });
+  else await tween(iris, { r: -90, duration: 0.65, ease: "power2.in", onUpdate: paint });
 
-  // Màn đen hoàn toàn: đổi cảnh dưới màn, kèm dòng chữ tên nơi đến
+  // Màn đen hoàn toàn: hiện tên nơi đến (chỉ opacity/transform, không đổi bố cục), đợi thẻ hiện rõ rồi mới đổi cảnh
   gsap.set(card, { opacity: 0, y: 8 });
-  gsap.set(card.querySelector(".t"), { letterSpacing: "0.22em" });
   gsap.to(card, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
-  gsap.to(card.querySelector(".t"), { letterSpacing: "0.02em", duration: 1.1, ease: "power2.out" });
-  await wait(780);
+  await wait(450);
   if (swap) swap();
   gsap.set($("scene"), { clearProps: "transform,transformOrigin" });
+  // Phần việc nặng (dựng SVG, raster nền, phân tích ánh sáng, tải texture) chạy lúc màn còn đen,
+  // không đè lên hoạt ảnh mở ra; vẫn giữ thẻ tên nơi đến tối thiểu như cũ
+  await Promise.all([wait(330), whenArtReady()]);
+  await settleFrames();
   await anim(card, { opacity: 0, y: -6 }, 0.25);
 
   // Mở ra từ giữa màn hình, đèn chập chờn như vừa bước vào phòng lạ
-  cur.style.setProperty("--cx", `${innerWidth / 2}px`);
-  cur.style.setProperty("--cy", `${innerHeight * 0.48}px`);
   flicker(0.5);
   bars(false, 0.6);
-  await tween(iris, { r: R, duration: 0.85, ease: "power2.out", onUpdate: paint });
+  if (LITE) {
+    await tween(cur, { opacity: 0, duration: 0.7, ease: "power1.out" });
+  } else {
+    cur.style.setProperty("--cx", `${innerWidth / 2}px`);
+    cur.style.setProperty("--cy", `${innerHeight * 0.48}px`);
+    await tween(iris, { r: R, duration: 0.85, ease: "power2.out", onUpdate: paint });
+  }
   cur.classList.remove("on");
   cur.style.opacity = "0";
 }

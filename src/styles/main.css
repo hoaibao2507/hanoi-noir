@@ -982,9 +982,12 @@ button.ov-row:hover { border-color: #8a5a14; background: rgba(255, 255, 255, 0.6
   background: radial-gradient(circle at var(--cx, 50%) var(--cy, 48%), transparent var(--r, -90px), var(--color-night) calc(var(--r, -90px) + 80px));
 }
 /* Hai thanh đen phim ảnh: dưới hộp thoại (40) để không che chữ, trên khung giao diện */
-#bars i { position: fixed; left: 0; right: 0; height: 0; z-index: 35; background: #000; pointer-events: none; }
-#bars i:first-child { top: 0; }
-#bars i:last-child { bottom: 0; }
+/* Cố định chiều cao, trượt vào/ra bằng transform (overlays.js: bars) để không phải tính lại bố cục mỗi khung hình */
+#bars i { position: fixed; left: 0; right: 0; height: 10.5vh; z-index: 35; background: #000; pointer-events: none; will-change: transform; }
+#bars i:first-child { top: 0; transform: translateY(-101%); }
+#bars i:last-child { bottom: 0; transform: translateY(101%); }
+/* Màn chuyển cảnh chỉ đổi opacity (chế độ nhẹ) nên cho riêng một lớp GPU trong lúc đang bật */
+#curtain.on { will-change: opacity; }
 
 /* Hộp thoại do GSAP làm hiện ra (tờ giấy rơi xuống), không dùng keyframe rise nữa */
 .sheet { animation: none; }

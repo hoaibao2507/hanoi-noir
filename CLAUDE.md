@@ -274,7 +274,7 @@ Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual
   → `lighting.setScene` → `actors.setScene` → `ambience.setScene`. Độ sâu: nền 0, mảnh nhân vật 1, bóng 2, bụi/khói/mưa 2–3, quầng sáng 6.
 - `phaser-core` không có `LightsPlugin`: alias `phaser-lights` trong `vite.config.js` + `plugins.scene` trong cấu hình game. Mất một trong hai là `scene.lights` undefined và đèn thật tắt (CSS vẫn chạy).
 - `#scene` là vùng `overflow:hidden`: focus bàn phím vào nút ngoài khung nhìn từng làm nó cuộn lệch, nên `stage.js` luôn trả `scrollLeft/Top` về 0.
-- `overlays.js`: `veil(kicker, title, sub, swap, origin)` (mống mắt qua biến CSS `--r`, `--cx`, `--cy`; `--r` âm nghĩa là đen kín), `pushIn/pushOut`, `shake`, `bars`,
+- `overlays.js`: `veil(kicker, title, sub, swap, origin)` (mống mắt qua biến CSS `--r`, `--cx`, `--cy`; `--r` âm nghĩa là đen kín; **chế độ nhẹ thay mống mắt bằng màn đen mờ dần** vì gradient toàn màn hình vẽ lại mỗi khung hình rất nặng trên điện thoại; đổi cảnh xong `veil` đợi `whenArtReady()` của `render/world.js` (nền mới raster + phân tích xong) rồi mới mở màn, để việc nặng chạy lúc màn còn đen; **đừng animate `letter-spacing`/`height` trong chuyển cảnh**, `bars` trượt bằng transform), `pushIn/pushOut`, `shake`, `bars`,
   `showSheet(html, {cinema})`, **`updateSheet(html)`** (vẽ lại hộp thoại đang mở sau một lựa chọn: giữ vị trí cuộn và focus theo thứ tự nút, không phát lại hoạt ảnh; dùng cho chọn nghi phạm/hồ sơ ở phiên xét xử và bàn phím khóa mã; mở lần đầu vẫn dùng `showSheet`), `showTestimony/hideTestimony`, `flyToNotebook`. Tất cả bỏ qua khi giảm chuyển động.
 
 ## 7. Việc thường làm

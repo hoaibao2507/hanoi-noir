@@ -72,7 +72,29 @@ export function splitArt(svg) {
 export function setArt(base, sceneKey, onReady, figs = []) {
   if (!game) return;
   latest = { base, sceneKey, onReady, figs };
+  pending = true;
   if (scene) scene.showArt();
+}
+
+/* Chuyển cảnh chờ nền mới vẽ xong (raster + phân tích pháp tuyến + tải texture) rồi mới mở màn đen,
+   để phần việc nặng chạy lúc màn còn đen chứ không đè lên hoạt ảnh mở ra. Có hạn chót để không treo. */
+let pending = false;
+let waiters = [];
+
+function settle() {
+  pending = false;
+  waiters.splice(0).forEach((f) => f());
+}
+
+export function whenArtReady(maxMs = 2500) {
+  if (!pending || !game) return Promise.resolve();
+  return new Promise((res) => {
+    const t = setTimeout(res, maxMs);
+    waiters.push(() => {
+      clearTimeout(t);
+      res();
+    });
+  });
 }
 
 // Đèn chập chờn một lúc: dùng cho diễn biến và chuyển cảnh
@@ -233,9 +255,11 @@ class WorldScene extends Phaser.Scene {
         }
         refreshWhilePaused();
         if (job.onReady) job.onReady();
+        settle();
       })
       .catch((err) => {
         if (!err.stale) console.warn("Không vẽ được nền cảnh.", err);
+        if (id === token) settle();
       });
   }
 }
