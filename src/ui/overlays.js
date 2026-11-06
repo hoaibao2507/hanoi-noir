@@ -247,15 +247,11 @@ export function showSheet(html, opts = {}) {
   if (b) b.focus({ preventScroll: true });
   const sheet = m.querySelector(".sheet");
   sheet.scrollTop = 0;
-  if (fancy()) {
-    // Tờ giấy rơi xuống mặt bàn rồi nằm yên
-    gsap.fromTo(sheet, { y: -46, rotate: -1.8, opacity: 0, scale: 0.97 }, { y: 0, rotate: 0, opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.5)", clearProps: "transform" });
-    gsap.fromTo(m, { backgroundColor: "rgba(6,4,3,0)" }, { backgroundColor: "rgba(6,4,3,0.72)", duration: 0.35, clearProps: "backgroundColor" });
-    if (opts.cinema) {
-      shake(1);
-      flicker(1);
-      bars(true, 0.4);
-    }
+  // Tờ giấy rơi xuống và màn tối hiện dần do CSS làm (xem .sheet và #modal::before trong main.css), không dùng GSAP trên luồng chính
+  if (fancy() && opts.cinema) {
+    shake(1);
+    flicker(1);
+    bars(true, 0.4);
   }
 }
 

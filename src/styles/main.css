@@ -567,12 +567,20 @@ body[data-screen="menu"] .pan { display: none !important; }
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(5, 7, 13, 0.72);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
+/* Màn tối phía sau là lớp riêng để làm hiện dần bằng opacity (chạy trên GPU); đổi background-color thì phải vẽ lại cả màn hình mỗi khung */
+#modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 7, 13, 0.72);
+  animation: veil-in 0.35s ease-out;
+}
 #modal.hidden { display: none; }
 .sheet {
+  position: relative; /* nằm trên lớp màn tối ::before */
   width: 100%;
   max-width: 680px;
   max-height: 90dvh;
@@ -585,7 +593,17 @@ body[data-screen="menu"] .pan { display: none !important; }
     linear-gradient(180deg, var(--color-paper), var(--color-paper-2));
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65);
   line-height: 1.6;
-  animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Tờ giấy rơi xuống mặt bàn rồi nằm yên: CSS (transform + opacity) chạy trên luồng compositor nên không bị khựng khi luồng chính bận
+     (trước đây GSAP làm trên luồng chính, tranh với vòng lặp Phaser). Hết hoạt ảnh thì transform về "none" (e2e kiểm tra điều này) */
+  animation: sheet-in 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.2);
+}
+@keyframes sheet-in {
+  from { transform: translate3d(0, -46px, 0) rotate(-1.8deg) scale(0.97); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes veil-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .sheet h2 { font-size: 24px; margin-bottom: 8px; color: #2a1d10; }
 .sheet h4 { color: #2a1d10; }
@@ -988,9 +1006,6 @@ button.ov-row:hover { border-color: #8a5a14; background: rgba(255, 255, 255, 0.6
 #bars i:last-child { bottom: 0; transform: translateY(101%); }
 /* Màn chuyển cảnh chỉ đổi opacity (chế độ nhẹ) nên cho riêng một lớp GPU trong lúc đang bật */
 #curtain.on { will-change: opacity; }
-
-/* Hộp thoại do GSAP làm hiện ra (tờ giấy rơi xuống), không dùng keyframe rise nữa */
-.sheet { animation: none; }
 
 /* Hồ sơ vừa thu bay vào Sổ tay */
 .fly {

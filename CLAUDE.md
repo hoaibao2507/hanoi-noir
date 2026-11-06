@@ -71,7 +71,7 @@ src/
   ui/flashlight.js    Hiện/mờ "dấu vết ẩn" theo khoảng cách tới đèn pin
   ui/ambience.js      Bụi (sprite), mưa và khói, ánh đèn lập lòe
   ui/templates.js     Mẫu HTML dạng chuỗi (menu, HUD, điểm điều tra, cửa, hộp thoại). Sổ tay không còn ở đây
-  ui/overlays.js      Chuyển cảnh (veil), toast, sheet (modal), hoạt ảnh GSAP
+  ui/overlays.js      Chuyển cảnh (veil), toast, sheet (modal), hoạt ảnh GSAP. Hộp thoại hiện bằng CSS (`.sheet` keyframe `sheet-in`, màn tối `#modal::before` đổi opacity): chạy trên compositor nên không khựng khi luồng chính bận; đừng quay lại GSAP/`background-color` cho phần này
   ui/dom.js           $, esc, icons, setHTML
   styles/main.css     Token @theme + toàn bộ CSS thành phần
   styles/fonts.css    @font-face nhúng (woff2 từ @fontsource), nạp trong main.js

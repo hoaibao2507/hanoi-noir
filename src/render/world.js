@@ -248,7 +248,9 @@ function syncLoop(ms) {
 export function setPaused(p) {
   if (!LITE || !game || p === paused) return;
   paused = p;
-  syncLoop(450);
+  // Hộp thoại vừa mở: vòng lặp đang chạy liên tục nên canvas đã có hình, chỉ cần ngủ sau ~vài khung (150 ms) thay vì 450 ms,
+  // để luồng chính rảnh sớm cho hoạt ảnh của hộp thoại
+  syncLoop(150);
 }
 
 // Lúc màn chuyển cảnh đã đen kín, vòng lặp Phaser vẫn vẽ ánh sáng từng khung hình dù không ai thấy, giành luồng chính với việc dựng nền mới.
