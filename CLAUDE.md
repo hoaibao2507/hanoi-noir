@@ -34,7 +34,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
 ```
 index.html            Khung trang (id cố định, xem mục 6)
 vite.config.js        Alias Phaser core, vá cờ build Phaser, singlefile
-public/               PWA, chép nguyên sang dist/: manifest.webmanifest (display fullscreen, orientation landscape), sw.js (network-first, chỉ đăng ký khi build chạy qua http(s)), icon PNG (sinh bằng tools/make-icons.mjs)
+public/               PWA, chép nguyên sang dist/: manifest.webmanifest (display standalone; cố ý không dùng fullscreen/orientation: bản cài hỏng ngay lúc mở trên một số máy Xiaomi/Oppo/Vivo/Realme, khóa ngang và toàn màn hình do `ui/fullscreen.js` làm), sw.js (network-first, chỉ đăng ký khi build chạy qua http(s)), icon PNG (sinh bằng tools/make-icons.mjs)
 src/
   main.js             Điểm vào: đăng ký icon FA, chặn click sau khi kéo, ủy quyền data-action, gọi boot()
   app.js              Bộ điều khiển: store + render + luồng chơi + bảng actions
@@ -237,7 +237,7 @@ rồi gọi `notifyLamp()`. `flashlight.js` đăng ký qua `onLampMove`: `.hs.is
 ### 6.6 Bố cục màn hình
 - **Menu**: tiêu đề + nút Cách chơi / Xóa tiến độ (trên); dưới là thanh chọn vùng `.region-bar` (chỉ hiện khi có từ hai vùng; hiện chỉ có Sài Gòn nên ẩn) rồi dải thẻ vụ án `.case-card`
   của vùng đó, cuộn ngang. Nền menu đổi theo vùng (`menu` / `menu_sg`).
-- **Toàn màn hình** (`.fs-btn`, action `fullscreen`): nút ở menu (cạnh Cách chơi) và HUD (cạnh số mạng). Hai biểu tượng `fs-in`/`fs-out` đổi bằng CSS `:root:fullscreen`; ẩn bằng `html.no-fs` hoặc `@media (display-mode: fullscreen|standalone)`. `#ui` lùi theo `env(safe-area-inset-*)` cho máy có tai thỏ. Menu có luật riêng cho màn hình ngang thấp (`max-height: 500px`): thẻ vụ án thu gọn, ẩn `.menu-note`/`.case-place`, nếu không thẻ che mất tiêu đề và nút phía trên.
+- **Toàn màn hình** (`.fs-btn`, action `fullscreen`): nút ở menu (cạnh Cách chơi) và HUD (cạnh số mạng). Hai biểu tượng `fs-in`/`fs-out` đổi bằng CSS `:root:fullscreen`; ẩn bằng `html.no-fs` hoặc `@media (display-mode: fullscreen)` (bản cài standalone vẫn có nút). `#ui` lùi theo `env(safe-area-inset-*)` cho máy có tai thỏ. Menu có luật riêng cho màn hình ngang thấp (`max-height: 500px`): thẻ vụ án thu gọn, ẩn `.menu-note`/`.case-place`, nếu không thẻ che mất tiêu đề và nút phía trên.
 - **Màn điều tra** (4 góc): trên trái = nút về menu + tên vụ; giữa = địa điểm; trên phải = đồng hồ, giờ còn lại, 3 mạng (tim);
   dưới trái = Sổ tay (kèm số hồ sơ), Gợi ý, Địa điểm (tổng quan, phím M); dưới giữa = gợi ý còn bao nhiêu điểm; dưới phải = Buộc tội.
 - **Điểm điều tra** `.hs`: chip vàng 54px (xanh khi `is-done`, xám khi `is-off`) + nhãn; tốn >1 giờ thì nhãn ghi giờ.

@@ -1,6 +1,6 @@
 /* Service worker tối thiểu: Chrome cần nó để cho "Cài đặt ứng dụng" (bản cài mở toàn màn hình, không thanh địa chỉ),
    và nhân tiện cho chơi offline sau lần mở đầu. Ưu tiên mạng để bản mới ra là thấy ngay; mất mạng thì dùng bản đã lưu. */
-const CACHE = "hanoi-noir-v1";
+const CACHE = "hanoi-noir-v2";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.add("./")).catch(() => {}));

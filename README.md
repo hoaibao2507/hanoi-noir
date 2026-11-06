@@ -32,8 +32,8 @@ Màn cảm ứng (`pointer: coarse`) tự vào **chế độ nhẹ** (`src/ui/de
 
 Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai cách bỏ nó:
 
-- **Nút "Toàn màn hình"** (menu và góc phải HUD, `src/ui/fullscreen.js`): Fullscreen API ẩn thanh địa chỉ, Android còn tự khóa ngang. Ẩn khi trình duyệt không hỗ trợ (iPhone Safari) hoặc khi game đã chạy như ứng dụng cài.
-- **Cài như ứng dụng (PWA)**: `public/manifest.webmanifest` khai `display: fullscreen` + `orientation: landscape`, `public/sw.js` là service worker tối thiểu (Chrome cần nó để cho "Cài đặt ứng dụng", đồng thời cho chơi offline sau lần mở đầu). Cần phục vụ qua https (Vercel đã đủ). Lối tắt "Thêm vào Màn hình chính" cũ tạo trước khi có manifest vẫn mở bằng trình duyệt: phải xóa rồi cài lại.
+- **Nút "Toàn màn hình"** (menu và góc phải HUD, `src/ui/fullscreen.js`): Fullscreen API ẩn thanh địa chỉ, Android còn tự khóa ngang. Ẩn khi trình duyệt không hỗ trợ (iPhone Safari) hoặc khi game đã chạy toàn màn hình sẵn.
+- **Cài như ứng dụng (PWA)**: `public/manifest.webmanifest` khai `display: standalone` (không dùng `fullscreen`/`orientation: landscape`: trên một số máy Xiaomi/Oppo/Vivo/Realme bản cài mở ra trắng rồi văng; khóa ngang và toàn màn hình do JS làm), `public/sw.js` là service worker tối thiểu (Chrome cần nó để cho "Cài đặt ứng dụng", đồng thời cho chơi offline sau lần mở đầu). Cần phục vụ qua https (Vercel đã đủ). Lối tắt "Thêm vào Màn hình chính" cũ tạo trước khi có manifest vẫn mở bằng trình duyệt: phải xóa rồi cài lại.
 - Icon PNG trong `public/` sinh bằng `node tools/make-icons.mjs` (dùng Chrome thật); đổi hình thì chạy lại.
 - Bản `dist/index.html` mở trực tiếp bằng `file://` vẫn chạy bình thường, chỉ không có service worker.
 

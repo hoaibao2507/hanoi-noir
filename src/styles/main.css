@@ -163,7 +163,7 @@ body[data-screen="menu"] .pan { display: none !important; }
 .btn-round { width: 46px; height: 46px; padding: 0; border-radius: 15px; }
 
 /* Nút toàn màn hình: hai biểu tượng, chỉ hiện cái hợp trạng thái. Ẩn khi trình duyệt không hỗ trợ (html.no-fs)
-   hoặc khi game đã chạy như ứng dụng cài về máy (đã toàn màn hình, không có gì để bật/tắt) */
+   hoặc khi game đã chạy toàn màn hình sẵn. Bản cài về máy chạy kiểu "standalone" (còn thanh trạng thái) nên vẫn có nút để bật toàn màn hình */
 .fs-btn.btn-round { width: 40px; height: 40px; border-radius: 13px; }
 .fs-btn .fs-out { display: none; }
 :root:fullscreen .fs-btn .fs-in { display: none; }
@@ -171,7 +171,7 @@ body[data-screen="menu"] .pan { display: none !important; }
 :root:-webkit-full-screen .fs-btn .fs-in { display: none; }
 :root:-webkit-full-screen .fs-btn .fs-out { display: inline-block; }
 .no-fs .fs-btn { display: none; }
-@media (display-mode: fullscreen), (display-mode: standalone) {
+@media (display-mode: fullscreen) {
   .fs-btn { display: none; }
 }
 

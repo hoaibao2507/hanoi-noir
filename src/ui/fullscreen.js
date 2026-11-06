@@ -1,5 +1,6 @@
 /* Toàn màn hình cho điện thoại: Fullscreen API ẩn thanh địa chỉ của Chrome, rồi khóa màn hình ngang.
-   Bản cài về máy (manifest display: fullscreen) đã toàn màn hình sẵn nên nút tự ẩn bằng CSS (display-mode). */
+   Bản cài về máy chạy kiểu standalone (manifest không còn display: fullscreen và orientation: landscape vì một số máy Xiaomi/Oppo/Vivo/Realme
+   làm bản cài hỏng ngay lúc mở), nên vẫn có nút này; riêng khi đã toàn màn hình sẵn thì nút tự ẩn bằng CSS (display-mode). */
 const root = document.documentElement;
 
 const enterFn = () => root.requestFullscreen || root.webkitRequestFullscreen;
@@ -41,6 +42,15 @@ export async function toggleFullscreen() {
 
 export function initFullscreen() {
   if (!canFullscreen()) root.classList.add("no-fs");
+  // Bản cài về máy: thử khóa ngang (manifest không còn khóa); máy nào không cho thì bỏ qua, không ảnh hưởng gì
+  if (matchMedia("(display-mode: standalone)").matches) {
+    try {
+      const p = screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape");
+      if (p && p.catch) p.catch(() => {});
+    } catch {
+      /* bỏ qua */
+    }
+  }
   // Thoát bằng cử chỉ Back của điện thoại thì cũng nhả khóa hướng, để máy xoay lại bình thường
   const onChange = () => isFullscreen() || unlockOrientation();
   document.addEventListener("fullscreenchange", onChange);
