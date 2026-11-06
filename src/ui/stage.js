@@ -82,6 +82,11 @@ export function setArt(key, build, sceneKey) {
   gl.setArt(base, sceneKey, show, figs, key, overlay);
 }
 
+// Dựng sẵn các cảnh kế tiếp lúc rảnh: items = [{key, sceneKey, build}] theo thứ tự ưu tiên (xem render/world.js: prefetchArt)
+export function prefetchArt(items) {
+  if (gl.active()) gl.prefetchArt(items);
+}
+
 export function setDoors(html) {
   setHTML(doorsEl, html);
 }

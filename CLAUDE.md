@@ -56,7 +56,7 @@ src/
   art/sg-btx.js       Cảnh vụ s3 (sgBtxPad, sgBtxLobby, sgBtxHall, sgBtxLounge, sgBtxOps); phòng giám định dùng lại sgLab
   art/sg-lm.js        Cảnh vụ s4 (sgLmDeck, sgLmParty, sgLmOps, sgLmOffice, sgLmGround); phòng giám định dùng lại sgLab
   art/art.js          Hai bên thế giới (FLANK/widen), khung camera, tài liệu, bảng đăng ký SCENES (cảnh Hà Nội đã bị gỡ, còn ~20 KB)
-  render/world.js     Lớp Phaser: raster hóa SVG nền, vẽ, đồng bộ với DOM. Có bộ nhớ đệm cảnh đã dựng (`cache`, tối đa 6 cảnh / 14 triệu điểm ảnh; `cachedArt(key)` cho stage.js hỏi trước khi sinh SVG), `whenArtReady()` cho veil đợi, `holdLoop()` ngủ vòng lặp lúc màn chuyển cảnh đen (chỉ chế độ nhẹ)
+  render/world.js     Lớp Phaser: raster hóa SVG nền, vẽ, đồng bộ với DOM. Có bộ nhớ đệm cảnh đã dựng (`cache`, tối đa 6 cảnh / 14 triệu điểm ảnh; `cachedArt(key)` cho stage.js hỏi trước khi sinh SVG), `whenArtReady()` cho veil đợi, `holdLoop()` ngủ vòng lặp lúc màn chuyển cảnh đen (chỉ chế độ nhẹ), `prefetchArt(items)` dựng sẵn các địa điểm còn lại lúc rảnh (app.js gọi mỗi lần `renderCase`; chỉ khi cảnh hiện tại lên đã 1,2 s, không có thao tác 0,8 s, màn chuyển cảnh không che; không loại cảnh khác khỏi đệm). Chế độ nhẹ dùng bản đồ pháp tuyến 640 điểm ngang thay vì 960
   render/lighting.js  Ánh sáng thật (Phaser Lights): đèn pin, nguồn sáng dò trong tranh, quầng sáng, chỉnh màu
   render/analyze.js   Từ nền đã raster: bản đồ pháp tuyến giả, vị trí nguồn sáng, probe màu (async, chia lát 6 ms để không khựng). `soften`/`normalPixels` viết đọc thẳng theo chỉ số (nhanh ~2,5 lần), test canh trùng bản đọc chín ô gốc
   render/actors.js    Nhân vật thành mảnh riêng: thở, nghiêng theo con trỏ, đổ bóng
@@ -67,7 +67,7 @@ src/
   ui/device.js        `LITE` (chế độ nhẹ): bật khi `pointer: coarse` (điện thoại/máy bảng), hoặc `?lite=1` / `?lite=0` để ép; gắn class `lite` lên `<html>`
   ui/fullscreen.js    Nút toàn màn hình: Fullscreen API + khóa ngang (Android); `initFullscreen` gắn `html.no-fs` khi không hỗ trợ
   ui/stage.js         Camera panorama (kéo, bánh xe, phím), nối DOM với Phaser
-  ui/cursor.js        Đèn pin theo con trỏ + độ nghiêng parallax
+  ui/cursor.js        Đèn pin theo con trỏ + độ nghiêng parallax (làm mượt theo THỜI GIAN thực, không theo số khung hình: máy chậm vẫn dừng đúng lúc)
   ui/flashlight.js    Hiện/mờ "dấu vết ẩn" theo khoảng cách tới đèn pin
   ui/ambience.js      Bụi (sprite), mưa và khói, ánh đèn lập lòe
   ui/templates.js     Mẫu HTML dạng chuỗi (menu, HUD, điểm điều tra, cửa, hộp thoại). Sổ tay không còn ở đây
@@ -98,7 +98,7 @@ tests/
   analyze.test.js     Phân tích nền: soften/normalPixels trùng bản đọc chín ô gốc ở mọi cỡ ảnh, vùng phẳng cho (128,128,255)
   hints.test.js       Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ trong ngân sách giờ, và buộc tội đúng thắng
   notebook.test.js    Sổ tay: tìm không dấu, lọc, sao, ghi chú, tổng quan địa điểm, escape HTML
-  e2e/smoke.mjs       Kiểm thử khói bằng Chrome thật (chạy bằng `npm run e2e`, không nằm trong `npm test`)
+  e2e/smoke.mjs       Kiểm thử khói bằng Chrome thật (chạy bằng `npm run e2e`, không nằm trong `npm test`). `E2E_CPU=14` làm chậm CPU để tái hiện lỗi chập chờn của runner CI; chờ hoạt ảnh bằng điều kiện thật, không bằng `waitForTimeout` (GSAP làm chậm hoạt ảnh khi khung hình thưa)
 eslint.config.js      ESLint flat config (chỉ bắt lỗi thật)
 .gitattributes        LF cho mọi file văn bản
 .github/workflows/ci.yml  CI: lint, test, build, e2e

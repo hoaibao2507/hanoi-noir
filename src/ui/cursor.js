@@ -6,6 +6,7 @@
    ===================================================================== */
 const REDUCED_MOTION = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const state = { x: 0, y: 0, gx: 0, gy: 0, px: 0, py: 0, nx: 0, ny: 0, raf: 0 };
+let lastT = 0;
 const listeners = [];
 let host = null;
 
@@ -38,7 +39,10 @@ function onHover(e) {
     state.nx = (e.clientX / window.innerWidth) * 2 - 1;
     state.ny = (e.clientY / window.innerHeight) * 2 - 1;
   }
-  if (!state.raf) state.raf = requestAnimationFrame(ease);
+  if (!state.raf) {
+    lastT = performance.now();
+    state.raf = requestAnimationFrame(ease);
+  }
 }
 
 const written = {};
@@ -49,8 +53,13 @@ function setVar(name, value) {
 }
 
 function ease() {
-  const k = REDUCED_MOTION ? 1 : 0.14; // đèn bám theo con trỏ
-  const p = REDUCED_MOTION ? 1 : 0.08; // độ nghiêng chậm hơn để có cảm giác nặng
+  // Làm mượt theo THỜI GIAN thực chứ không theo số khung hình: hệ số dưới đây là của một khung 60 fps, đổi theo khoảng cách thời gian
+  // thật giữa hai khung. Máy chậm (điện thoại yếu, runner CI vẽ bằng CPU chỉ vài fps) vẫn dừng đúng lúc, không kéo dài hàng chục giây
+  const now = performance.now();
+  const frames = Math.min(Math.max((now - lastT) / 16.667, 0), 60); // số khung 60 fps đã trôi qua (chặn trên để khỏi tràn)
+  lastT = now;
+  const k = REDUCED_MOTION ? 1 : 1 - Math.pow(1 - 0.14, frames); // đèn bám theo con trỏ
+  const p = REDUCED_MOTION ? 1 : 1 - Math.pow(1 - 0.08, frames); // độ nghiêng chậm hơn để có cảm giác nặng
   const tx = REDUCED_MOTION ? 0 : state.nx;
   const ty = REDUCED_MOTION ? 0 : state.ny;
   state.x += (state.gx - state.x) * k;

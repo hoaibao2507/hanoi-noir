@@ -3,7 +3,8 @@
    hộp thoại để lọt focus ra phía sau, sổ tay không trả focus, ván đang chơi không khôi phục khi tải lại.
 
    Chạy: npm run e2e (tự build trước). Cần Chrome hoặc Edge đã cài; đặt CHROME_PATH nếu không tự tìm thấy.
-   E2E_NO_GL=1 bỏ qua kiểm tra WebGL (máy không có GPU hay phần mềm vẽ thay thế). */
+   E2E_NO_GL=1 bỏ qua kiểm tra WebGL (máy không có GPU hay phần mềm vẽ thay thế).
+   E2E_CPU=<n> làm chậm CPU trình duyệt n lần (CDP) để tái hiện lỗi chỉ hiện trên runner CI chậm (khung hình vài fps). */
 import { chromium } from "playwright-core";
 import { existsSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -34,6 +35,11 @@ const browser = await chromium.launch({
   args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
 });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+page.setDefaultTimeout(SLOW); // mặc định 30 giây là chật trên runner CI chậm: click phải chờ phần tử ngừng chuyển động
+if (Number(process.env.E2E_CPU) > 1) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: Number(process.env.E2E_CPU) });
+}
 
 const problems = [];
 page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
@@ -233,7 +239,12 @@ try {
   await run("buộc tội: chọn một mục chỉ cập nhật tại chỗ, giữ vị trí cuộn và focus, không phát lại hoạt ảnh", async () => {
     await page.click('[data-action="accuse"]');
     await page.waitForSelector("#modal:not(.hidden) .sheet");
-    await page.waitForTimeout(900); // chờ tờ giấy rơi xong, nếu không vị trí các nút còn đang trôi
+    // Chờ tờ giấy rơi xong, nếu không vị trí các nút còn đang trôi. Chờ theo điều kiện chứ không theo số mili giây:
+    // GSAP làm chậm hoạt ảnh khi khung hình quá thưa (lagSmoothing), nên trên runner CI chậm 900 ms không đủ
+    await page.waitForFunction(() => {
+      const sh = document.querySelector("#modal .sheet");
+      return sh && getComputedStyle(sh).transform === "none" && getComputedStyle(sh).opacity === "1";
+    }, null, { timeout: SLOW });
     const picked = await page.evaluate(() => {
       const sh = document.querySelector("#modal .sheet");
       window.__sheet = sh;

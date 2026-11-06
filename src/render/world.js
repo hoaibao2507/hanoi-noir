@@ -69,6 +69,77 @@ export function cachedArt(key) {
   return fits(e, quality()) && scene.textures.exists(e.texKey);
 }
 
+/* Dựng sẵn các cảnh kế tiếp lúc rảnh: người chơi đứng trong một địa điểm (đọc hồ sơ, nhìn quanh) thì máy dựng ngầm từng địa điểm
+   còn lại vào bộ nhớ đệm, mỗi lần một cảnh, nên lúc bấm cửa cảnh đích thường đã có sẵn (vài ms thay vì ~0,5 s dưới màn đen).
+   Nhường người chơi: chỉ chạy khi cảnh hiện tại đã lên ít nhất 1,2 s (hoạt ảnh vào cảnh đã xong), màn chuyển cảnh không đang che,
+   trang không bị ẩn; phân tích dùng lát ngắn (3 ms) và nghỉ giữa các lát; có cảnh thật cần dựng thì bỏ dở ngay (prefetchGen).
+   Không bao giờ loại một cảnh khác khỏi đệm chỉ để dựng sẵn: hết số lượng hoặc hết ngân sách điểm ảnh thì dừng. */
+let prefetchGen = 0;
+let pq = [];        // hàng đợi {key, sceneKey, build}
+let pqGen = 0;      // prefetchGen lúc xếp hàng; lệch nghĩa là hàng đợi đã cũ
+let pfBusy = false;
+let readyAt = 0;    // lúc cảnh hiện tại lên xong
+let texSeq = 0;
+const PREFETCH_AFTER_MS = 1200;
+const QUIET_MS = 800;   // không có thao tác nào trong chừng này thì mới dựng ngầm
+let lastInputAt = 0;
+
+const whenIdle = (fn) => (typeof requestIdleCallback === "function" ? requestIdleCallback(fn, { timeout: 3000 }) : setTimeout(fn, 250));
+
+export function prefetchArt(items) {
+  if (!scene || !view) return;
+  const q = quality();
+  pq = items.filter((it) => !fits(cache.get(it.key), q));
+  pqGen = prefetchGen;
+  pumpPrefetch(PREFETCH_AFTER_MS);
+}
+
+function pumpPrefetch(delay) {
+  if (pfBusy || !pq.length) return;
+  pfBusy = true;
+  setTimeout(() => whenIdle(async () => {
+    let next = 300;
+    try {
+      if ((await prefetchOne()) === "wait") next = 1000;
+    } catch (err) {
+      if (!err.stale) console.warn("Không dựng sẵn được cảnh.", err);
+    } finally {
+      pfBusy = false;
+      pumpPrefetch(next);
+    }
+  }), delay);
+}
+
+async function prefetchOne() {
+  if (pqGen !== prefetchGen) { // đã có cảnh thật được yêu cầu sau lần xếp hàng này
+    pq = [];
+    return;
+  }
+  const veilOn = document.getElementById("curtain")?.classList.contains("on");
+  const now = performance.now();
+  // Một vài bước (giải mã SVG, đọc ngược pixel từ GPU) không chia lát được: chỉ làm khi tay người chơi không đang trên màn hình
+  if (!scene || !view || pending || veilOn || document.hidden || now - readyAt < PREFETCH_AFTER_MS || now - lastInputAt < QUIET_MS) return "wait";
+  const item = pq.shift();
+  const q = quality();
+  if (fits(cache.get(item.key), q)) return;
+  const px = Math.round(view.worldW * q) * Math.round(WORLD_H * q);
+  let used = 0;
+  for (const e of cache.values()) used += e.px;
+  if (cache.size >= CACHE_MAX || used + px > CACHE_PIXELS) { // đệm đầy: dựng thêm chỉ làm cảnh khác bị loại
+    pq = [];
+    return;
+  }
+  const gen = prefetchGen, stale = () => gen !== prefetchGen;
+  const { base, overlay, figs } = splitArt(item.build());
+  const entry = await scene.buildEntry({ base, overlay, figs, key: item.key, sceneKey: item.sceneKey }, q, stale, { slice: 3, rest: 8 });
+  if (!entry) return;
+  if (stale()) { // trong lúc đó có cảnh thật được yêu cầu: bỏ kết quả, gỡ texture vừa đăng ký
+    if (scene.textures.exists(entry.texKey)) scene.textures.remove(entry.texKey);
+    return;
+  }
+  remember(entry);
+}
+
 export function active() {
   return game !== null;
 }
@@ -91,6 +162,9 @@ export function mount() {
   } catch (err) {
     console.warn("Phaser không khởi động được, dùng SVG trong DOM.", err);
     game = null;
+  }
+  for (const type of ["pointerdown", "pointermove", "wheel", "keydown", "touchmove"]) {
+    window.addEventListener(type, () => { lastInputAt = performance.now(); }, { passive: true, capture: true });
   }
   if (import.meta.env && import.meta.env.DEV) window.__phaser = game; // chỉ khi chạy dev, để gỡ lỗi trong console
 }
@@ -127,6 +201,7 @@ let waiters = [];
 
 function settle() {
   pending = false;
+  readyAt = performance.now();
   waiters.splice(0).forEach((f) => f());
 }
 
@@ -288,6 +363,7 @@ class WorldScene extends Phaser.Scene {
     const job = latest;
     if (!job || !view) return;
     const id = ++token;
+    prefetchGen++; // yêu cầu thật được ưu tiên: bỏ dở việc dựng sẵn đang chạy (stage/app sẽ xếp lại sau khi cảnh này lên)
     const t0 = performance.now();
     const q = quality();
     for (const e of [...cache.values()]) if (!fits(e, q)) discard(e); // lệch độ phân giải: không dùng lại được nữa
@@ -305,27 +381,38 @@ class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const W = Math.round(view.worldW * q), H = Math.round(WORLD_H * q);
-    rasterize(sized(job.base, W, H), W, H)
-      .then(async (canvas) => {
-        if (id !== token) return; // đã có yêu cầu mới hơn
-        const texKey = `art-${id}`;
-        const t1 = performance.now();
-        const { normal, lamps, probe } = await analyze(canvas, view.worldW, WORLD_H, job.figs, () => id !== token);
-        if (id !== token) return; // trong lúc phân tích đã có nền mới hơn
-        const t2 = performance.now();
-        this.textures.addImage(texKey, canvas, normal);
-        const entry = { key: job.key || texKey, texKey, canvas, normal, lamps, probe, overlay: job.overlay, figs: job.figs, q, worldW: view.worldW, px: W * H, dead: false };
+    this.buildEntry(job, q, () => id !== token)
+      .then((entry) => {
+        if (!entry) return; // đã có yêu cầu mới hơn
         remember(entry);
         this.present(entry, job);
-        if (import.meta.env && import.meta.env.DEV) {
-          console.debug(`[nền] ${job.sceneKey}: raster ${Math.round(t1 - t0)} ms, phân tích ${Math.round(t2 - t1)} ms, dựng ${Math.round(performance.now() - t2)} ms, ${W}×${H}`);
-        }
       })
       .catch((err) => {
         if (!err.stale) console.warn("Không vẽ được nền cảnh.", err);
         if (id === token) settle();
       });
+  }
+
+  // Dựng một cảnh thành mục đệm: raster SVG, phân tích pháp tuyến + nguồn sáng, đăng ký texture.
+  // Trả null nếu stale() báo đã có yêu cầu mới hơn; analyze ném lỗi có cờ `stale` nếu bị hủy giữa chừng.
+  // opts.slice/rest: nhịp nhường luồng của phân tích (dựng ngầm dùng lát ngắn, nghỉ dài)
+  async buildEntry(job, q, stale, opts = {}) {
+    const worldW = view.worldW;
+    const W = Math.round(worldW * q), H = Math.round(WORLD_H * q);
+    const t0 = performance.now();
+    const canvas = await rasterize(sized(job.base, W, H), W, H);
+    if (stale()) return null;
+    const t1 = performance.now();
+    // Chế độ nhẹ: màn hình nhỏ nên bản đồ pháp tuyến hẹp hơn (640 thay vì 960 điểm ngang) vẫn đủ nét, mà ít hơn ~2,2 lần điểm ảnh phải tính
+    const { normal, lamps, probe } = await analyze(canvas, worldW, WORLD_H, job.figs, stale, { normalW: LITE ? 640 : 960, ...opts });
+    if (stale()) return null;
+    const t2 = performance.now();
+    const texKey = `art-${++texSeq}`;
+    this.textures.addImage(texKey, canvas, normal);
+    if (import.meta.env && import.meta.env.DEV) {
+      console.debug(`[nền] ${job.sceneKey}${opts.rest ? " (dựng sẵn)" : ""}: raster ${Math.round(t1 - t0)} ms, phân tích ${Math.round(t2 - t1)} ms, dựng ${Math.round(performance.now() - t2)} ms, ${W}×${H}`);
+    }
+    return { key: job.key || texKey, texKey, canvas, normal, lamps, probe, overlay: job.overlay, figs: job.figs, q, worldW, px: W * H, dead: false };
   }
 
   // Đưa một cảnh đã dựng (mới dựng hoặc lấy từ bộ nhớ đệm) lên màn hình

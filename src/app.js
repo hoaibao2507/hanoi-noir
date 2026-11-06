@@ -78,6 +78,12 @@ function renderCase(s) {
   syncWorld(`case:${g.idx}:${g.loc}`, WORLD_W, OX + COMP_W / 2);
   const doors = doorsFor(c.locations, g.loc);
   stage.setArt(`${c.id}:${g.loc}`, () => ART.scene(L.scene, doors), L.scene);
+  // Lúc rảnh, dựng sẵn các địa điểm còn lại (bắt đầu từ chỗ kế tiếp) để bấm cửa là có cảnh ngay
+  const n = c.locations.length;
+  stage.prefetchArt(Array.from({ length: n - 1 }, (_, k) => {
+    const i = (g.loc + k + 1) % n, loc = c.locations[i];
+    return { key: `${c.id}:${i}`, sceneKey: loc.scene, build: () => ART.scene(loc.scene, doorsFor(c.locations, i)) };
+  }));
   stage.setDoors(T.doorsHTML(doors));
   stage.setHotspots(T.hotspotsHTML(g, c, L));
   setHTML($("ui"), T.hudHTML(g, c, L));

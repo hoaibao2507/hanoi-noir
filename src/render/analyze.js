@@ -22,12 +22,13 @@ const yieldToMain = () =>
         c.port2.postMessage(0);
       });
 
-// Người điều độ: gọi `await tick()` ở cuối mỗi hàng điểm ảnh; hết lát thì nhường luồng. Nền bị thay giữa chừng (stale()) thì bỏ dở
-function pacer(stale) {
+// Người điều độ: gọi `await tick()` ở cuối mỗi hàng điểm ảnh; hết lát thì nhường luồng. Nền bị thay giữa chừng (stale()) thì bỏ dở.
+// opts.slice: số ms mỗi lát; opts.rest: nghỉ thêm bấy nhiêu ms giữa hai lát (dựng ngầm lúc đang chơi: lát ngắn, nghỉ đủ cho vài khung hình)
+function pacer(stale, { slice = SLICE_MS, rest = 0 } = {}) {
   let t = performance.now();
   return async () => {
-    if (performance.now() - t < SLICE_MS) return;
-    await yieldToMain();
+    if (performance.now() - t < slice) return;
+    await (rest > 0 ? new Promise((resolve) => setTimeout(resolve, rest)) : yieldToMain());
     if (stale()) throw Object.assign(new Error("Nền đã bị thay"), { stale: true });
     t = performance.now();
   };
@@ -166,9 +167,10 @@ async function findLamps(src, worldW, worldH, figs, tick) {
 // Trả về { normal: canvas pháp tuyến, lamps: [{x, y, k, warm}] theo đơn vị thế giới,
 // probe(wx, wy): màu [r, g, b] của nền tại một điểm thế giới }. Mọi thứ đọc từ bản thu nhỏ, không đọc ngược cả ảnh gốc từ GPU.
 // stale() báo nền này đã bị thay bằng nền khác: phân tích bỏ dở và ném lỗi có cờ `stale`
-export async function analyze(art, worldW, worldH, figs = [], stale = () => false) {
-  const tick = pacer(stale);
-  const s = shrink(art, Math.min(NORMAL_W, art.width));
+// opts: { normalW: bề rộng bản đồ pháp tuyến (mặc định NORMAL_W; chế độ nhẹ dùng nhỏ hơn vì màn hình nhỏ), slice, rest: xem pacer }
+export async function analyze(art, worldW, worldH, figs = [], stale = () => false, opts = {}) {
+  const tick = pacer(stale, opts);
+  const s = shrink(art, Math.min(opts.normalW || NORMAL_W, art.width));
   const { data } = s.ctx.getImageData(0, 0, s.w, s.h);
   const normal = await normalMap(await soften(luminance(data, s.w * s.h), s.w, s.h, tick), s.w, s.h, tick);
   const probe = (wx, wy) => {
