@@ -1,7 +1,7 @@
 /* Lớp phủ: chuyển cảnh điện ảnh, thông báo, lời khai cận cảnh và hộp thoại kiểu hồ sơ giấy. */
 import gsap from "gsap";
 import { $, icons } from "./dom.js";
-import { flicker, setPaused, whenArtReady } from "../render/world.js";
+import { flicker, setPaused, whenArtReady, holdLoop } from "../render/world.js";
 import { LITE } from "./device.js";
 
 const REDUCED = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -65,6 +65,19 @@ export function bars(on, seconds = 0.45) {
   return tween(els, { yPercent: on ? 0 : (i) => (i ? 101 : -101), duration: dur(seconds), ease: on ? "power2.out" : "power2.inOut", overwrite: "auto" });
 }
 
+// Đổi cảnh khi màn đã đen kín: cho vòng lặp Phaser ngủ để nhường luồng chính, chờ nền mới dựng xong rồi đánh thức lại
+// (finally: lỗi giữa chừng cũng không để vòng lặp ngủ mãi)
+async function swapUnderBlack(swap, after) {
+  holdLoop(true);
+  try {
+    if (swap) swap();
+    if (after) after();
+    await whenArtReady();
+  } finally {
+    holdLoop(false);
+  }
+}
+
 // Đợi hai khung hình để trình duyệt kịp vẽ xong cảnh mới dưới màn đen
 const settleFrames = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
@@ -86,8 +99,7 @@ export async function veil(kicker, title, sub, swap, origin) {
     await anim(cur, { opacity: 1 }, dur(0.35));
     await anim(card, { opacity: 1, y: 0 }, dur(0.4));
     await wait(REDUCED ? 120 : 650);
-    if (swap) swap();
-    await whenArtReady();
+    await swapUnderBlack(swap);
     await settleFrames();
     await anim(card, { opacity: 0, y: -6 }, dur(0.25));
     await anim(cur, { opacity: 0 }, dur(0.4));
@@ -124,11 +136,9 @@ export async function veil(kicker, title, sub, swap, origin) {
   gsap.set(card, { opacity: 0, y: 8 });
   gsap.to(card, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
   await wait(450);
-  if (swap) swap();
-  gsap.set($("scene"), { clearProps: "transform,transformOrigin" });
   // Phần việc nặng (dựng SVG, raster nền, phân tích ánh sáng, tải texture) chạy lúc màn còn đen,
   // không đè lên hoạt ảnh mở ra; vẫn giữ thẻ tên nơi đến tối thiểu như cũ
-  await Promise.all([wait(330), whenArtReady()]);
+  await Promise.all([wait(330), swapUnderBlack(swap, () => gsap.set($("scene"), { clearProps: "transform,transformOrigin" }))]);
   await settleFrames();
   await anim(card, { opacity: 0, y: -6 }, 0.25);
 

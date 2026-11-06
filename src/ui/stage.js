@@ -64,6 +64,14 @@ export function setWorld(worldW, center = DEFAULT_CENTER, reset = true) {
 export function setArt(key, build, sceneKey) {
   if (artKey === key) return;
   artKey = key;
+  const show = (overlay) => {
+    if (artKey === key) artEl.innerHTML = overlay;
+  };
+  // Cảnh vừa dựng xong trước đó còn trong bộ nhớ đệm của Phaser: khỏi sinh SVG, tách chữ và nạp cả bức vẽ vào DOM
+  if (gl.active() && gl.cachedArt(key)) {
+    gl.setArt(null, sceneKey, show, null, key);
+    return;
+  }
   const svg = build();
   if (!gl.active()) {
     artEl.innerHTML = svg;
@@ -71,9 +79,7 @@ export function setArt(key, build, sceneKey) {
   }
   const { base, overlay, figs } = gl.splitArt(svg);
   artEl.innerHTML = svg;
-  gl.setArt(base, sceneKey, () => {
-    if (artKey === key) artEl.innerHTML = overlay;
-  }, figs);
+  gl.setArt(base, sceneKey, show, figs, key, overlay);
 }
 
 export function setDoors(html) {

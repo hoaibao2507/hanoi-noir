@@ -81,6 +81,7 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `tests/fixture.js` | Vụ mẫu (không nằm trong trò chơi) để thử các luật `gone`/`leave`, chuỗi chứng minh ba bước, đưa chứng cứ |
 | `tests/hints.test.js` | Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ và thắng được |
 | `tests/render.test.js` | Số đo nhân vật mà `art.js` gắn vào cảnh (lớp Phaser dùng để làm người thở và đổ bóng) |
+| `tests/analyze.test.js` | Phân tích nền: bản tối ưu trùng bản đọc chín ô gốc ở mọi cỡ ảnh |
 | `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
 | `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": múi giờ, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian và hai lối chứng cứ cho mỗi bước |
 | `tests/case-check.test.js` | Công cụ kiểm tra vụ: mọi vụ sạch lỗi và công cụ bắt được các lỗi dữ liệu hay gặp |

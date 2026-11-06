@@ -60,19 +60,24 @@ function luminance(data, n) {
   return L;
 }
 
-// Làm mờ nhẹ (hộp 3 × 3, hai lượt) để mép cứng của hình vẽ không thành viền nổi gắt
-async function soften(L, w, h, tick) {
+// Làm mờ nhẹ (hộp 3 × 3, hai lượt) để mép cứng của hình vẽ không thành viền nổi gắt.
+// Hộp 3 × 3 tách được thành hai lượt 3 × 1 rồi 1 × 3 (kẹp biên giống hệt bản đọc 9 ô), nên mỗi điểm chỉ đọc 6 ô thay vì 9
+// và không phải kẹp tọa độ trong vòng lặp trong. Kết quả trùng bản cũ (test canh).
+export async function soften(L, w, h, tick = async () => {}) {
   let src = L;
   for (let pass = 0; pass < 2; pass++) {
+    const mid = new Float32Array(src.length);
+    for (let y = 0; y < h; y++) {
+      const row = y * w;
+      for (let x = 0; x < w; x++) {
+        mid[row + x] = src[row + (x > 0 ? x - 1 : 0)] + src[row + x] + src[row + (x < w - 1 ? x + 1 : x)];
+      }
+      await tick();
+    }
     const out = new Float32Array(src.length);
     for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        let sum = 0;
-        for (let j = -1; j <= 1; j++) {
-          for (let i = -1; i <= 1; i++) sum += src[Math.min(h - 1, Math.max(0, y + j)) * w + Math.min(w - 1, Math.max(0, x + i))];
-        }
-        out[y * w + x] = sum / 9;
-      }
+      const up = (y > 0 ? y - 1 : 0) * w, row = y * w, dn = (y < h - 1 ? y + 1 : y) * w;
+      for (let x = 0; x < w; x++) out[row + x] = (mid[up + x] + mid[row + x] + mid[dn + x]) / 9;
       await tick();
     }
     src = out;
@@ -80,26 +85,34 @@ async function soften(L, w, h, tick) {
   return src;
 }
 
-// Bản đồ pháp tuyến từ độ sáng (Sobel). Vùng phẳng cho (128,128,255): ánh sáng chiếu thẳng
+// Điểm ảnh RGBA của bản đồ pháp tuyến từ độ sáng (Sobel). Vùng phẳng cho (128,128,255): ánh sáng chiếu thẳng.
+// Đọc thẳng theo chỉ số hàng (không qua hàm kẹp từng ô) và dùng sqrt thay Math.hypot, chậm hơn nhiều khi gọi hàng trăm nghìn lần
+export async function normalPixels(L, w, h, tick = async () => {}) {
+  const data = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    const r0 = (y > 0 ? y - 1 : 0) * w, r1 = y * w, r2 = (y < h - 1 ? y + 1 : y) * w;
+    for (let x = 0; x < w; x++) {
+      const xl = x > 0 ? x - 1 : 0, xr = x < w - 1 ? x + 1 : x;
+      const gx = L[r0 + xr] + 2 * L[r1 + xr] + L[r2 + xr] - L[r0 + xl] - 2 * L[r1 + xl] - L[r2 + xl];
+      const gy = L[r2 + xl] + 2 * L[r2 + x] + L[r2 + xr] - L[r0 + xl] - 2 * L[r0 + x] - L[r0 + xr];
+      const nx = -gx * BUMP, ny = gy * BUMP;
+      const k = 0.5 / Math.sqrt(nx * nx + ny * ny + 1);
+      const o = (r1 + x) * 4;
+      data[o] = (nx * k + 0.5) * 255;
+      data[o + 1] = (ny * k + 0.5) * 255;
+      data[o + 2] = (k + 0.5) * 255;
+      data[o + 3] = 255;
+    }
+    await tick();
+  }
+  return data;
+}
+
 async function normalMap(L, w, h, tick) {
   const out = make(w, h);
   const g = out.getContext("2d");
   const img = g.createImageData(w, h);
-  const at = (x, y) => L[Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))];
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const gx = at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x - 1, y) - at(x - 1, y + 1);
-      const gy = at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1) - at(x - 1, y - 1) - 2 * at(x, y - 1) - at(x + 1, y - 1);
-      const nx = -gx * BUMP, ny = gy * BUMP, nz = 1;
-      const len = Math.hypot(nx, ny, nz);
-      const o = (y * w + x) * 4;
-      img.data[o] = (nx / len * 0.5 + 0.5) * 255;
-      img.data[o + 1] = (ny / len * 0.5 + 0.5) * 255;
-      img.data[o + 2] = (nz / len * 0.5 + 0.5) * 255;
-      img.data[o + 3] = 255;
-    }
-    await tick();
-  }
+  img.data.set(await normalPixels(L, w, h, tick));
   g.putImageData(img, 0, 0);
   return out;
 }

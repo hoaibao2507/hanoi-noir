@@ -24,7 +24,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
   Font Awesome SVG core (icon), Preact 11 + htm (Sổ tay), `vite-plugin-singlefile`. Test dùng `preact-render-to-string`.
 - Build ra **một file** `dist/index.html` (JS, CSS, SVG gộp hết), mở trực tiếp bằng trình duyệt được, **không cần mạng**:
   font nhúng từ `@fontsource` (`src/styles/fonts.css`, chỉ woff2, latin + vietnamese; thêm độ đậm mới = thêm khối `@font-face` ở đó).
-- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 154 test, không cần trình duyệt) ·
+- Lệnh: `npm run dev` · `npm run build` · `npm run preview` · `npm test` (`node --test`, 157 test, không cần trình duyệt) ·
   `npm run lint` (ESLint) · `npm run e2e` (build + mở bản build bằng Chrome thật qua `playwright-core`, `tests/e2e/smoke.mjs`).
 - Không có router, không backend. Lưu tiến độ bằng `localStorage`.
 - `dist/` và `node_modules/` bị gitignore.
@@ -56,9 +56,9 @@ src/
   art/sg-btx.js       Cảnh vụ s3 (sgBtxPad, sgBtxLobby, sgBtxHall, sgBtxLounge, sgBtxOps); phòng giám định dùng lại sgLab
   art/sg-lm.js        Cảnh vụ s4 (sgLmDeck, sgLmParty, sgLmOps, sgLmOffice, sgLmGround); phòng giám định dùng lại sgLab
   art/art.js          Hai bên thế giới (FLANK/widen), khung camera, tài liệu, bảng đăng ký SCENES (cảnh Hà Nội đã bị gỡ, còn ~20 KB)
-  render/world.js     Lớp Phaser: raster hóa SVG nền, vẽ, đồng bộ với DOM
+  render/world.js     Lớp Phaser: raster hóa SVG nền, vẽ, đồng bộ với DOM. Có bộ nhớ đệm cảnh đã dựng (`cache`, tối đa 6 cảnh / 14 triệu điểm ảnh; `cachedArt(key)` cho stage.js hỏi trước khi sinh SVG), `whenArtReady()` cho veil đợi, `holdLoop()` ngủ vòng lặp lúc màn chuyển cảnh đen (chỉ chế độ nhẹ)
   render/lighting.js  Ánh sáng thật (Phaser Lights): đèn pin, nguồn sáng dò trong tranh, quầng sáng, chỉnh màu
-  render/analyze.js   Từ nền đã raster: bản đồ pháp tuyến giả, vị trí nguồn sáng, probe màu (async, chia lát 6 ms để không khựng)
+  render/analyze.js   Từ nền đã raster: bản đồ pháp tuyến giả, vị trí nguồn sáng, probe màu (async, chia lát 6 ms để không khựng). `soften`/`normalPixels` viết đọc thẳng theo chỉ số (nhanh ~2,5 lần), test canh trùng bản đọc chín ô gốc
   render/actors.js    Nhân vật thành mảnh riêng: thở, nghiêng theo con trỏ, đổ bóng
   ui/notebook.js      Sổ tay: component Preact (Notebook, ClueList, Icon) + mountNotebook/unmountNotebook
   ui/icon-lib.js      Đăng ký biểu tượng Font Awesome (import một lần; thêm icon mới ở đây)
@@ -95,6 +95,7 @@ tests/
   story.test.js       Cốt truyện (stories.js): mọi vụ đủ chương và mốc, khối gập ở màn thắng/thua, hộp thoại đọc lại, nút ở menu chỉ cho vụ đã giải, esc HTML
   sg-landmark.test.js Vụ s4: bàn tay kéo chứ không đẩy, cuộc gọi giọng giả, vòng loại trừ lúc 22:47, ngoại phạm, mã 1708, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước, giấy tờ gọn trong khung
   render.test.js      Số đo nhân vật (data-fig) mà people.js gắn vào mọi cảnh
+  analyze.test.js     Phân tích nền: soften/normalPixels trùng bản đọc chín ô gốc ở mọi cỡ ảnh, vùng phẳng cho (128,128,255)
   hints.test.js       Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ trong ngân sách giờ, và buộc tội đúng thắng
   notebook.test.js    Sổ tay: tìm không dấu, lọc, sao, ghi chú, tổng quan địa điểm, escape HTML
   e2e/smoke.mjs       Kiểm thử khói bằng Chrome thật (chạy bằng `npm run e2e`, không nằm trong `npm test`)
@@ -297,7 +298,7 @@ Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual
 - `busy` là khóa trong lúc chuyển cảnh (`veil`); các hành động trong rules từ chối khi `busy`.
 - Hoạt ảnh vào cảnh dùng `animateEntrance` (GSAP) và bỏ qua `.is-secret` vì độ mờ của chúng do đèn pin điều khiển.
 - Commit dùng thông điệp tiếng Việt, ngắn, mô tả thay đổi (xem `git log`).
-- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (154 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
+- Kiểm tra: `npm run lint` (không còn cảnh báo), `npm test` (157 test xanh), `npm run e2e` (kiểm thử khói bằng trình duyệt thật: không lỗi console,
   không yêu cầu mạng, WebGL/đèn thật chạy, focus hộp thoại và sổ tay, khôi phục ván). CI (`.github/workflows/ci.yml`) chạy cả bốn bước. Chưa có formatter.
   `.gitattributes` ép LF cho mọi file văn bản.
 - Trợ năng bàn phím (`ui/overlays.js`): khi hộp thoại mở, `#scene`, `#ui`, `#testimony`, nút xem hai bên **và** sổ tay đều `inert`; đóng thì trả focus về nút đã mở
