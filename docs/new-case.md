@@ -22,7 +22,8 @@ quá thấp, gợi ý bị kẹt, dòng giấy tờ quá dài...). Chạy nó sa
 4. **Viết `src/data/sg-<tên>.js`** (export một object vụ), nối vào `SG_CASES` trong `sg.js` (import + thêm cuối mảng, **không chèn giữa**: chỉ số vụ dùng cho bản lưu). Chạy `check-case`.
 5. **Vẽ cảnh** `src/art/sg-<tên>.js` + đăng ký (mục 6). Kiểm tra bằng `npm run scenes`. Có thể giao cho một agent/session riêng chạy song song miễn là đã chốt địa điểm và tọa độ `hs`.
 6. **Test riêng của vụ** `tests/sg-<tên>.test.js` (mục 7), thêm vào script `test` trong `package.json`.
-7. **Tài liệu:** `docs/cases-index.md` (thêm vụ + cơ chế đã dùng), bảng vụ và số test trong `CLAUDE.md`, mục đầu `README.md` và bảng file.
+7. **Cốt truyện** (`src/data/stories.js`, khóa theo id vụ): kể lại chuyện đã thật sự xảy ra theo thời gian, khác với `explanation` (lập luận). Mảng `{ part }` (chương) và `{ at, title, text }` (mốc, chuỗi thuần không HTML); ≥ 2 chương, ≥ 10 mốc, bắt đầu bằng một chương, có mốc `at: "Kết cục"`. Chương gợi ý: gốc rễ / trước đêm xảy ra án, đêm xảy ra án, điều tra. Hiện ở màn thắng/thua và nút "Đọc lại cốt truyện" ở menu.
+8. **Tài liệu:** `docs/cases-index.md` (thêm vụ + cơ chế đã dùng), bảng vụ và số test trong `CLAUDE.md`, mục đầu `README.md` và bảng file.
 
 ## 3. Mẫu bảng sự thật (viết vào đầu file dữ liệu dưới dạng comment hoặc nháp, không cần commit)
 
@@ -36,7 +37,7 @@ Mã khóa: đáp án, hai hồ sơ ghép ra nó, một hồ sơ là "dấu vết
 Hồ sơ về muộn: id + giờ đến; điểm bị gate: id + kết luận mở
 ```
 
-Nguyên tắc câu đố đã chạy tốt ở ba vụ:
+Nguyên tắc câu đố đã chạy tốt ở bốn vụ:
 - Người chơi bị dẫn tới **giờ sai** hoặc **người sai** trước (thẻ quẹt 22:34, camera chậm 17 phút, giờ Thái Bình Dương), rồi một hồ sơ đến muộn hoặc khóa mã lật lại.
 - Thủ phạm có **ngoại phạm đẹp ở khung giờ người ta tưởng** là giờ án mạng; sơ hở nằm ở khung giờ thật.
 - Mỗi người ngoài cuộc **nói dối một chuyện riêng** (biển thủ, đi làm cho đối thủ, chở hàng lậu...) và lộ ra bằng "đưa chứng cứ"; chỉ thủ phạm là không bao giờ thú nhận.
@@ -77,7 +78,7 @@ Nguyên tắc câu đố đã chạy tốt ở ba vụ:
 - Mỗi hồ sơ gốc đặt đúng một chỗ trên bản đồ; kết luận và lời khai `via` không đặt.
 
 **Buộc tội**
-- `chain`: đúng 3 bước, khóa tự do nhưng khác nhau (`opportunity/means/motive` ở s2, `time/access/motive` ở s3), mỗi bước có `label`, `ask`, `hint`, `ids` (các **kết luận** được chấp nhận làm chứng cứ).
+- `chain`: đúng 3 bước, khóa tự do nhưng khác nhau (`opportunity/means/motive` ở s2, `time/access/motive` ở s3, `cause/author/motive` ở s4), mỗi bước có `label`, `ask`, `hint`, `ids` (các **kết luận** được chấp nhận làm chứng cứ).
 - `verdict` (nhiều người) thay cho `chain`: xem s1.
 - `culprit` bắt buộc với `chain`.
 
@@ -142,6 +143,7 @@ Khi thêm vụ, các test chung **không** còn pin số vụ (đã gỡ), nhưn
 ## 8. Danh sách việc khi thêm vụ (tick từng ô)
 
 - [ ] `src/data/sg-<tên>.js` + nối cuối `SG_CASES` trong `sg.js`
+- [ ] `STORIES[id]` trong `src/data/stories.js` (cốt truyện kể theo thời gian)
 - [ ] `src/art/sg-<tên>.js` + `art.js`: import, `SCENES`, `FLANK`, `camBody`/`CAM_KINDS` (nếu cần); `ambience.js` nếu có mưa
 - [ ] `npm run check-case -- <id> --table` sạch lỗi; đọc bảng ngoại phạm xem có đúng ý đồ
 - [ ] `tests/sg-<tên>.test.js` + thêm vào script `test`

@@ -1,7 +1,8 @@
 # Hanoi Noir · Vụ Án Sài Gòn
 
-Trò chơi điều tra chạy trên trình duyệt, hiện có ba vụ ở Sài Gòn: *Đỉnh Triều Bến Vân Đồn* (ba kẻ liên đới, một án mạng được dựng
-thành tai nạn bằng đồng hồ), *Mực Chưa Khô* (Vani Ecommerce) và *Búp Sen Đen* (tháp Bitexco, một cái chết bị dời giờ bằng tấm thẻ của nạn nhân). Các vụ ở phố cổ Hà Nội đã được gỡ bỏ. Hồ sơ và chứng cứ không biến mất theo
+Trò chơi điều tra chạy trên trình duyệt, hiện có bốn vụ ở Sài Gòn: *Đỉnh Triều Bến Vân Đồn* (ba kẻ liên đới, một án mạng được dựng
+thành tai nạn bằng đồng hồ), *Mực Chưa Khô* (Vani Ecommerce), *Búp Sen Đen* (tháp Bitexco, một cái chết bị dời giờ bằng tấm thẻ của nạn nhân) và
+*Bốn Giây* (tòa tháp Landmark 81, một người rơi khỏi đài quan sát khi người ở cạnh đang van nài anh xuống: người khuyên can bị nghi nhất, còn kẻ thật sự đứng sau chỉ cần một cuộc gọi hẹn giờ). Các vụ ở phố cổ Hà Nội đã được gỡ bỏ. Hồ sơ và chứng cứ không biến mất theo
 thời gian, và ngân sách giờ của mỗi vụ tối thiểu bằng nửa số điểm điều tra (30 điểm thì ít nhất 15 giờ). Menu có bộ chọn vùng, chỉ hiện khi có từ hai vùng trở lên.
 Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc dùng mũi tên để xem hai bên,
 đi qua cửa để sang địa điểm khác, nút chức năng nằm ở bốn góc.
@@ -12,7 +13,7 @@ Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc 
 npm install
 npm run dev      # máy chủ phát triển (Vite)
 npm run build    # tạo dist/index.html: một file duy nhất, mở trực tiếp được
-npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải ba vụ Sài Gòn (không cần trình duyệt)
+npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải bốn vụ Sài Gòn (không cần trình duyệt)
 npm run lint     # ESLint: biến chưa khai báo, biến thừa...
 npm run e2e      # build rồi mở dist/index.html bằng Chrome thật, chơi vài bước (cần Chrome hoặc Edge đã cài)
 npm run check-case -- s3 --table   # công cụ tác giả: kiểm tra dữ liệu một vụ (bỏ tên vụ để kiểm tra tất cả)
@@ -66,12 +67,15 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `src/art/sg.js` | Cảnh vùng Sài Gòn |
 | `src/art/sg-vani.js` | Cảnh vụ "Mực Chưa Khô" (cổng, văn phòng, phòng giám đốc, xưởng in, hẻm sau) |
 | `src/art/sg-btx.js` | Cảnh vụ "Búp Sen Đen" (sân đáp tầng 52, sảnh tầng 1, sảnh tiệc tầng 50, phòng chờ VIP tầng 51, phòng vận hành) |
+| `src/art/sg-lm.js` | Cảnh vụ "Bốn Giây" (đài quan sát tầng 81, sảnh tiệc tầng 79, phòng kiểm soát tầng B1, văn phòng tầng 66, sân bục tầng 3) |
 | `src/ui/coach.js` | Hướng dẫn lần đầu chơi |
 | `src/art/people.js` | Người trong cảnh (`figure`) và chân dung (`portrait`) dùng chung một bộ vẽ: tỉ lệ 6,9 đầu, vai, tay, bàn tay, giày, nét mặt, tóc, kính, ria |
 | `src/data/cases.js` | Danh sách vùng (`REGIONS`, hiện chỉ có Sài Gòn), loại hồ sơ; gộp các vụ Sài Gòn thành danh sách phẳng `CASES` |
 | `src/data/sg.js` | Vùng Sài Gòn: vụ "Đỉnh Triều Bến Vân Đồn" (nghi phạm, hồ sơ, kết luận, phiên xét xử nhiều người) |
 | `src/data/sg-vani.js` | Vụ "Mực Chưa Khô" (Vani Ecommerce): một thủ phạm, báo cáo Zoom và Amazon ghi giờ Thái Bình Dương, điện thoại có mã, hồ sơ về muộn |
 | `src/data/sg-bitexco.js` | Vụ "Búp Sen Đen" (tháp Bitexco): một thủ phạm, giờ chết bị dời bằng thẻ ra vào, vòng loại trừ bốn lớp, điện thoại có mã, hồ sơ về muộn |
+| `src/data/stories.js` | Cốt truyện đầy đủ của từng vụ, kể theo thời gian: hiện sau khi khép hồ sơ (và khi thua), và qua nút "Đọc lại cốt truyện" ở thẻ vụ đã giải |
+| `src/data/sg-landmark.js` | Vụ "Bốn Giây" (Landmark 81): một thủ phạm, cuộc gọi giọng giả hẹn giờ, vòng loại trừ ở khung giờ cài lịch, tải trọng thang máy, điện thoại có mã, hồ sơ về muộn |
 | `src/styles/main.css` | Token thiết kế (`@theme`) và các thành phần giao diện |
 | `tests/rules.test.js` | Kiểm thử đơn vị luật chơi và dữ liệu các vụ (`npm test`), gồm ngân sách giờ ≥ nửa số điểm và không có hồ sơ mất theo thời gian |
 | `tests/fixture.js` | Vụ mẫu (không nằm trong trò chơi) để thử các luật `gone`/`leave`, chuỗi chứng minh ba bước, đưa chứng cứ |
@@ -81,6 +85,8 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": múi giờ, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian và hai lối chứng cứ cho mỗi bước |
 | `tests/case-check.test.js` | Công cụ kiểm tra vụ: mọi vụ sạch lỗi và công cụ bắt được các lỗi dữ liệu hay gặp |
 | `tests/sg-btx.test.js` | Kiểm thử vụ "Búp Sen Đen": giờ chết thật, xưng hô "cậu", vòng loại trừ, ngoại phạm, mã điện thoại, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
+| `tests/story.test.js` | Kiểm thử cốt truyện: mọi vụ đủ chương và mốc, khối gập ở màn thắng/thua, hộp thoại đọc lại, nút ở menu chỉ cho vụ đã giải |
+| `tests/sg-landmark.test.js` | Kiểm thử vụ "Bốn Giây": bàn tay kéo chứ không đẩy, cuộc gọi giọng giả, vòng loại trừ lúc 22:47, ngoại phạm, mã 1708, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
 | `tests/notebook.test.js` | Sổ tay: tìm hồ sơ không dấu, lọc theo loại, đánh dấu sao, ghi chú, tổng quan địa điểm |
 | `tools/case-check.mjs` | `npm run check-case`: kiểm tra mọi luật dữ liệu chung của một vụ, lộ trình gợi ý và bảng ngoại phạm |
 | `tools/scenes.html`, `tools/scenes.js` | `npm run scenes`: trang xem cảnh của vụ kèm chấm điểm điều tra |
@@ -113,10 +119,10 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
   mốc chồng giờ ở nơi khác, "Được xác nhận" nếu có mốc bao trọn khoảng khai ở đúng nơi đó. Việc này không tốn giờ.
 - Đồng hồ và diễn biến: mỗi vụ có `clock.start` (giờ bắt đầu) và mảng `world`. Mỗi giờ điều tra là một giờ trôi qua; di chuyển
   không tốn giờ nên không làm đồng hồ chạy. Engine vẫn hỗ trợ diễn biến `gone` (mất một hồ sơ chưa thu) và `leave` (nghi phạm rời thành phố), nhưng
-  **ba vụ Sài Gòn không dùng chúng**: `tests/rules.test.js` bắt buộc mọi vụ trong trò chơi chỉ có diễn biến `arrive` (hồ sơ về muộn). Các luật `gone`/`leave`
+  **bốn vụ Sài Gòn không dùng chúng**: `tests/rules.test.js` bắt buộc mọi vụ trong trò chơi chỉ có diễn biến `arrive` (hồ sơ về muộn). Các luật `gone`/`leave`
   được kiểm thử bằng vụ mẫu `tests/fixture.js`. Diễn biến được báo ngay khi đồng hồ tới mốc và ghi trong tab Thời gian.
 - Ngân sách giờ: `budget` của mỗi vụ phải tối thiểu bằng nửa số điểm điều tra trên bản đồ (`test` kiểm tra `budget * 2 >= tổng số hs`).
-  Hiện s1 có 30 điểm, 15 giờ; s2 có 29 điểm, 15 giờ; s3 có 30 điểm, 15 giờ.
+  Hiện s1 có 30 điểm, 15 giờ; s2 có 29 điểm, 15 giờ; s3 có 30 điểm, 15 giờ; s4 có 30 điểm, 15 giờ.
 
 ## Hình ảnh: ánh sáng, nhân vật và chuyển cảnh
 
@@ -188,12 +194,20 @@ phải tìm giờ chết thật (hộp thư thoại, đồng hồ thông minh), 
 camera phòng vận hành, camera sảnh tiệc). `chain` ba bước dùng khóa `time`, `access`, `motive` (khóa tự do, chỉ cần đủ ba bước và khác nhau). Mã điện thoại là
 tầng sân đáp rồi tầng đài quan sát (5249), lấy từ bảng chỉ dẫn các tầng ở sảnh. Năm người nói dối chuyện riêng (Thắm, Ngân, Trang, Sơn, Vũ) và chỉ một người giấu chuyện án mạng.
 `tests/sg-btx.test.js` kiểm tra giờ chết thật, xưng hô, vòng loại trừ, trạng thái ngoại phạm, mã, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước và hình giấy tờ gọn trong khung.
-Tìm lời giải theo chiều rộng của `tests/rules.test.js` chạy trên vụ mẫu, vì kết luận của ba vụ Sài Gòn không đặt trên bản đồ (đã có kiểm thử lời giải riêng).
+
+Vụ s4 "Bốn Giây" (`src/data/sg-landmark.js`) là vụ **người khuyên can bị nghi nhất**: Khang rơi từ đài quan sát tầng 81 và camera ghi hai bàn tay của vợ cũ (Ngân) đặt lên lưng anh
+đúng giây anh rơi; chị còn nói dối, bỏ chạy và xóa tệp ghi âm. Nhưng pháp y, lan can và bản ghi âm khôi phục cho thấy bàn tay ấy kéo chứ không đẩy; điều khiến Khang buông tay là một cuộc gọi
+phát giọng bé Bi giả (tổng hợp từ video Ngày hội gia đình) do dịch vụ gọi tự động thực hiện đúng 00:05:48. Lúc đó Diệp (Trưởng phòng Nhân sự, con gái ông Tự) đứng giữa sân khấu trước hai trăm người,
+nên **giờ quyết định là 22:47**, khi lịch gọi bị sửa từ máy hậu trường: vòng loại trừ năm nguồn (camera hành lang tầng 78, camera phòng kiểm soát, nhật ký máy in, cổng soát vé) chỉ còn Diệp.
+Cơ chế mới: nhật ký tải trọng thang máy làm chứng "chỉ có hai người trên đài" (84 kg và 52 kg), giọng nói tổng hợp, ngoại phạm hoàn hảo ở khung giờ cuộc gọi reo, số điện thoại nối hai hồ sơ.
+`chain` ba bước dùng khóa `cause`, `author`, `motive`. Mã điện thoại 1708 là ngày 17/8 khoanh đỏ dưới tấm kính bàn (dấu vết ẩn) theo lời của Trang (ngày rồi tháng).
+`tests/sg-landmark.test.js` kiểm tra các lối chứng cứ, vòng loại trừ, ngoại phạm, mã, cổng mở khóa, hồ sơ về muộn và hình giấy tờ gọn trong khung.
+Tìm lời giải theo chiều rộng của `tests/rules.test.js` chạy trên vụ mẫu, vì kết luận của bốn vụ Sài Gòn không đặt trên bản đồ (đã có kiểm thử lời giải riêng).
 
 ## Thêm địa điểm hoặc điểm điều tra
 
 1. Vẽ cảnh trong `src/art/art.js` (hàm trả về SVG, khung 1600 × 900) và đăng ký trong `SCENES`.
 2. Thêm phong cách hai bên trong `FLANK` (phòng `room`, phố Sài Gòn `sgstreet` hoặc sân thượng `roof`).
-3. Thêm địa điểm vào `locations` của vụ trong `src/data/sg.js`, `src/data/sg-vani.js` hoặc `src/data/sg-bitexco.js` với `scene` tương ứng.
+3. Thêm địa điểm vào `locations` của vụ trong `src/data/sg.js`, `src/data/sg-vani.js`, `src/data/sg-bitexco.js` hoặc `src/data/sg-landmark.js` với `scene` tương ứng.
 4. Đặt điểm điều tra bằng `[mã hành động, x, y, nhãn]` trên khung 1600 × 900. Giữ `x` trong khoảng 300–1300
    để không sát mép, nơi có nút xem hai bên.

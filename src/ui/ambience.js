@@ -9,7 +9,9 @@ import { LITE } from "./device.js";
 
 export const AMBIENT = {
   sg_street: { rain: true },
-  sg_btx_pad: { rain: true }
+  sg_btx_pad: { rain: true },
+  sg_lm_deck: { rain: true },
+  sg_lm_ground: { rain: true }
   // Khói: thêm khóa { smoke: [[x, y]] } cho cảnh cần khói (hiện chưa cảnh nào dùng)
 };
 

@@ -7,6 +7,7 @@ Mỗi vụ: bối cảnh, thủ phạm, cái "aha", cơ chế đã dùng, ai nó
 | s1 | Đỉnh Triều Bến Vân Đồn | Ngân (chủ mưu), Thắm (ra tay), Hải (kỹ thuật) | 1920 (giờ đỉnh triều) | cdr_tham 02:30, sao_ke_gh 04:00 | camera chậm 17 phút (`devices`), xét xử nhiều người (`verdict`) |
 | s2 | Mực Chưa Khô | Vũ | 0309 (sinh nhật đứa chị) | grab_vu 01:00, zoom_log 03:30, br_report 05:00 | múi giờ Thái Bình Dương +15 giờ (`devices`), gate, `chain` toàn kết luận |
 | s3 | Búp Sen Đen | Quân | 5249 (tầng sân đáp, tầng đài quan sát) | hop_thu 00:20, nk_thang 02:30, dkkd_sen_vang 03:30, lab_cup 04:30 | giờ chết bị dời bằng thẻ, xưng hô "cậu", vòng loại trừ bốn lớp, 5 lời thú nhận |
+| s4 | Bốn Giây | Diệp | 1708 (ngày 17/8, ngày ông Tự mất) | ghi_am_ngan 01:30, nk_nhamang 02:30, nk_ivr 03:30, giam_dinh_giong 05:00 | người khuyên can bị nghi nhất, cuộc gọi giọng giả hẹn giờ, loại trừ ở khung giờ cài lịch (22:47), tải trọng thang máy, 5 lời thú nhận |
 
 ## s1 · Đỉnh Triều Bến Vân Đồn (`sg.js`)
 - **Bối cảnh:** chung cư Sao Mai Riverside, Quận 4, triều cường 19h20, hầm B1 ngập. Nạn nhân ông Đoàn Văn Châu (chủ tịch Châu Phát Logistics), được coi là trượt chân. Bắt đầu 21:00.
@@ -30,17 +31,27 @@ Mỗi vụ: bối cảnh, thủ phạm, cái "aha", cơ chế đã dùng, ai nó
 - **Người ngoài cuộc:** Vũ chở hàng riêng 72 kg/chuyến; Sơn rời ca 22:05–22:31 và tắt chuông cảnh báo; Thắm chèn cửa; Ngân đưa USB cho nhà báo Trang.
 - **Mã:** 5249 = tầng sân đáp (52) rồi tầng đài quan sát (49), từ bảng chỉ dẫn các tầng ở sảnh + mẩu giấy sau gương.
 
+## s4 · Bốn Giây (`sg-landmark.js`)
+- **Bối cảnh:** tòa tháp Landmark 81, đêm đếm ngược chào năm mới của Thiên Phú Capital ở sảnh tiệc tầng 79, mưa phùn, pháo hoa 00:00–00:10. Nạn nhân Đỗ Hữu Khang (giám đốc tài chính, 46 tuổi) rơi từ đài quan sát tầng 81 lúc 00:06:41; người ở cạnh anh là vợ cũ Ngân, van nài mười bảy phút. Bắt đầu 00:30.
+- **Sự thật:** Diệp (Trưởng phòng Nhân sự, tên khai sinh Lâm Thu Diệp, con gái ông Lâm Văn Tự, nhà đầu tư quỹ Đại Phát tự kết thúc đời mình ngày 17/8/2018 sau khi Khang ký báo cáo kiểm toán 2017) nhắn Khang 21 đêm, rồi cài một cuộc gọi tự động phát giọng bé Bi giả (ghép từ video Ngày hội gia đình) vào 00:05:48, đúng lúc anh đứng một mình (thói quen giao thừa, thẻ do chính cô duyệt).
+- **Aha:** hai bàn tay của Ngân trên lưng Khang là bàn tay kéo (pháp y, lan can, bản ghi âm khôi phục); Diệp có ngoại phạm hoàn hảo ở 00:05:48 (đứng trên sân khấu trước hai trăm người), nhưng lịch gọi bị sửa lúc **22:47:12** từ máy MC-CONSOLE ở hậu trường, nơi chỉ Diệp vắng khỏi sảnh mà không có hồ sơ nào đặt cô ở chỗ khác. Lối hai: tệp giọng của Bi bị tải xuống bằng tài khoản hr.admin của Trưởng phòng Nhân sự.
+- **Người ngoài cuộc:** Ngân nói dối là ngủ ở nhà mẹ, bỏ chạy và xóa tệp ghi âm (sợ bị gán tội vì phiên tòa, bảo hiểm 14 tỷ đứng tên con); Hào gặp luật sư soạn đề nghị cách chức Khang; Vũ bỏ bàn kỹ thuật nghe điện thoại đòi nợ; Thắm duyệt mã QR không kiểm và bỏ vị trí chín phút xem pháo hoa; Trang in tin nhắn nặc danh theo lời Khang dặn nên khai ở nhà.
+- **Mã:** 1708 = ngày rồi tháng của "ngày anh không bao giờ quên" (lời Trang), 17/8 khoanh đỏ dưới tấm kính bàn (dấu vết ẩn), trùng ngày ông Tự mất.
+- **Lối động cơ không cần hộ tịch:** số 0903 118 412 xuất hiện ở kịch bản MC (Diệp) và đơn khiếu nại năm 2018 (Lâm Thu Diệp).
+- **Tín hiệu nhỏ:** Diệp nói "bố tôi" và "bảy năm trước" trong lời khai; giọng giả gọi "bố" trong khi Bi luôn gọi "ba".
+
 ## Cơ chế đố đã dùng (tránh lặp nguyên xi)
 
 | Nhóm | Đã dùng |
 | ---- | ------- |
-| Thời gian | camera chậm 17 phút (s1); múi giờ +15 giờ (s2); giờ chết bị dời bằng thẻ quẹt giả (s3); khung giờ bị hại từ dạ dày và nhà ăn (s2); thân nhiệt bị nhiễu (s2 lò sấy, s3 mưa lạnh) |
-| Ngoại phạm | hai lời khai chỉ dựa vào nhau (s1); xác nhận bằng đường dây cố định, camera vận hành (s3); chuyến xe công nghệ + áo mưa (s2); vòng loại trừ nhiều lớp (s2, s3) |
-| Mã khóa | giờ đỉnh triều (s1), ngày sinh người chị của cặp song sinh (s2), số tầng trong bảng chỉ dẫn (s3) |
-| Vật chứng | áo mẫu làm găng (s2), cúp pha lê khắc tên người khác để đổ tội (s3), sợi áo mưa dưới móng tay (s1), quần ướt 55 cm (s1) |
-| Lối vào | cửa hậu mở từ bên trong (s2), cửa thoát hiểm bị chèn (s3), thang bộ chế độ bảo trì (s1) |
-| Kiến thức | xưng hô "cậu" (s3); camera hỏng chỉ người nhận thông báo mới biết (s3) |
-| Động cơ | gian hàng cạnh tranh của vợ (s2), công ty vỏ bọc em vợ (s3), khoản vay điều 12 (s1) |
+| Thời gian | camera chậm 17 phút (s1); múi giờ +15 giờ (s2); giờ chết bị dời bằng thẻ quẹt giả (s3); khung giờ bị hại từ dạ dày và nhà ăn (s2); thân nhiệt bị nhiễu (s2 lò sấy, s3 mưa lạnh); giờ quyết định là lúc cài lịch chứ không phải lúc cuộc gọi reo (s4) |
+| Ngoại phạm | hai lời khai chỉ dựa vào nhau (s1); xác nhận bằng đường dây cố định, camera vận hành (s3); chuyến xe công nghệ + áo mưa (s2); vòng loại trừ nhiều lớp (s2, s3, s4); thủ phạm có ngoại phạm hoàn hảo ở khung giờ cuộc gọi reo (s4) |
+| Mã khóa | giờ đỉnh triều (s1), ngày sinh người chị của cặp song sinh (s2), số tầng trong bảng chỉ dẫn (s3), ngày người thân của nạn nhân mất, khoanh đỏ dưới tấm kính (s4) |
+| Vật chứng | áo mẫu làm găng (s2), cúp pha lê khắc tên người khác để đổ tội (s3), sợi áo mưa dưới móng tay (s1), quần ướt 55 cm (s1), mảnh vải bị kéo vào trong và vết nắm giật (s4) |
+| Lối vào | cửa hậu mở từ bên trong (s2), cửa thoát hiểm bị chèn (s3), thang bộ chế độ bảo trì (s1); không ai vào được đài (s4: tải trọng thang + nhật ký cửa) |
+| Kiến thức | xưng hô "cậu" (s3); camera hỏng chỉ người nhận thông báo mới biết (s3); Bi gọi "ba" chứ không phải "bố" (s4) |
+| Động cơ | gian hàng cạnh tranh của vợ (s2), công ty vỏ bọc em vợ (s3), khoản vay điều 12 (s1), trả thù cho cha, đổi họ tên để vào công ty (s4) |
+| Công nghệ | giọng nói tổng hợp bằng AI, dịch vụ gọi tự động hẹn giờ, số ảo, tải trọng thang máy làm nhân chứng (s4) |
 | Người nói dối chuyện riêng | biển thủ, đi làm cho đối thủ, bản quyền, chở hàng lậu, rời ca, chèn cửa, đưa tài liệu cho nhà báo |
 
 ## Ý tưởng chưa dùng (chọn ba để đưa người dùng chọn, hoặc tự chọn nếu họ giao quyền)
@@ -51,9 +62,8 @@ Mỗi ý: địa danh Sài Gòn · cái "aha" · gợi ý cơ chế dữ liệu.
 2. **Chợ Bến Thành, kho đông lạnh sau giờ đóng cửa:** nhiệt độ kho ghi lại từng lần mở cửa; thi thể đông cứng làm sai giờ chết (đối lập với "thân nhiệt vô giá trị" của s2/s3: lần này nhiệt độ là bằng chứng nhưng bị đảo chiều).
 3. **Metro số 1 (Bến Thành – Suối Tiên):** thẻ vé và cổng soát vé ghi giờ vào/ra từng ga, thời gian chạy giữa hai ga cố định; một nghi phạm "đi một chuyến" không thể vừa kịp. Mã: số hiệu đoàn tàu.
 4. **Bưu điện Trung tâm, buổi triển lãm tem:** hai người cùng dùng một chữ ký; giám định nét chữ; kết luận là mã bưu chính hoặc số lô tem; vật chứng là con dấu ngày (ngày âm lịch / ngày dương lịch lệch).
-5. **Landmark 81, tầng 81 đài quan sát:** cân nặng trong thang máy (nhật ký tải trọng từng chuyến) và nhận diện người; xác bị chuyển bằng xe đẩy hàng, tải trọng chuyến xuống nặng hơn chuyến lên.
-6. **Thảo Cầm Viên, đêm chuồng thú:** lịch cho ăn, camera hồng ngoại, quan hệ giữa người chăm thú; bằng chứng là thức ăn và mùi; kiểu "lối vào" mới (chìa khóa chuồng, hệ thống tưới).
-7. **Sân bay Tân Sơn Nhất, hành lý thất lạc:** hai va li cùng mẫu, nhãn hành lý bị tráo; băng chuyền ghi giờ; hải quan; xưng hô/tên viết hoa đảo họ tên giữa hộ chiếu và vé.
-8. **Chợ Lớn, tiệm thuốc bắc:** toa thuốc có liều, người bốc thuốc, trọng lượng cân sai; chất độc ghi bằng tên thuốc cổ (ngôn ngữ làm lớp đố, như xưng hô ở s3).
+5. **Thảo Cầm Viên, đêm chuồng thú:** lịch cho ăn, camera hồng ngoại, quan hệ giữa người chăm thú; bằng chứng là thức ăn và mùi; kiểu "lối vào" mới (chìa khóa chuồng, hệ thống tưới).
+6. **Sân bay Tân Sơn Nhất, hành lý thất lạc:** hai va li cùng mẫu, nhãn hành lý bị tráo; băng chuyền ghi giờ; hải quan; xưng hô/tên viết hoa đảo họ tên giữa hộ chiếu và vé.
+7. **Chợ Lớn, tiệm thuốc bắc:** toa thuốc có liều, người bốc thuốc, trọng lượng cân sai; chất độc ghi bằng tên thuốc cổ (ngôn ngữ làm lớp đố, như xưng hô ở s3).
 
 Ý của người dùng luôn thắng; tài liệu này chỉ để khỏi nghĩ từ đầu.

@@ -751,6 +751,63 @@ body[data-screen="menu"] .pan { display: none !important; }
 .picks-sm .pick .portrait { width: 64px; }
 .sheet details summary { padding: 2px 0; }
 
+/* Cốt truyện đầy đủ: dòng thời gian kể lại chuyện đã thật sự xảy ra (màn thắng/thua và nút "Đọc lại cốt truyện" ở menu) */
+.story-box {
+  margin-top: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(42, 29, 16, 0.15);
+  border-radius: 14px;
+}
+.sheet .story-box > summary { padding: 12px 16px; font-weight: 700; color: #5a3a10; cursor: pointer; list-style: none; }
+.story-box > summary::-webkit-details-marker { display: none; }
+.story-box > summary i { margin-right: 6px; }
+.story-box[open] > summary { border-bottom: 1px solid rgba(42, 29, 16, 0.15); }
+.story { list-style: none; margin: 0; padding: 4px 16px 14px; font-size: 14px; line-height: 1.6; }
+.story-part {
+  margin: 16px 0 4px;
+  padding-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: #7a4a10;
+  border-bottom: 1px solid rgba(42, 29, 16, 0.2);
+}
+.story-beat {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 4px 12px;
+  margin-left: 5px;
+  padding: 8px 0 8px 14px;
+  border-left: 2px solid rgba(183, 121, 31, 0.45);
+}
+.story-beat::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #b7791f;
+  border: 2px solid var(--color-paper);
+}
+.story-at { font-size: 12px; font-weight: 700; color: #8a5a14; font-variant-numeric: tabular-nums; padding-top: 2px; }
+.story-body b { display: block; color: #2a1d10; }
+.story-body span { display: block; color: #3b2a1b; }
+@media (max-width: 480px) {
+  .story-beat { grid-template-columns: 1fr; }
+}
+
+/* Thẻ vụ đã khép hồ sơ: nút đọc lại cốt truyện nằm ngay dưới thẻ */
+.case-wrap { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; width: min(300px, 78vw); }
+.case-wrap .case-card { width: 100%; }
+.story-btn { justify-content: center; padding: 8px 12px; font-size: 13px; }
+@media (max-height: 500px) and (orientation: landscape) {
+  .case-wrap { width: min(250px, 38vw); }
+  .story-btn { padding: 5px 10px; font-size: 12px; }
+}
+
 /* Mốc từ thiết bị chưa hiệu chỉnh: viền đỏ nhạt để nhớ rằng giờ có thể sai */
 .tl-row.raw { box-shadow: inset 3px 0 0 rgba(214, 90, 69, 0.55); }
 .banner.warn { color: #f6d9d2; background: rgba(214, 90, 69, 0.16); border-color: rgba(214, 90, 69, 0.5); font-weight: 500; font-size: 13px; }

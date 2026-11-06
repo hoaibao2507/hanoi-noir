@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "check-case": "node tools/case-check.mjs",
     "scenes": "vite --open /tools/scenes.html",
-    "test": "node --test tests/rules.test.js tests/save.test.js tests/sg.test.js tests/sg-vani.test.js tests/sg-btx.test.js tests/case-check.test.js tests/render.test.js tests/hints.test.js tests/notebook.test.js",
+    "test": "node --test tests/rules.test.js tests/save.test.js tests/sg.test.js tests/sg-vani.test.js tests/sg-btx.test.js tests/sg-landmark.test.js tests/story.test.js tests/case-check.test.js tests/render.test.js tests/hints.test.js tests/notebook.test.js",
     "lint": "eslint .",
     "e2e": "vite build && node tests/e2e/smoke.mjs"
   },

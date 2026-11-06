@@ -1,11 +1,12 @@
 /* =====================================================================
-   HANOI NOIR · Dữ liệu vụ án (ba vụ Sài Gòn nằm ở sg.js, sg-vani.js và sg-bitexco.js)
+   HANOI NOIR · Dữ liệu vụ án (bốn vụ Sài Gòn nằm ở sg.js, sg-vani.js, sg-bitexco.js và sg-landmark.js; cốt truyện kể lại ở stories.js)
    - Mỗi vụ: nghi phạm, hành động điều tra, địa điểm và tọa độ điểm điều tra.
    - Tọa độ (x, y) của điểm điều tra tính trên khung cảnh 1600 × 900 (tỷ lệ 16:9).
    - Mỗi hành động thuộc đúng một địa điểm.
    ===================================================================== */
 
 import { SG_CASES } from "./sg.js";
+import { STORIES } from "./stories.js";
 
 /* Phân loại hồ sơ: màu nhấn và biểu tượng tương ứng */
 export const TYPES = {
@@ -27,5 +28,8 @@ export const REGIONS = [
 
 // Danh sách phẳng của mọi vụ. Chỉ số trong danh sách này là chỉ số vụ dùng khắp trò chơi và trong bản lưu ván đang chơi
 export const CASES = [...SG_CASES];
+
+// Cốt truyện đầy đủ (kể theo thời gian) nằm riêng trong stories.js, gắn vào từng vụ ở đây
+for (const c of CASES) c.story = STORIES[c.id] || [];
 
 export const casesOf = (region) => CASES.filter((c) => c.region === region);

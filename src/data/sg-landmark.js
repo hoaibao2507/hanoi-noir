@@ -1,0 +1,426 @@
+/* =====================================================================
+   HANOI NOIR · Vùng Sài Gòn · Vụ 4 "Bốn Giây"
+   Tòa tháp Landmark 81 · 208 Nguyễn Hữu Cảnh, Bình Thạnh, TP. Hồ Chí Minh. Đêm đếm ngược chào năm mới của Thiên Phú Capital ở sảnh tiệc tầng 79.
+   Một người rơi từ đài quan sát tầng 81, người ở cạnh chỉ van nài anh xuống: người khuyên can lại là người bị nghi nhiều nhất.
+   Kẻ thật sự đứng sau không có mặt trên đài: một cuộc gọi tự động phát giọng bé gái làm giả, cài sẵn từ 22:47.
+   - deduce: 18 kết luận; vòng loại trừ ở khung giờ cài lịch (22:47), không phải khung giờ cuộc gọi reo (00:05:48)
+   - lock: điện thoại nạn nhân có mã bốn số, suy ra từ tờ lịch để bàn (dấu vết ẩn) và lời trợ lý
+   - gate: hồ sơ hộ tịch chỉ xin được khi biết kẻ gửi tin nhắn nặc danh vì chuyện của ông Tự
+   - world "arrive": bốn hồ sơ về muộn (bản ghi âm khôi phục, nhà mạng, nhật ký dịch vụ gọi tự động, giám định giọng nói)
+   - confront: năm người nói dối chuyện riêng (Ngân, Hào, Vũ, Thắm, Trang), chỉ có một người giấu chuyện cuộc gọi
+   - mới: tải trọng thang máy làm chứng "chỉ có hai người trên đài"; giọng nói tổng hợp; thủ phạm có ngoại phạm hoàn hảo ở khung giờ cuộc gọi
+   Người chơi lại gặp Vũ, Ngân, Thắm, Trang của các vụ trước, ở những vai khác.
+   ===================================================================== */
+
+// Tên nơi dùng chung cho lời khai (alibi) và mốc camera/nhật ký (spans): phải trùng khớp từng chữ thì ngoại phạm mới đối chiếu được
+const HALL = "Sảnh tiệc Thiên Hà (tầng 79)";
+const TECH = "Bàn kỹ thuật âm thanh (trong sảnh tiệc)";
+const BACK = "Hậu trường sảnh tiệc (ngoài tầm camera)";
+const OUT = "Ngoài sảnh tiệc (cửa chính, ngoài tầm camera)";
+const ROOM78 = "Phòng họp tầng 78";
+const STAIR = "Chiếu nghỉ cầu thang tầng 78";
+const CTRL = "Phòng kiểm soát (tầng hầm B1)";
+const LOBBY = "Sảnh tầng 1 (ngoài cửa kính)";
+const OFFICE = "Văn phòng Khang (tầng 66)";
+const HOME = "Nhà riêng của Trang (ngoài tòa tháp)";
+const HOME_N = "Nhà mẹ Ngân ở Phú Nhuận";
+const INSIDE = "Trong tòa tháp (đã qua cổng soát vé)";
+const DECK = "Đài quan sát ngoài trời (tầng 81)";
+
+export const LANDMARK = {
+  id: "s4", no: 4, region: "sg", title: "Bốn Giây", place: "Tòa tháp Landmark 81 · 208 Nguyễn Hữu Cảnh, Bình Thạnh, TP. Hồ Chí Minh",
+  level: "★★★★★★★ Bốn giây", budget: 15,
+  clock: { start: "00:30" },
+  world: [
+    { at: "01:30", kind: "arrive", id: "ghi_am_ngan", text: "Phòng kỹ thuật số khôi phục xong tệp ghi âm đã bị xóa trên điện thoại của chị Ngân." },
+    { at: "02:30", kind: "arrive", id: "nk_nhamang", text: "Nhà mạng trả lời yêu cầu khẩn về số điện thoại đã gọi cho nạn nhân lúc 00:05." },
+    { at: "03:30", kind: "arrive", id: "nk_ivr", text: "Nhà cung cấp dịch vụ gọi tự động gửi nhật ký tài khoản và lịch gọi theo lệnh của cơ quan điều tra." },
+    { at: "05:00", kind: "arrive", id: "giam_dinh_giong", text: "Phòng giám định hoàn thành phân tích giọng nói trong cuộc gọi cuối cùng." }
+  ],
+  intro: "Đêm giao thừa dương lịch, tòa tháp Landmark 81: sảnh tiệc tầng 79 của Thiên Phú Capital đông hai trăm khách, tháp sâm panh, nhạc dồn dập, và ngoài cửa kính là mưa phùn trên dòng sông Sài Gòn sắp nổ pháo hoa. 00h00 pháo hoa bắn lên; hai trăm người ngước nhìn ra cửa kính. Không ai nghe tiếng rơi. 00h06 cảnh sát được gọi: giám đốc tài chính Đỗ Hữu Khang, 46 tuổi, nằm bất động trên sân bục tầng 3, phía chân tháp, cách tường kính sáu mét. Trên đài quan sát tầng 81, camera ghi một người phụ nữ hai tay đặt lên lưng anh đúng giây anh rơi. Người đó là Ngân, vợ cũ của anh, người khai rằng đêm nay cô ngủ ở nhà mẹ. Bạn đến lúc 00h30. Một người đàn ông rơi từ độ cao 330 mét. Một người phụ nữ đã nói dối rằng mình không có ở đó. Và bốn giây rơi là khoảng thời gian đủ dài cho người ta nghĩ lại điều mà một cuộc gọi vừa nói với mình.",
+  suspects: [
+    { id: "ngan", name: "Ngân", role: "Vợ cũ của nạn nhân · 41 tuổi", bio: "Giáo viên tiểu học, ly hôn Khang tám tháng, đang tranh chấp quyền nuôi bé Bi, mười tuổi. Phiên xét xử sẽ mở ngày 3/1. Người khai là đêm nay mình ngủ ở nhà mẹ.",
+      look: { skin: "#efc9a7", hair: "long", hc: "#2a1a14", top: "#6b6f7a", acc: "none" } },
+    { id: "diep", name: "Diệp", role: "Trưởng phòng Nhân sự & Văn hóa · 38 tuổi", bio: "Về Thiên Phú ba năm trước, lo mọi việc “người” của công ty và dẫn chương trình đêm đếm ngược. Người duyệt quyền thẻ lên đài quan sát cho Khang mỗi giao thừa.",
+      look: { skin: "#f1d0b4", hair: "bun", hc: "#15110f", top: "#1d3a40", acc: "glasses" } },
+    { id: "hao", name: "Hào", role: "Chủ tịch HĐQT Thiên Phú Capital · 57 tuổi", bio: "Dựng Thiên Phú từ một công ty tư vấn nhỏ, coi Khang như cánh tay phải mười hai năm. Mấy tuần nay hai người bất đồng về báo cáo tài chính.",
+      look: { skin: "#d9ae88", hair: "bald", hc: "#bbb", top: "#2a2230", acc: "tie", ac: "#b3202a", sex: "m" } },
+    { id: "vu", name: "Vũ", role: "Kỹ thuật viên âm thanh – ánh sáng · 34 tuổi", bio: "Người của công ty thuê ngoài, phụ trách hiệu lệnh pháo hoa và nhạc. Ngồi bàn kỹ thuật cuối sảnh, nơi nhìn thấy cả sân khấu.",
+      look: { skin: "#dfae85", hair: "short", hc: "#2a1e16", top: "#1b1f2b", acc: "none" } },
+    { id: "tham", name: "Thắm", role: "Nhân viên trực kiểm soát tòa nhà · 29 tuổi", bio: "Ca đêm ở phòng kiểm soát tầng hầm B1: camera, cửa từ, thang máy. Người duyệt mọi mã khách vào tháp sau 22h00.",
+      look: { skin: "#e9c09b", hair: "long", hc: "#2b1b14", top: "#2e4b78", acc: "none" } },
+    { id: "trang", name: "Trang", role: "Kế toán tổng hợp, trợ lý của Khang · 31 tuổi", bio: "Làm việc với Khang bảy năm, rành mọi thói quen của anh. Thân thiết với bé Bi, hay đưa bé đi ăn kem khi hai vợ chồng bận cãi nhau.",
+      look: { skin: "#f4d6bd", hair: "short", hc: "#2a1a14", top: "#8a7a5a", acc: "glasses", sex: "f" } }
+  ],
+  locations: [
+    { id: "deck", name: "Đài quan sát ngoài trời · tầng 81", time: "00:30", scene: "sg_lm_deck", hs: [
+      ["hien_truong_81", 820, 610, "Lan can phía Đông"], ["cam_81", 1190, 250, "Camera đài quan sát"], ["ao_khoac", 520, 640, "Áo vest trên ghế đá"],
+      ["cua_81", 360, 500, "Bảng cấp quyền ở cửa D-81"] ] },
+    { id: "party", name: "Sảnh tiệc Thiên Hà · tầng 79", time: "22:45", scene: "sg_lm_party", hs: [
+      ["loi_diep", 650, 580, "Hỏi chị Diệp"], ["loi_hao", 410, 570, "Hỏi ông Hào"], ["loi_vu", 900, 570, "Hỏi anh Vũ"],
+      ["cam_tiec", 1010, 195, "Camera sảnh tiệc"], ["ban_mc", 1260, 560, "Bàn MC & máy trạm hậu trường"] ] },
+    { id: "ops", name: "Phòng kiểm soát & thang máy · tầng B1", time: "23:40", scene: "sg_lm_ops", hs: [
+      ["loi_tham", 420, 590, "Hỏi chị Thắm"], ["cam_ops", 560, 210, "Camera phòng kiểm soát"], ["cam_hl78", 866, 250, "Camera hành lang tầng 78"],
+      ["nk_cua_81", 1030, 580, "Nhật ký cửa & cổng soát vé"], ["nk_tai_trong", 1230, 470, "Nhật ký tải trọng thang T9"] ] },
+    { id: "office", name: "Văn phòng giám đốc tài chính · tầng 66", time: "22:46", scene: "sg_lm_office", hs: [
+      ["loi_trang", 400, 570, "Hỏi chị Trang"], ["mau_giong_bi", 640, 470, "Ổ lưu trữ của phòng Nhân sự"], ["ban_khang", 830, 610, "Dưới tấm kính bàn làm việc", "soi"],
+      ["thu_de_doa", 1110, 540, "Máy in & xấp tin nhắn"], ["quy_dai_phat", 1270, 640, "Ngăn dưới cùng của tủ hồ sơ"] ] },
+    { id: "ground", name: "Sân bục tầng 3 · nơi rơi", time: "00:06", scene: "sg_lm_ground", hs: [
+      ["loi_ngan", 430, 570, "Hỏi chị Ngân"], ["dt_ngan", 640, 650, "Điện thoại của chị Ngân"], ["hien_truong_rot", 880, 660, "Dưới tấm bạt xanh"],
+      ["dt_khang", 1030, 735, "Điện thoại của anh Khang"], ["cam_buc", 1170, 250, "Camera sân bục"] ] },
+    { id: "lab", name: "Phòng giám định & dữ liệu", time: "Bất kỳ lúc nào", scene: "sg_lab", hs: [
+      ["phap_y", 320, 470, "Biên bản pháp y"], ["ghi_am_ngan", 520, 590, "Tệp ghi âm khôi phục"], ["giam_dinh_giong", 700, 290, "Giám định giọng nói"],
+      ["nk_nhamang", 900, 330, "Trả lời của nhà mạng"], ["nk_ivr", 1010, 600, "Nhật ký dịch vụ gọi tự động"], ["ho_tich_diep", 1180, 320, "Hồ sơ hộ tịch"] ] }
+  ],
+  actions: [
+    /* ---------- Lời khai ---------- */
+    { id: "loi_ngan", cost: 1, type: "Lời khai", title: "Ngân: ngủ ở nhà mẹ, chưa từng vào tòa nhà từ ngày ly hôn",
+      text: "Ngân khai: đêm nay chị ở nhà mẹ ruột ở Phú Nhuận cùng bé Bi, ngủ thiếp trên sofa từ 22h30. Khang gọi lúc 23h34 “chắc vậy”, chị không nghe máy; chị biết tin lúc 00h40 khi cảnh sát gọi. Hai người ly hôn tám tháng, phiên xét xử quyền nuôi Bi sẽ mở ngày 3/1. “Tôi chưa từng đặt chân vào cái tòa nhà đó từ ngày anh ấy dọn ra.” Hỏi về hợp đồng bảo hiểm 14 tỷ đứng tên Bi, chị gạt đi: “Tôi không cần tiền của anh ấy.” Chị nói thêm: “Con bé gọi anh ấy là ba. Ba chứ không phải bố.”",
+      visual: { k: "who", id: "ngan" },
+      alibi: { who: "ngan", from: "23:45", to: "23:59", at: HOME_N } },
+    { id: "loi_diep", cost: 1, type: "Lời khai", title: "Diệp: dẫn đếm ngược trước hai trăm người, ở sảnh cả đêm",
+      text: "Diệp khai: cô là trưởng phòng Nhân sự, lo toàn bộ đêm tiệc. 23h15 cô mời Khang một ly sâm panh; thấy anh trầm, cô hỏi han nhưng anh bảo mệt. 23h29 anh ra ngoài. Cô dẫn đếm ngược trên sân khấu từ 23h58 tới 00h09, “hai trăm người nhìn thấy”. Ngoài ra cô ở sảnh cả đêm, chỉ vài lần ra sau sân khấu lấy tài liệu. Cô duyệt quyền thẻ lên đài quan sát cho Khang như mọi năm: “giao thừa nào anh cũng lên đó xem pháo hoa một mình”. Cô lau mắt rất nhanh: “Bố tôi cũng mất vì tuyệt vọng, bảy năm trước. Tôi hiểu chữ ‘một mình’ đáng sợ thế nào.”",
+      visual: { k: "who", id: "diep" },
+      alibi: { who: "diep", from: "22:40", to: "23:00", at: HALL } },
+    { id: "loi_hao", cost: 1, type: "Lời khai", title: "Hào: ở sảnh tiệc cả đêm, chưa rời quá năm phút",
+      text: "Hào khai: ông ở sảnh tiệc cả đêm, 23h00 lên phát biểu mừng năm mới, “chưa rời sảnh quá năm phút”. Ông không có quyền thẻ lên tầng 81, không biết Khang ở đó. Khang là cánh tay phải của ông mười hai năm; “mấy tuần nay nó căng thẳng, tôi bảo nghỉ ngơi sau Tết”. Hỏi về bất đồng báo cáo tài chính, ông gạt: “Chuyện công ty để mai.” Ông không biết gì về chuyện cũ của Khang trước khi về Thiên Phú.",
+      visual: { k: "who", id: "hao" },
+      alibi: { who: "hao", from: "22:40", to: "23:00", at: HALL } },
+    { id: "loi_vu", cost: 1, type: "Lời khai", title: "Vũ: ngồi bàn kỹ thuật cả tối, máy hậu trường ai cũng dùng",
+      text: "Vũ khai: anh là kỹ thuật viên thuê ngoài, ngồi bàn kỹ thuật cuối sảnh cả đêm, “không rời nửa bước”. 00h00 anh bấm hiệu lệnh cho pháo hoa, 00h05 mở nhạc cao trào. Máy trạm MC-CONSOLE ở hậu trường là máy dùng chung của cả ê-kíp, mật khẩu dán ngay trên màn hình; chị Diệp thường dùng để chỉnh kịch bản, ai trong ê-kíp cũng đụng vào được. Anh không quen biết Khang.",
+      visual: { k: "who", id: "vu" },
+      alibi: { who: "vu", from: "22:40", to: "23:00", at: TECH } },
+    { id: "loi_tham", cost: 1, type: "Lời khai", title: "Thắm: ngồi phòng kiểm soát suốt ca, không có khách nào lên tầng 81",
+      text: "Thắm khai: cô trực ca đêm ở phòng kiểm soát B1, “ngồi suốt, không rời quá hai phút đi vệ sinh”. Sau 22h00 không có khách nào lên đài quan sát tầng 81, chỉ có thẻ KT-02 của anh Khang theo giấy phép của Nhân sự; cô thấy anh Khang lên thang T9 lúc 23h40. Pháo hoa bắn lúc 00h00 cô vẫn ngồi theo dõi màn hình. Khi có tin người rơi, cô gọi 115 lúc 00h10.",
+      visual: { k: "who", id: "tham" },
+      alibi: { who: "tham", from: "23:55", to: "23:59", at: CTRL } },
+    { id: "loi_trang", cost: 1, type: "Lời khai", title: "Trang: ốm ở nhà, nói về thói quen và mật khẩu của Khang",
+      text: "Trang khai: cô là kế toán tổng hợp, trợ lý của Khang. Tối nay cô ốm nên ở nhà, không dự tiệc. Khang mấy tuần nay bất thường, mất ngủ, nhận tin nhắn lạ mà không chịu nói. “Giao thừa nào anh cũng lên đài quan sát tầng 81 hút thuốc xem pháo hoa một mình, từ ba năm nay.” Anh đặt mật khẩu mọi thứ bằng một ngày: “ngày anh không bao giờ quên”, viết ngày rồi tháng, bốn số. Cô không biết đó là ngày nào.",
+      visual: { k: "who", id: "trang" },
+      alibi: { who: "trang", from: "22:40", to: "23:00", at: HOME } },
+
+    /* ---------- Camera ---------- */
+    { id: "cam_81", cost: 1, type: "Camera", title: "Camera đài quan sát: hai bàn tay đặt lên lưng Khang lúc 00:06:38",
+      text: "CAM-81 trên cột đèn, giờ mạng chính xác, nhìn chéo từ sau lưng xuống lan can phía Đông; hình ngược sáng, mưa phùn, không có âm thanh. 23:41 Khang ra, đặt áo vest lên ghế đá, hút thuốc. 23:49 một phụ nữ từ cửa cầu thang ra nói chuyện với anh. 23:55 Khang trèo lên bậu ngoài thanh ray, ngồi quay lưng ra thành phố; người phụ nữ đứng cách một sải tay, giơ tay van lơn. 00:00–00:05 pháo hoa nháy sáng. 00:05:48 Khang rút điện thoại, bật loa, đặt lên bậu; ánh màn hình hắt lên mặt. 00:06:34 anh đứng dậy trên bậu. 00:06:38 người phụ nữ lao tới, hai tay chụp lên lưng và vai anh. 00:06:41 Khang rơi khỏi khung hình. Cô quỵ xuống, 00:07:05 chạy vào cửa cầu thang. Không có ai khác trên đài quan sát.",
+      visual: { k: "cam", scene: "cam_lm_deck", time: "00:06:38", cam: "CAM-81 ĐÀI QUAN SÁT · giờ mạng", alt: "Hai bàn tay của Ngân đặt lên lưng Khang lúc 00:06:38" },
+      spans: [
+        { who: "ngan", from: "23:49", to: "23:59", at: DECK },
+        { who: "ngan", from: "00:00", to: "00:07", at: DECK }
+      ] },
+    { id: "cam_tiec", cost: 2, type: "Camera", title: "Camera sảnh tiệc: ai vắng khỏi sảnh lúc 22:44–22:58 (giờ mạng, chính xác)",
+      text: "Camera sảnh tiệc Thiên Hà, giờ mạng chính xác, phủ cả sân khấu, bàn kỹ thuật và cửa chính; cửa hậu trường và lối ra cầu thang nằm ngoài tầm quay. 22:44 Diệp rời sảnh qua cửa hậu trường, 22:57 vào lại. 22:46 Vũ rời bàn kỹ thuật, 22:52 quay lại. 22:48 Hào ra cửa chính, 22:58 vào lại. 23:15 Diệp đưa Khang một ly sâm panh; 23:29 Khang ra cửa chính. 23:58 đến 00:09 Diệp đứng giữa sân khấu dẫn đếm ngược, hai trăm khách quay mặt lên màn hình. Thắm, Ngân và Trang không có trong khung hình cả đêm. Đèn sảnh tắt từ 00:00 đến 00:10 để xem pháo hoa.",
+      visual: { k: "cam", scene: "cam_lm_party", time: "22:44", cam: "CAM-79 SẢNH TIỆC · giờ mạng", alt: "Diệp rời sảnh tiệc qua cửa hậu trường lúc 22:44" },
+      spans: [
+        { who: "diep", from: "22:00", to: "22:44", at: HALL },
+        { who: "diep", from: "22:44", to: "22:57", at: BACK },
+        { who: "diep", from: "22:57", to: "23:59", at: HALL },
+        { who: "diep", from: "00:00", to: "00:15", at: HALL },
+        { who: "hao", from: "22:00", to: "22:48", at: HALL },
+        { who: "hao", from: "22:48", to: "22:58", at: OUT },
+        { who: "hao", from: "22:58", to: "23:59", at: HALL },
+        { who: "vu", from: "22:00", to: "22:46", at: TECH },
+        { who: "vu", from: "22:46", to: "22:52", at: OUT },
+        { who: "vu", from: "22:52", to: "23:59", at: TECH }
+      ] },
+    { id: "cam_ops", cost: 1, type: "Camera", title: "Camera phòng kiểm soát: Thắm bỏ ghế 23:58–00:09",
+      text: "Camera phòng kiểm soát B1, giờ mạng chính xác. Thắm ngồi ở bàn giám sát từ 22:00 đến 23:58, mắt dán vào màn hình, ăn một hộp cơm lúc 22:30. 23:43 cô cầm điện thoại bàn, bấm một nút trên bảng điều khiển. 23:58 cô rời ghế, đi ra cửa. 00:09 cô quay vào, người lạnh, tóc ướt. Màn hình giám sát sảnh tầng 1 ở góc khung hình cho thấy trong khoảng ấy cô đứng ngoài cửa kính ngó pháo hoa, rồi chạy vào lúc 00:08 khi bộ đàm báo có người rơi.",
+      visual: { k: "cam", scene: "cam_lm_ops", time: "22:47", cam: "CAM-B1 PHÒNG KIỂM SOÁT · giờ mạng", alt: "Thắm ngồi trước màn hình giám sát lúc 22:47" },
+      spans: [
+        { who: "tham", from: "22:00", to: "23:58", at: CTRL },
+        { who: "tham", from: "23:58", to: "23:59", at: LOBBY },
+        { who: "tham", from: "00:00", to: "00:09", at: LOBBY }
+      ] },
+    { id: "cam_hl78", cost: 1, type: "Camera", title: "Camera hành lang tầng 78: Vũ ở chiếu nghỉ, Hào ở phòng họp",
+      text: "Camera hành lang tầng 78, giờ mạng chính xác, nhìn dọc hành lang tới phòng họp và chiếu nghỉ cầu thang. 22:46 Vũ ra chiếu nghỉ cầu thang, áp điện thoại vào tai, đi qua đi lại, hạ giọng gắt gỏng; 22:52 anh quay lên sảnh tiệc. 22:49 Hào cùng một người đàn ông xách cặp bước vào phòng họp 78; 22:57 cả hai ra, bắt tay, Hào đi lên sảnh tiệc. Không ai khác đi qua hành lang trong khoảng này.",
+      visual: { k: "cam", scene: "cam_lm_hall78", time: "22:49", cam: "CAM-78 HÀNH LANG · giờ mạng", alt: "Hào vào phòng họp tầng 78 lúc 22:49" },
+      spans: [
+        { who: "vu", from: "22:46", to: "22:52", at: STAIR },
+        { who: "hao", from: "22:49", to: "22:57", at: ROOM78 }
+      ] },
+    { id: "cam_buc", cost: 1, type: "Camera", title: "Camera sân bục tầng 3: vật rơi chạm đất lúc 00:06:49",
+      text: "Camera sân bục tầng 3, giờ mạng chính xác, nhìn từ cột đèn xuống mặt bục lát đá. 00:00–00:12 pháo hoa nháy trắng sân bục; hàng trăm người dưới sông và trên đường Nguyễn Hữu Cảnh ngước lên trời. 00:06:49 một vật tối rơi xuống mặt bục cách chân tháp sáu mét, tiếng động chìm trong tiếng pháo. Không ai ở sân bục nhìn thấy. 00:10 một bảo vệ chạy tới.",
+      visual: { k: "cam", scene: "cam_lm_ground", time: "00:06:49", cam: "CAM-03 SÂN BỤC · giờ mạng", alt: "Một vật tối rơi xuống sân bục lúc 00:06:49" } },
+
+    /* ---------- Hồ sơ, nhật ký, vật chứng ---------- */
+    { id: "hien_truong_81", cost: 1, type: "Vật chứng", title: "Lan can phía Đông: dấu tay trong, mảnh vải bị kéo vào trong",
+      text: "Lan can phía Đông đài quan sát: thanh ray inox cao 1,1 mét, dưới là bậu đá rộng bốn mươi phân. Mặt ngoài thanh ray có dấu hai bàn tay Khang bám và hai dấu đế giày nam cỡ 43 trên bậu ngoài. Mặt trong thanh ray có dấu hai bàn tay phụ nữ bám chặt và một mảnh vải sơ mi trắng kẹt ở chốt cuối thanh ray: sợi vải căng theo hướng vào phía sàn đài, tức bị kéo về phía trong. Vệt trượt của giày cao gót kéo dài bốn mươi phân trên sàn ướt, hướng về lan can.",
+      visual: { k: "paper", alt: "Lan can phía Đông", title: "LAN CAN ĐÔNG · TẦNG 81",
+        rows: ["Ngoài ray: tay Khang, giày nam cỡ 43", "Trong ray: hai bàn tay phụ nữ", "Mảnh sơ mi trắng kẹt chốt ray", "Sợi vải căng về phía sàn đài", "Vệt trượt gót giày hướng vào ray"] } },
+    { id: "ao_khoac", cost: 1, type: "Vật chứng", title: "Áo vest và tờ giấy ăn Khang để lại trên ghế đá",
+      text: "Trên ghế đá: áo vest xám gấp gọn, bên trên là ví, thẻ KT-02 và bao thuốc còn bốn điếu. Trong ví có hợp đồng bảo hiểm nhân thọ 14 tỷ đồng, người thụ hưởng là bé Đỗ Ngọc Bi, mẹ là người giám hộ. Túi áo có một tờ giấy ăn viết bút bi, nét chữ Khang run: “Tự. Bảy năm. Anh biết là ai cũng không quan trọng. Xin đừng làm gì Bi.” Không có thư gửi ai, không có lời trách ai.",
+      visual: { k: "paper", alt: "Tờ giấy ăn trong túi áo vest", title: "GIẤY GHI TAY TRONG ÁO VEST",
+        rows: ["“Tự. Bảy năm.”", "“Xin đừng làm gì Bi.”", "Bút bi trên giấy ăn, nét chữ run", "Không trách ai, không gửi ai", "Ví: bảo hiểm 14 tỷ, bé Bi thụ hưởng"] } },
+    { id: "cua_81", cost: 1, type: "Hồ sơ", title: "Bảng cấp quyền tạm thời ở cửa D-81: Diệp duyệt thẻ của Khang",
+      text: "Bảng cấp quyền dán cạnh cửa D-81: “Thẻ KT-02 (Đỗ Hữu Khang) được cấp quyền vào đài quan sát đêm 31/12, từ 23:30 đến 00:30, theo thông lệ ba năm nay. Người duyệt: Trần Ngọc Diệp, Trưởng phòng Nhân sự.” Cạnh đó là biển “Đài quan sát đóng cửa với khách sau 22:00”. Cửa tự đóng sau năm giây, mở từ trong ra bằng nút thoát.",
+      visual: { k: "paper", alt: "Bảng cấp quyền tạm thời cửa D-81", title: "CẤP QUYỀN TẠM THỜI · D-81",
+        rows: ["Thẻ KT-02 · Đỗ Hữu Khang", "Đêm 31/12 · 23:30–00:30", "Theo thông lệ ba năm nay", "Người duyệt: Trần Ngọc Diệp (Nhân sự)", "Cửa tự đóng 5 giây, mở trong bằng nút"] } },
+    { id: "ban_mc", cost: 1, type: "Hồ sơ", title: "Máy trạm MC-CONSOLE ở hậu trường: dùng chung, nối Wi-Fi sảnh tiệc",
+      text: "Bàn MC và máy trạm MC-CONSOLE ở hậu trường sảnh tiệc: máy dùng chung cho cả ê-kíp (MC, kỹ thuật, điều phối), tài khoản event-team, mật khẩu dán trên màn hình, nối Wi-Fi nội bộ sảnh tiệc (IP 10.79.4.21). Nhật ký máy: đăng nhập 22:44:20, đăng xuất 22:55:40. Kịch bản MC ghi: 22:45 “chỉnh lại giờ pháo hoa 00:00–00:10”; 23:58 đếm ngược. Dòng cuối ghi liên hệ MC: “Diệp, 0903 118 412”.",
+      visual: { k: "paper", alt: "Nhật ký máy MC-CONSOLE", title: "MÁY TRẠM MC-CONSOLE · HẬU TRƯỜNG",
+        rows: ["Tài khoản event-team, dùng chung", "Đăng nhập 22:44:20, đăng xuất 22:55:40", "Wi-Fi sảnh tiệc · IP 10.79.4.21", "Mật khẩu dán ngay trên màn hình", "Liên hệ MC: Diệp 0903 118 412"] } },
+    { id: "nk_cua_81", cost: 1, type: "Hồ sơ", title: "Nhật ký cửa và cổng soát vé: mã QR khách quét lúc 23:44",
+      text: "Nhật ký bộ điều khiển cửa BMS, giờ mạng chính xác. Cửa D-81 (đài quan sát): 23:41:08 mở bằng thẻ KT-02; 23:48:40 mở từ xa theo lệnh của tài khoản trực ca khi khách quét mã QR-G-0417; 00:07:15 mở từ trong ra bằng nút thoát. Không còn lượt mở nào từ 23:41 tới 00:09. Cửa cầu thang D-80S (từ tầng 79 lên tầng 80): không có lượt quẹt nào từ 22:00 đến 00:30. Cổng soát vé sảnh tầng 1: mã QR-G-0417, tạo lúc 23:37 từ tài khoản của Khang, quét lần đầu 23:44, ra lúc 00:19; thẻ nhân viên TP-0231 (Trang) vào 21:56, ra 00:31.",
+      visual: { k: "paper", alt: "Nhật ký cửa BMS", title: "BMS · CỬA D-81, D-80S, CỔNG VÉ",
+        rows: ["D-81 · 23:41:08 thẻ KT-02", "D-81 · 23:48:40 mở từ xa (QR-G-0417)", "D-81 · 00:07:15 nút thoát từ trong ra", "QR-G-0417: tạo 23:37, quét 23:44", "D-80S: không lượt quẹt 22:00–00:30"] },
+      spans: [
+        { who: "ngan", from: "23:44", to: "23:59", at: INSIDE },
+        { who: "ngan", from: "00:00", to: "00:19", at: INSIDE },
+        { who: "trang", from: "21:56", to: "23:59", at: INSIDE },
+        { who: "trang", from: "00:00", to: "00:31", at: INSIDE },
+        { who: "trang", from: "18:00", to: "21:56", at: HOME }
+      ] },
+    { id: "nk_tai_trong", cost: 1, type: "Hồ sơ", title: "Nhật ký tải trọng thang T9: chỉ hai người lên tầng 80",
+      text: "Nhật ký tải trọng thang nhân viên T9, bộ điều khiển, sai số ±2 kg. T9 là thang duy nhất tới tầng 80, nơi có cầu thang bộ duy nhất lên đài quan sát. Từ 23:00 đến 00:30 T9 chạy bốn chuyến: 23:40 lên tầng 80, tải 84 kg; 23:46 lên tầng 80, tải 52 kg; 00:09 xuống, tải 52 kg; 00:27 xuống, tải 0 kg (nhân viên kỹ thuật kiểm tra). Không có chuyến rỗng nào lên tầng 80 trong khoảng ấy.",
+      visual: { k: "paper", alt: "Nhật ký tải trọng thang T9", title: "THANG T9 · TẢI TRỌNG",
+        rows: ["23:40 · lên tầng 80 · 84 kg", "23:46 · lên tầng 80 · 52 kg", "00:09 · xuống · 52 kg", "00:27 · xuống · 0 kg (kỹ thuật)", "Không chuyến rỗng lên tầng 80"] } },
+    { id: "phap_y", cost: 1, type: "Biên bản", title: "Biên bản pháp y: vết nắm kéo ở cẳng tay phải, lưng không có vết đẩy",
+      text: "Biên bản pháp y sơ bộ: Đỗ Hữu Khang, 46 tuổi, 83,6 kg, tử vong tại chỗ do đa chấn thương do rơi từ độ cao lớn. Nồng độ cồn 0,6‰ (hai ly sâm panh), không thuốc, không độc chất. Cẳng tay phải có bốn vết bầm hình đầu ngón tay ở mặt trong và một vết ở mặt ngoài, đúng kiểu bị nắm giật về phía người nắm. Không có vết bầm hình bàn tay ở lưng hay hai vai. Áo sơ mi trắng rách ở vai phải. Móng tay trái của Khang không có da hay sợi vải của ai.",
+      visual: { k: "paper", alt: "Biên bản pháp y", title: "PHÁP Y SƠ BỘ · ĐỖ HỮU KHANG",
+        rows: ["Khang · 83,6 kg · đa chấn thương do rơi", "Cồn 0,6‰ · không thuốc, không độc", "Cẳng tay phải: vết nắm ở mặt trong", "Lưng và vai: không vết bầm bàn tay", "Sơ mi trắng rách ở vai phải"] } },
+    { id: "thu_de_doa", cost: 1, type: "Vật chứng", title: "Xấp 21 trang tin nhắn nặc danh Trang in lúc 22:46–22:50",
+      text: "Xấp 21 trang in tin nhắn nặc danh trên bàn Khang; nhật ký máy in tầng 66: 22:46–22:50 in 21 trang bằng tài khoản của Trang. Các tin đến từ số 0899 305 117, mỗi đêm một tin trong 21 đêm: “Tự gửi lời chào.” “Anh có nhớ ngày 17/8 không?” “Bảy năm rồi. Tôi đã đợi đủ lâu.” Tin cuối lúc 23:21: “Bi nhớ ba lắm. Chúc anh năm mới.” Khang đã gạch chân chữ “Bi” bằng bút đỏ.",
+      visual: { k: "paper", alt: "Xấp tin nhắn nặc danh", title: "TIN NHẮN NẶC DANH · 21 ĐÊM",
+        rows: ["Nguồn: 0899 305 117 · mỗi đêm một tin", "“Tự gửi lời chào.”", "“Anh có nhớ ngày 17/8 không?”", "23:21 “Bi nhớ ba lắm. Chúc anh năm mới.”", "In 22:46–22:50 · tài khoản của Trang"] },
+      spans: [{ who: "trang", from: "22:46", to: "22:50", at: OFFICE }] },
+    { id: "mau_giong_bi", cost: 1, type: "Hồ sơ", title: "Ổ lưu trữ Nhân sự: video “Thư gửi ba mẹ” của bé Bi bị tải xuống 21 ngày trước",
+      text: "Ổ lưu trữ phòng Nhân sự: video “Thư gửi ba mẹ” trong Ngày hội gia đình Thiên Phú, bé Bi mười tuổi đọc thư gửi ba (một phút bốn giây). Nhật ký ổ: 21 ngày trước, 02:11, tệp Thu_gui_ba_Bi.mp4 được tải xuống bằng tài khoản hr.admin; không có lượt tải nào khác kể từ khi lưu. hr.admin là tài khoản của Trưởng phòng Nhân sự; tài khoản thứ hai của chuyên viên Hạnh không đăng nhập từ khi chị nghỉ thai sản sáu tuần trước.",
+      visual: { k: "paper", alt: "Nhật ký ổ lưu trữ Nhân sự", title: "Ổ NHÂN SỰ · THU_GUI_BA_BI.MP4",
+        rows: ["Video 1:04 · Ngày hội gia đình", "Tải xuống: 21 ngày trước · 02:11", "Tài khoản: hr.admin (Trưởng phòng NS)", "Không lượt tải nào khác", "Tài khoản thứ hai: nghỉ thai sản 6 tuần"] } },
+    { id: "ban_khang", cost: 1, type: "Vật chứng", title: "Tờ lịch dưới tấm kính bàn: ngày 17/8 khoanh đỏ",
+      text: "Dưới tấm kính trên bàn Khang là tờ lịch cũ của một năm đã qua, chỉ khoanh đỏ một ngày: 17/8, bên cạnh ghi chữ “T.”. Quanh đó, tấm kính mòn nhẵn ở đúng chỗ ngón tay anh hay đặt lên. Cạnh tờ lịch là tấm ảnh nhỏ bé Bi mặc áo dài mầm non.",
+      visual: { k: "paper", alt: "Tờ lịch dưới tấm kính", title: "TỜ LỊCH DƯỚI KÍNH BÀN",
+        rows: ["Một ngày khoanh đỏ: 17/8", "Bên cạnh ghi: “T.”", "Kính mòn đúng chỗ ngón tay đặt", "Cạnh đó: ảnh bé Bi mặc áo dài"] } },
+    { id: "quy_dai_phat", cost: 2, type: "Hồ sơ", title: "Hồ sơ quỹ Đại Phát năm 2018: Khang ký báo cáo, con gái ông Tự khiếu nại",
+      text: "Ngăn dưới cùng khóa trong tủ hồ sơ của Khang là hồ sơ quỹ Đại Phát. Báo cáo kiểm toán năm 2017 “chấp nhận toàn phần” có chữ ký Đỗ Hữu Khang, khi anh còn là kiểm toán viên; tháng 4/2018 quỹ vỡ nợ, 212 nhà đầu tư mất 1.340 tỷ đồng. Nhà đầu tư Lâm Văn Tự mất 3,2 tỷ và tự kết thúc đời mình ngày 17/8/2018. Đơn khiếu nại gửi Khang và công ty kiểm toán của con gái ông Tự: “Người khiếu nại: Lâm Thu Diệp, ĐT 0903 118 412”, đã bị bác.",
+      visual: { k: "paper", alt: "Hồ sơ quỹ Đại Phát", title: "QUỸ ĐẠI PHÁT · HỒ SƠ 2018",
+        rows: ["Kiểm toán 2017: chấp nhận toàn phần", "Ký: Đỗ Hữu Khang · quỹ vỡ nợ 4/2018", "Lâm Văn Tự mất 3,2 tỷ · mất 17/8/2018", "Khiếu nại: Lâm Thu Diệp, 0903 118 412", "Kết quả: đơn bị bác"] } },
+    { id: "hien_truong_rot", cost: 1, type: "Vật chứng", title: "Chân tháp: Khang rơi cách tường kính sáu mét",
+      text: "Sân bục tầng 3 dưới chân tháp, phía Đông: thi thể Khang phủ bạt xanh, cách chân tháp sáu mét, hai xe cứu thương, cảnh sát khoanh vùng. Chiếc đồng hồ thông minh trên cổ tay trái ghi nhịp tim tăng dần tới 00:06:41 rồi ngừng ở 00:06:49. Điện thoại vỡ nằm cách hai mét. Theo cảnh sát, người rơi từ độ cao 330 mét mất chừng bốn giây.",
+      visual: { k: "paper", alt: "Hiện trường chân tháp", title: "CHÂN THÁP · SÂN BỤC TẦNG 3",
+        rows: ["Cách chân tháp: 6 mét", "Đồng hồ: nhịp tim tăng tới 00:06:41", "Đồng hồ ngừng đo: 00:06:49", "Rơi từ 330 mét: chừng 4 giây", "Điện thoại vỡ cách thi thể 2 mét"] } },
+    { id: "dt_khang", cost: 1, type: "Vật chứng", title: "Điện thoại của Khang: cuộc gọi đến 00:05:48 từ số lạ",
+      text: "Điện thoại của Khang, màn hình nứt nhưng còn bật. Cuộc gọi: 23:34 gọi đi Ngân (3 phút 12 giây, có nghe máy); 00:05:48 gọi đến từ số 0899 305 117, 46 giây, bật loa ngoài. Tin nhắn: 23:37 gửi Ngân “QR khách. Lên đài quan sát. Anh cần em.”. Tin của luật sư: “Phiên 3/1, ta sẽ nộp bản ghi âm chị Ngân dọa anh.” Tin của Ngân hôm qua: “Anh còn đem con ra làm quân bài thì tôi không tha.”",
+      visual: { k: "paper", alt: "Điện thoại của Khang", title: "ĐIỆN THOẠI ĐỖ HỮU KHANG",
+        rows: ["23:34 · gọi đi Ngân · 3 phút 12 giây", "23:37 · gửi Ngân mã QR khách", "00:05:48 · đến từ 0899 305 117 · 46 s", "Luật sư: “Phiên 3/1, nộp bản ghi âm”", "Ngân: “Còn đem con làm quân bài…”"] },
+      lock: { code: "1708", digits: 4, prompt: "Điện thoại của Khang cần mã bốn số." } },
+    { id: "dt_ngan", cost: 1, type: "Vật chứng", title: "Điện thoại của Ngân: tệp ghi âm 17 phút vừa bị xóa lúc 00:24",
+      text: "Điện thoại của Ngân, cô tự nguyện giao cho cảnh sát và đọc mật khẩu. Cuộc gọi: 23:34 Khang gọi đến, nghe máy 3 phút 12 giây. Zalo 23:37 từ Khang: mã QR khách. Ứng dụng Ghi âm: một tệp 17 phút 36 giây tạo lúc 23:49, xóa lúc 00:24, còn nằm trong mục lưu tạm. Vị trí điện thoại: từ 22:00 đến 23:30 ở Phú Nhuận; từ 23:44 đến 00:19 ở trạm sóng khu Vinhomes Central Park; sau 00:48 lại ở Phú Nhuận.",
+      visual: { k: "paper", alt: "Điện thoại của Ngân", title: "ĐIỆN THOẠI CỦA NGÂN",
+        rows: ["23:34 · Khang gọi đến · nghe máy 3:12", "23:49 · tạo tệp ghi âm 17 phút 36 giây", "00:24 · tệp bị xóa, còn trong mục tạm", "22:00–23:30 · vị trí Phú Nhuận", "23:44–00:19 · vị trí khu Vinhomes"] },
+      spans: [{ who: "ngan", from: "22:00", to: "23:30", at: HOME_N }] },
+
+    /* ---------- Hồ sơ về muộn ---------- */
+    { id: "ghi_am_ngan", cost: 1, type: "Biên bản", title: "Tệp ghi âm khôi phục: Ngân van nài 17 phút, rồi một giọng bé gái",
+      text: "Phòng kỹ thuật số khôi phục tệp ghi âm 17 phút 36 giây trên điện thoại của Ngân. 23:49–00:05: Ngân van nài Khang xuống, nhắc tên Bi, nhắc phiên tòa; Khang nói anh sợ “người đó” sẽ làm hại Bi vì chuyện của Tự. 00:05:48: tiếng chuông; Khang bật loa ngoài; một giọng bé gái nói “Bố… bố ơi, con là Bi đây…”, trách Khang đã làm mẹ khóc, kết thúc bằng “con không cần bố nữa, xin bố đừng gọi lại”. Ngân hét: “Bi gọi anh là ba, anh quên sao? Đó không phải con bé! Bi đang ngủ ở nhà bà!” Khang đáp: “Anh không biết nữa… anh mệt quá.” 00:06:34 tiếng tút; 00:06:38 Ngân hét “Khang! Đừng!”, tiếng vải rách, tiếng pháo hoa, rồi tiếng khóc của chị.",
+      visual: { k: "paper", alt: "Tệp ghi âm khôi phục", title: "GHI ÂM KHÔI PHỤC · 17:36",
+        rows: ["23:49–00:05 · Ngân van nài, nhắc Bi", "00:05:48 · chuông, Khang bật loa ngoài", "Giọng bé gái gọi “bố”, trách, từ chối", "Ngân: “Đó không phải con bé!”", "00:06:38 · “Khang! Đừng!”, vải rách"] } },
+    { id: "nk_nhamang", cost: 1, type: "Hồ sơ", title: "Nhà mạng: 0899 305 117 là số ảo của dịch vụ gọi tự động",
+      text: "Nhà mạng trả lời yêu cầu khẩn: số 0899 305 117 là số ảo thuê của dịch vụ gọi tự động CallBot Việt, mở 24 ngày trước, nạp tiền bằng thẻ trả trước, không gắn SIM nào. Số này gửi 21 tin nhắn nặc danh tới số của Khang trong 21 đêm liên tục, và thực hiện cuộc gọi duy nhất 00:05:48–00:06:34 (46 giây) bằng hệ thống gọi tự động; không có cuộc gọi nào khác.",
+      visual: { k: "paper", alt: "Trả lời của nhà mạng", title: "NHÀ MẠNG · SỐ 0899 305 117",
+        rows: ["Số ảo thuê của CallBot Việt", "Mở 24 ngày trước · thẻ trả trước", "21 tin nhắn nặc danh · 21 đêm", "Một cuộc gọi: 00:05:48–00:06:34", "Thực hiện bằng hệ thống tự động"] } },
+    { id: "nk_ivr", cost: 1, type: "Hồ sơ", title: "Nhật ký dịch vụ gọi tự động: lịch gọi bị sửa lúc 22:47:12 từ Wi-Fi sảnh tiệc",
+      text: "Nhật ký CallBot Việt: tài khoản mở bằng email dùng một lần; đơn BOT-3391 phát tệp bi_01.wav (46 giây, ghép từ các âm tiết của bé Bi) tới số của Khang. Đơn tạo 21 ngày trước từ một IP thuê bao ngoài; tệp âm thanh tải lên 20 ngày trước. Đêm nay: 22:44:20 đăng nhập từ IP 10.79.4.21 (Wi-Fi nội bộ sảnh tiệc tầng 79, thiết bị MC-CONSOLE); 22:47:12 sửa lịch gọi từ 00:02:00 thành 00:05:48; 22:55:40 đăng xuất. 00:05:48 hệ thống gọi, phát tệp, kết nối 46 giây.",
+      visual: { k: "paper", alt: "Nhật ký dịch vụ gọi tự động", title: "CALLBOT VIỆT · ĐƠN BOT-3391",
+        rows: ["Phát tệp bi_01.wav · 46 giây", "Tạo 21 ngày trước · IP thuê bao ngoài", "22:44:20 đăng nhập · IP 10.79.4.21", "22:47:12 sửa lịch: 00:02:00 → 00:05:48", "22:55:40 đăng xuất · 00:05:48 gọi"] } },
+    { id: "giam_dinh_giong", cost: 1, type: "Biên bản", title: "Giám định giọng nói: “Bi” là giọng tổng hợp, ghép từ video Ngày hội gia đình",
+      text: "Giám định âm thanh 46 giây giọng “Bi” trong bản ghi: dải tần phẳng trên 11 kHz, nhịp thở đều như máy, âm tiết “bố” lặp lại cùng một dạng sóng; độ tin cậy giọng tổng hợp bằng trí tuệ nhân tạo là 97%. Các âm tiết khớp với giọng bé Bi trong video “Thư gửi ba mẹ”, nhưng câu nói chưa từng có trong video. Bé Bi thật ngủ ở nhà bà ngoại từ 21:30; điện thoại và máy tính bảng của bé tắt theo chế độ ngủ do mẹ cài.",
+      visual: { k: "paper", alt: "Giám định giọng nói", title: "GIÁM ĐỊNH GIỌNG NÓI · 46 GIÂY",
+        rows: ["Giọng tổng hợp bằng AI · tin cậy 97%", "Âm tiết lấy từ video “Thư gửi ba mẹ”", "Câu nói chưa từng có trong video", "Gọi “bố” trong khi Bi luôn gọi “ba”", "Bi thật ngủ ở nhà bà từ 21:30"] } },
+    { id: "ho_tich_diep", cost: 1, type: "Hồ sơ", title: "Hồ sơ hộ tịch: Diệp tên khai sinh Lâm Thu Diệp, con gái ông Tự",
+      gate: "k_ke_bao_thu",
+      text: "Sở Tư pháp phản hồi: Trần Ngọc Diệp, sinh 12/5/1990, tên khai sinh Lâm Thu Diệp, đổi họ tên tháng 9/2019 theo họ mẹ. Cha: Lâm Văn Tự (mất 17/8/2018). Mẹ: Trần Thị Mai. Hồ sơ nhân sự Thiên Phú: Diệp nộp đơn vào công ty ba năm trước, một tháng sau khi Khang được bổ nhiệm giám đốc tài chính.",
+      visual: { k: "paper", alt: "Hồ sơ hộ tịch", title: "HỘ TỊCH · TRẦN NGỌC DIỆP",
+        rows: ["Tên khai sinh: Lâm Thu Diệp · 12/5/1990", "Đổi họ tên: tháng 9/2019 (theo họ mẹ)", "Cha: Lâm Văn Tự (mất 17/8/2018)", "Mẹ: Trần Thị Mai", "Vào Thiên Phú sau Khang lên CFO 1 tháng"] } },
+
+    /* ---------- Lời khai mở bằng cách đưa chứng cứ ---------- */
+    { id: "ngan_thu", cost: 0, via: "confront", type: "Lời khai", title: "Ngân thừa nhận: lên đài quan sát, kéo anh lại, rồi bỏ chạy",
+      text: "Ngân thừa nhận: 23:34 Khang gọi, nói anh đang ở tầng 81 và “không chịu nổi nữa”; chị gửi Bi cho mẹ, lái xe tới, quét mã QR anh gửi. Chị năm mươi hai ký, anh tám mươi tư ký: “tôi đẩy sao nổi”. Chị van anh mười bảy phút, nắm tay áo anh kéo lại; lúc anh nghe cuộc gọi “của Bi” rồi đứng dậy trên bậu, chị lao tới giữ lưng áo nhưng vải rách. Chị chạy xuống vì hoảng sợ và vì nghĩ sẽ không ai tin: vợ cũ, phiên tòa tuần sau, bảo hiểm của con. Chị khai dối vì thế.",
+      visual: { k: "who", id: "ngan" } },
+    { id: "hao_thu", cost: 0, via: "confront", type: "Lời khai", title: "Hào thừa nhận: họp riêng với luật sư để cách chức Khang",
+      text: "Hào thừa nhận: 22:49 ông gặp luật sư ở phòng họp tầng 78 để soạn đề nghị cách chức Khang sau Tết, vì Khang từ chối ký báo cáo tài chính hợp nhất cuối năm. Ông giấu vì thấy nhục: “Mười hai năm tôi coi nó như em.” Ông nói chắc rằng không biết gì về tin nhắn nặc danh hay chuyện cũ của Khang.",
+      visual: { k: "who", id: "hao" } },
+    { id: "vu_thu", cost: 0, via: "confront", type: "Lời khai", title: "Vũ thừa nhận: bỏ bàn kỹ thuật sáu phút để nghe điện thoại đòi nợ",
+      text: "Vũ thừa nhận: 22:46 anh ra chiếu nghỉ cầu thang nghe điện thoại của một chủ nợ cho vay nặng lãi đòi 80 triệu, nên bỏ bàn kỹ thuật sáu phút và nhờ phụ tá giữ bàn. Anh khai dối vì sợ mất việc. Anh nói lúc đi ngang cửa hậu trường vẫn nghe tiếng người, nhưng không biết là ai; máy MC-CONSOLE thì anh không đụng tới.",
+      visual: { k: "who", id: "vu" } },
+    { id: "tham_thu", cost: 0, via: "confront", type: "Lời khai", title: "Thắm thừa nhận: duyệt mã QR không kiểm giấy tờ, bỏ vị trí chín phút",
+      text: "Thắm thừa nhận: 23:43 cô duyệt thủ công mã QR khách do tài khoản của Khang yêu cầu, ghi chú “người nhà, gấp”, mà không kiểm giấy tờ và không báo ai, vì sợ làm khó quản lý. 23:58 cô bỏ vị trí xuống sảnh tầng 1 xem pháo hoa chín phút. Cô khai dối vì quy định trực ca nghiêm cấm; cô chỉ thấy một phụ nữ trùm áo mưa quét mã tại cổng.",
+      visual: { k: "who", id: "tham" } },
+    { id: "trang_thu", cost: 0, via: "confront", type: "Lời khai", title: "Trang thừa nhận: vào văn phòng Khang lúc 22:46 để in tin nhắn",
+      text: "Trang thừa nhận: cô vào tòa tháp lúc 21:56, không dự tiệc mà ở văn phòng Khang. 22:46 cô in toàn bộ tin nhắn nặc danh theo lời nhờ của anh, hẹn trình công an sáng mùng 1. Khang dặn cô giữ bí mật vì ngờ kẻ nhắn là người trong công ty. Cô khai ở nhà để giữ lời. Cô nói thêm: anh chưa bao giờ nói anh muốn chết, anh chỉ sợ cho Bi.",
+      visual: { k: "who", id: "trang" } },
+
+    /* ---------- Kết luận (suy luận từ các hồ sơ ở trên; xem "deduce") ---------- */
+    { id: "k_keo_lai", cost: 0, via: "deduce", type: "Kết luận", title: "Bàn tay của Ngân kéo Khang lại, không đẩy",
+      text: "Dấu tay phụ nữ ở mặt trong thanh ray, mảnh sơ mi bị kéo vào phía sàn đài, vết bầm kiểu nắm giật về phía người nắm và lưng không có vết bầm bàn tay: tất cả cùng một hướng. Ngân nắm tay áo kéo anh vào, rồi lao tới giữ lưng áo khi anh đứng lên bậu. Hai bàn tay trong camera là bàn tay của người đang cố giữ lại, không phải người đẩy.",
+      visual: { k: "paper", alt: "Kết luận: bàn tay kéo, không đẩy", title: "KẾT LUẬN",
+        rows: ["Dấu tay phụ nữ ở mặt trong ray", "Sợi vải bị kéo vào phía sàn đài", "Vết nắm giật về phía người nắm", "Lưng, vai: không vết bàn tay"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_chi_hai_nguoi", cost: 0, via: "deduce", type: "Kết luận", title: "Từ 23:41 tới 00:09 chỉ có hai người trên đài: Khang và Ngân",
+      text: "Cửa D-81 chỉ mở ba lần (thẻ KT-02, mở từ xa cho mã QR khách, nút thoát), cửa cầu thang D-80S không có lượt quẹt nào, và thang T9, đường duy nhất tới tầng 80, chỉ chở hai người lên (84 kg và 52 kg) rồi một người (52 kg) xuống. Không ai khác lên hay xuống đài quan sát. Kẻ nào làm Khang rời lan can thì không đứng trên đài.",
+      visual: { k: "paper", alt: "Kết luận: chỉ hai người trên đài", title: "KẾT LUẬN",
+        rows: ["Cửa D-81: 3 lượt mở, đều có chủ", "Cửa D-80S: không lượt quẹt", "T9 lên: 84 kg và 52 kg", "T9 xuống: một người, 52 kg"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_goi_cuoi", cost: 0, via: "deduce", type: "Kết luận", title: "Bảy giây sau khi cuộc gọi kết thúc, Khang rơi",
+      text: "00:05:48 điện thoại Khang nhận cuộc gọi từ số lạ 0899 305 117, kéo dài 46 giây tới 00:06:34; Khang bật loa ngoài, đứng lên bậu lúc 00:06:34 và rơi khỏi lan can lúc 00:06:41. Không có hành động nào khác giữa hai mốc: điều thay đổi trong những giây cuối là cuộc gọi.",
+      visual: { k: "paper", alt: "Kết luận: cuộc gọi cuối cùng", title: "KẾT LUẬN",
+        rows: ["00:05:48 · cuộc gọi đến từ số lạ", "00:06:34 · cuộc gọi kết thúc", "00:06:34 · Khang đứng lên bậu", "00:06:41 · Khang rơi"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_giong_gia", cost: 0, via: "deduce", type: "Kết luận", title: "Giọng “Bi” trong cuộc gọi là giọng làm giả; Bi thật đang ngủ",
+      text: "Giọng bé gái trong cuộc gọi là giọng tổng hợp ghép từ âm tiết của bé Bi, gọi “bố” trong khi Bi luôn gọi “ba”, và nói những câu bé chưa từng nói. Bé Bi ngủ ở nhà bà từ 21:30, thiết bị tắt. Khang bị đánh gục bằng đúng nỗi sợ lớn nhất của anh: con gái anh từ chối anh.",
+      visual: { k: "paper", alt: "Kết luận: giọng làm giả", title: "KẾT LUẬN",
+        rows: ["Giọng tổng hợp bằng AI · tin cậy 97%", "Gọi “bố”, Bi thật luôn gọi “ba”", "Bi thật ngủ ở nhà bà từ 21:30", "Cuộc gọi là bản ghi dựng sẵn"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_cuoc_goi_hen_gio", cost: 0, via: "deduce", type: "Kết luận", title: "Cuộc gọi do máy tự động thực hiện, không cần ai bấm lúc 00:05:48",
+      text: "Số 0899 305 117 là số ảo thuê của dịch vụ gọi tự động và đơn BOT-3391 phát một tệp âm thanh dựng sẵn đúng 00:05:48. Không có người nào phải ngồi cạnh điện thoại lúc đó; một người có thể đứng giữa sân khấu, hoặc ở bất cứ nơi nào, mà cuộc gọi vẫn reo.",
+      visual: { k: "paper", alt: "Kết luận: cuộc gọi hẹn giờ", title: "KẾT LUẬN",
+        rows: ["Số ảo thuê của dịch vụ gọi tự động", "Đơn BOT-3391 phát tệp dựng sẵn", "Giờ gọi hẹn: 00:05:48", "Không ai phải bấm lúc 00:05:48"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_22h47", cost: 0, via: "deduce", type: "Kết luận", title: "Giờ quyết định là 22:47: lịch gọi bị sửa từ máy hậu trường sảnh tiệc",
+      text: "Đơn BOT-3391 bị sửa lúc 22:47:12 từ IP 10.79.4.21, chính là Wi-Fi nội bộ sảnh tiệc và máy MC-CONSOLE ở hậu trường, đang đăng nhập 22:44:20–22:55:40. Người cài lịch phải có mặt ở hậu trường sảnh tiệc tầng 79 trong khoảng ấy. Ai có ngoại phạm lúc 00:05:48 cũng không có nghĩa gì: ngoại phạm phải xét lúc 22:47.",
+      visual: { k: "paper", alt: "Kết luận: giờ quyết định là 22:47", title: "KẾT LUẬN",
+        rows: ["22:44:20 · MC-CONSOLE đăng nhập", "22:47:12 · sửa lịch gọi 00:05:48", "22:55:40 · đăng xuất", "Nơi: hậu trường sảnh tiệc tầng 79"], stamp: "ĐÃ XÁC LẬP" },
+      spans: [{ from: "22:47", to: "22:48", at: BACK }] },
+    { id: "k_diep_san_khau", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 00:05:48 Diệp đứng giữa sân khấu trước hai trăm người",
+      text: "Diệp dẫn đếm ngược trên sân khấu từ 23:58 tới 00:09, giữa ánh đèn và hai trăm khách; máy MC-CONSOLE ngay sau sân khấu không có ai ngồi. Nếu ai đó tìm một người bấm gọi lúc 00:05:48 thì Diệp, như hầu hết khách trong sảnh, có ngoại phạm hoàn hảo ở khung giờ ấy.",
+      visual: { k: "paper", alt: "Kết luận: Diệp ở sân khấu lúc 00:05:48", title: "KẾT LUẬN",
+        rows: ["23:58–00:09 · Diệp dẫn đếm ngược", "Trước hai trăm khách, đèn sân khấu", "Lúc 00:05:48: không thể ở nơi khác"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_loai_hao_vu", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 Hào ở phòng họp tầng 78, Vũ ở chiếu nghỉ cầu thang",
+      text: "Camera hành lang tầng 78 đặt Hào trong phòng họp 22:49–22:57 và Vũ ở chiếu nghỉ cầu thang 22:46–22:52, cả hai đều ngoài hậu trường sảnh tiệc khi lịch gọi bị sửa. Cả hai nói dối chuyện riêng, nhưng không ai trong hai người ngồi vào máy MC-CONSOLE.",
+      visual: { k: "paper", alt: "Kết luận: Hào và Vũ ở ngoài hậu trường", title: "KẾT LUẬN",
+        rows: ["22:49–22:57 · Hào ở phòng họp 78", "22:46–22:52 · Vũ ở chiếu nghỉ cầu thang", "Cả hai ngoài hậu trường lúc 22:47"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_loai_tham", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 Thắm ngồi ở phòng kiểm soát B1, trước camera",
+      text: "Camera phòng kiểm soát ghi Thắm ngồi ở bàn giám sát suốt từ 22:00 đến 23:58. Cô không thể có mặt ở hậu trường sảnh tầng 79 lúc 22:47, dù lời khai của cô có chỗ sai ở khung giờ khác.",
+      visual: { k: "paper", alt: "Kết luận: Thắm ở phòng kiểm soát", title: "KẾT LUẬN",
+        rows: ["22:00–23:58 · Thắm ở bàn giám sát", "Phòng kiểm soát nằm ở tầng hầm B1", "Lúc 22:47: không ở tầng 79"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_loai_trang", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 Trang đứng ở máy in tầng 66",
+      text: "Nhật ký máy in tầng 66 ghi tài khoản của Trang in 21 trang từ 22:46 đến 22:50. Cô nói dối rằng mình ở nhà, nhưng đang ở văn phòng Khang, không ở hậu trường sảnh tiệc tầng 79 khi lịch gọi bị sửa.",
+      visual: { k: "paper", alt: "Kết luận: Trang ở tầng 66", title: "KẾT LUẬN",
+        rows: ["22:46–22:50 · Trang in tại tầng 66", "Văn phòng Khang cách tầng 79 mười ba tầng", "Lúc 22:47: không ở hậu trường"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_loai_ngan", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 Ngân còn ở ngoài tòa tháp: lần quét đầu tiên là 23:44",
+      text: "Mã QR khách của Ngân chỉ được tạo lúc 23:37 và quét lần đầu lúc 23:44; điện thoại của chị ở Phú Nhuận cho tới 23:30. Chị không thể ngồi ở máy MC-CONSOLE trong khoảng 22:44–22:55, dù chị có nói dối chuyện mình ở đâu lúc 23:44.",
+      visual: { k: "paper", alt: "Kết luận: Ngân chưa vào tòa tháp lúc 22:47", title: "KẾT LUẬN",
+        rows: ["QR-G-0417 tạo lúc 23:37", "Quét lần đầu lúc 23:44", "Lúc 22:47: chưa vào tòa tháp"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_con_lai_diep", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 chỉ còn Diệp vắng khỏi sảnh tiệc mà không nơi nào chứng minh",
+      text: "Hào và Vũ ở ngoài hậu trường có camera, Thắm ở phòng kiểm soát, Trang ở tầng 66 bên máy in, Ngân chưa vào tòa tháp. Chỉ còn Diệp rời sảnh tiệc qua cửa hậu trường lúc 22:44 và vào lại lúc 22:57, đúng khoảng máy MC-CONSOLE có người đăng nhập, mà không có hồ sơ nào đặt cô ở chỗ nào khác.",
+      visual: { k: "paper", alt: "Kết luận: chỉ còn Diệp ở hậu trường", title: "KẾT LUẬN",
+        rows: ["Hào, Vũ: camera tầng 78", "Thắm: camera phòng kiểm soát", "Trang: máy in tầng 66", "Ngân: chưa vào tháp. Diệp: không nơi nào"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_mau_giong", cost: 0, via: "deduce", type: "Kết luận", title: "Mẫu giọng của Bi bị tải khỏi ổ Nhân sự bằng tài khoản Trưởng phòng",
+      text: "Các âm tiết trong tệp bi_01.wav lấy từ video Thu_gui_ba_Bi.mp4, tệp chỉ bị tải xuống một lần, 21 ngày trước, bằng tài khoản hr.admin của Trưởng phòng Nhân sự; tài khoản thứ hai của chuyên viên Hạnh không đăng nhập từ khi chị nghỉ thai sản. Chỉ một người có thể lấy mẫu giọng ấy.",
+      visual: { k: "paper", alt: "Kết luận: mẫu giọng lấy từ ổ Nhân sự", title: "KẾT LUẬN",
+        rows: ["Âm tiết bi_01.wav từ video Thu_gui_ba_Bi", "Tải 21 ngày trước bằng hr.admin", "hr.admin: Trưởng phòng Nhân sự", "Tài khoản thứ hai: nghỉ thai sản"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_ke_bao_thu", cost: 0, via: "deduce", type: "Kết luận", title: "Kẻ nhắn 21 đêm và kẻ gọi cuối là một, vì chuyện của Lâm Văn Tự",
+      text: "Tin nhắn nặc danh mở đầu bằng “Tự gửi lời chào”, nhắc ngày 17/8 và “bảy năm”; tờ giấy ăn của Khang ghi “Tự. Bảy năm.”. Cuộc gọi cuối cùng phát đi từ chính số ảo đã gửi các tin nhắn. Có một người đang trả thù cho Lâm Văn Tự và đã nhắm vào Khang bằng đúng điều anh sợ nhất: Bi.",
+      visual: { k: "paper", alt: "Kết luận: người trả thù cho ông Tự", title: "KẾT LUẬN",
+        rows: ["Tin nhắn mở đầu: “Tự gửi lời chào”", "Giấy ăn của Khang: “Tự. Bảy năm.”", "Cuộc gọi cuối: cùng số 0899 305 117", "Mục tiêu: nỗi sợ về Bi"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_con_gai_tu", cost: 0, via: "deduce", type: "Kết luận", title: "Diệp là con gái của Lâm Văn Tự, nhà đầu tư quỹ Đại Phát",
+      text: "Số 0903 118 412 là số liên hệ của MC Diệp trên kịch bản đêm nay, và cũng là số của người khiếu nại Lâm Thu Diệp, con gái ông Lâm Văn Tự, trong hồ sơ Đại Phát năm 2018. Cô đổi họ tên năm 2019 theo họ mẹ và vào Thiên Phú một tháng sau khi Khang làm giám đốc tài chính.",
+      visual: { k: "paper", alt: "Kết luận: Diệp là con gái ông Tự", title: "KẾT LUẬN",
+        rows: ["0903 118 412: MC Diệp đêm nay", "0903 118 412: Lâm Thu Diệp, hồ sơ 2018", "Cha: Lâm Văn Tự, mất 17/8/2018"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_khang_ky", cost: 0, via: "deduce", type: "Kết luận", title: "Khang ký báo cáo che giấu việc quỹ Đại Phát vỡ nợ, và tự biết mình có lỗi",
+      text: "Khang ký báo cáo kiểm toán năm 2017 “chấp nhận toàn phần” trước khi quỹ Đại Phát vỡ nợ; anh giữ hồ sơ ấy trong ngăn khóa và ghi “Tự. Bảy năm.” trên mẩu giấy cuối cùng. Anh biết có người sẽ đòi anh món nợ ấy, và sợ họ chạm tới Bi.",
+      visual: { k: "paper", alt: "Kết luận: Khang ký báo cáo Đại Phát", title: "KẾT LUẬN",
+        rows: ["Kiểm toán 2017 ký bởi Đỗ Hữu Khang", "Quỹ vỡ nợ 4/2018 · 212 người mất tiền", "Khang giữ hồ sơ trong ngăn khóa"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_dong_co", cost: 0, via: "deduce", type: "Kết luận", title: "Người trả thù muốn Khang chết đúng như cha cô: rơi từ trên cao",
+      text: "Diệp là con gái ông Tự, người đã chịu một cái kết mà cô gắn thẳng vào chữ ký của Khang. Cô vào Thiên Phú, duyệt thẻ đài quan sát cho Khang mỗi giao thừa, lấy giọng con gái anh, nhắn anh 21 đêm và hẹn một cuộc gọi cho đúng lúc anh đứng một mình trên cao. Bảy năm chờ đợi, và một cái chết dựng sao cho giống chuyện tự nguyện.",
+      visual: { k: "paper", alt: "Kết luận: động cơ trả thù", title: "KẾT LUẬN",
+        rows: ["Con gái ông Tự vào Thiên Phú sau Khang", "Duyệt thẻ lên đài quan sát cho Khang", "Lấy giọng Bi, nhắn 21 đêm, hẹn cuộc gọi"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_thoi_quen", cost: 0, via: "deduce", type: "Kết luận", title: "Giao thừa nào Khang cũng lên đài quan sát một mình, Nhân sự duyệt thẻ",
+      text: "Trang nói Khang lên tầng 81 hút thuốc xem pháo hoa một mình mỗi giao thừa, ba năm nay; bảng cấp quyền ghi người duyệt là Trưởng phòng Nhân sự. Ai ở phòng Nhân sự đều biết Khang sẽ ở đó lúc nửa đêm, không ai khác cần phải đoán.",
+      visual: { k: "paper", alt: "Kết luận: thói quen lên đài của Khang", title: "KẾT LUẬN",
+        rows: ["Ba năm nay: giao thừa lên tầng 81", "Quyền thẻ do Nhân sự duyệt hằng năm", "Giờ Khang ở đó: biết trước được"], stamp: "ĐÃ XÁC LẬP" } }
+  ],
+
+  // Ghép hồ sơ thành kết luận. Dòng đầu của mỗi kết luận là lối ngắn nhất (gợi ý đi theo lối này); thứ tự "needs" là thứ tự gợi ý đi.
+  deduce: [
+    { needs: ["phap_y", "hien_truong_81"], gives: "k_keo_lai" },
+    { needs: ["phap_y", "ghi_am_ngan"], gives: "k_keo_lai" },
+    { needs: ["nk_tai_trong", "nk_cua_81"], gives: "k_chi_hai_nguoi" },
+    { needs: ["cam_81", "nk_cua_81"], gives: "k_chi_hai_nguoi" },
+    { needs: ["cam_81", "nk_nhamang"], gives: "k_goi_cuoi" },
+    { needs: ["dt_khang", "cam_buc"], gives: "k_goi_cuoi" },
+    { needs: ["ghi_am_ngan", "giam_dinh_giong"], gives: "k_giong_gia" },
+    { needs: ["nk_ivr", "ghi_am_ngan"], gives: "k_giong_gia" },
+    { needs: ["nk_ivr", "nk_nhamang"], gives: "k_cuoc_goi_hen_gio" },
+    { needs: ["nk_ivr", "ban_mc"], gives: "k_22h47" },
+    { needs: ["cam_tiec", "ban_mc"], gives: "k_diep_san_khau" },
+    { needs: ["cam_hl78", "k_22h47"], gives: "k_loai_hao_vu" },
+    { needs: ["cam_ops", "k_22h47"], gives: "k_loai_tham" },
+    { needs: ["thu_de_doa", "k_22h47"], gives: "k_loai_trang" },
+    { needs: ["nk_cua_81", "k_22h47"], gives: "k_loai_ngan" },
+    { needs: ["k_loai_hao_vu", "k_loai_tham", "k_loai_trang", "k_loai_ngan"], gives: "k_con_lai_diep" },
+    { needs: ["mau_giong_bi", "nk_ivr"], gives: "k_mau_giong" },
+    { needs: ["mau_giong_bi", "giam_dinh_giong"], gives: "k_mau_giong" },
+    { needs: ["thu_de_doa", "ao_khoac"], gives: "k_ke_bao_thu" },
+    { needs: ["thu_de_doa", "nk_nhamang"], gives: "k_ke_bao_thu" },
+    { needs: ["quy_dai_phat", "ban_mc"], gives: "k_con_gai_tu" },
+    { needs: ["ho_tich_diep", "thu_de_doa"], gives: "k_con_gai_tu" },
+    { needs: ["quy_dai_phat", "ao_khoac"], gives: "k_khang_ky" },
+    { needs: ["k_con_gai_tu", "k_khang_ky"], gives: "k_dong_co" },
+    { needs: ["k_con_gai_tu", "k_ke_bao_thu"], gives: "k_dong_co" },
+    { needs: ["cua_81", "loi_trang"], gives: "k_thoi_quen" },
+    { needs: ["cua_81", "loi_diep"], gives: "k_thoi_quen" },
+    { needs: ["cam_tiec", "loi_diep"], gives: "k_diep_san_khau" }
+  ],
+
+  culprit: "diep",
+
+  confront: [
+    { who: "ngan", clue: "cam_81", reveal: "ngan_thu",
+      text: "Ngân nhìn hai bàn tay mình đặt lên lưng Khang trong khung hình và gục xuống. “Phải… tôi ở đó.” Giọng chị vỡ ra. “Đừng nói tôi đẩy. Tôi kéo mà.” Rồi chị kể hết." },
+    { who: "ngan", clue: "phap_y",
+      text: "Ngân nhìn dòng vết nắm ở cẳng tay: “Tôi nắm tay áo anh ấy. Nắm mãi. Nó lằn lại ở đó sao?” Chị lấy tay che miệng." },
+    { who: "ngan", clue: "dt_ngan",
+      text: "Ngân bặm môi: “Tôi xóa. Tôi sợ. Một người vợ cũ, một phiên tòa tuần sau, một cái bảo hiểm… Ai tin tôi ở trên đó mà không đẩy?”" },
+    { who: "ngan", clue: "nk_cua_81",
+      text: "Ngân nhìn mã QR lúc 23:44: “Anh ấy gửi tôi cái mã đó. Anh ấy bảo anh cần em. Mười tháng tôi không nghe anh ấy nói câu đó.”" },
+    { who: "ngan", clue: "dt_khang",
+      text: "Ngân đọc tin nhắn của chính mình: “Tôi giận. Tôi nói bậy. Tôi không bao giờ muốn anh ấy chết.”" },
+    { who: "diep", clue: "cam_tiec",
+      text: "Diệp nhìn mình rời sảnh qua cửa hậu trường: “Tôi ra lấy kịch bản, đổi micro, ba lần bốn lần trong đêm. Người dẫn chương trình mà.” Giọng cô đều." },
+    { who: "diep", clue: "ban_mc",
+      text: "Diệp liếc dòng “Liên hệ MC: Diệp”: “Máy dùng chung. Ai cũng ngồi vào đó được. Anh Vũ cũng vậy.” Cô nhắc tên Vũ rất nhanh." },
+    { who: "diep", clue: "nk_ivr",
+      text: "Diệp đọc giờ 22:47:12 rất lâu. “Tôi ở sảnh. Camera có ghi.” Rồi cô nhíu mày: “Camera đâu có phủ hậu trường.”" },
+    { who: "diep", clue: "k_22h47",
+      text: "Diệp cười nhạt: “Anh bảo ai cài lịch trong lúc tôi ra sau sân khấu? Chuyện đó chứng minh gì?” Ngón tay cô gõ nhẹ lên mặt bàn, hai nhịp, đều." },
+    { who: "diep", clue: "mau_giong_bi",
+      text: "Diệp nhìn dòng hr.admin: “Tài khoản đó tôi chia sẻ cho cả phòng. Ai chẳng biết mật khẩu.” Nhưng chuyên viên Hạnh đang nghỉ thai sản, và cô đã biết điều đó." },
+    { who: "diep", clue: "k_mau_giong",
+      text: "Diệp im lặng. Lần đầu tiên cô tháo kính, lau, rồi đeo lại. “Giọng của một đứa bé thì ai cũng ghi âm được.”" },
+    { who: "diep", clue: "k_con_gai_tu",
+      text: "Diệp nhìn chữ “Lâm Thu Diệp” rất lâu. “Tôi đổi tên vì tôi muốn quên.” Rồi môi cô cong lên: “Nhưng anh ấy chưa bao giờ quên, phải không?”" },
+    { who: "diep", clue: "k_dong_co",
+      text: "Diệp ngồi thẳng lưng, giọng thật nhẹ: “Ông ấy rơi mất bốn giây. Bảy năm tôi tự hỏi bốn giây ấy dài thế nào.” Cô quay sang bạn: “Tôi cần luật sư.”" },
+    { who: "diep", clue: "k_con_lai_diep",
+      text: "Diệp nhìn sang chỗ khác. “Anh loại trừ hết mọi người rồi bảo là còn lại tôi? Tôi vẫn ở đây. Tôi đâu bỏ chạy như chị ấy.” Câu cuối chỉ là một cái ngoái đầu về phía Ngân." },
+    { who: "hao", clue: "cam_tiec", reveal: "hao_thu",
+      text: "Hào nhìn mình bước ra cửa chính lúc 22:48 và cúi mặt. “Phải… tôi gặp luật sư. Đừng kể cho người ngoài.” Rồi ông kể." },
+    { who: "hao", clue: "cam_hl78",
+      text: "Hào gõ ngón tay xuống bàn: “Tôi ở phòng họp mười phút. Không ai chết vì mười phút đó.” Mắt ông đỏ." },
+    { who: "vu", clue: "cam_hl78", reveal: "vu_thu",
+      text: "Vũ nhìn mình đi qua đi lại ở chiếu nghỉ cầu thang. “Tôi nghe điện thoại thôi. Một người đòi nợ.” Anh kể hết, giọng mệt mỏi." },
+    { who: "vu", clue: "cam_tiec",
+      text: "Vũ gãi đầu: “Tôi ra có sáu phút. Cậu phụ tá giữ bàn. Tôi tưởng không ai để ý.”" },
+    { who: "vu", clue: "ban_mc",
+      text: "Vũ nhún vai: “Cái máy đó ai trong ê-kíp cũng đụng. Tôi chỉ dùng chỉnh nhạc. Không đụng vào cái khác.”" },
+    { who: "tham", clue: "nk_cua_81", reveal: "tham_thu",
+      text: "Thắm nhìn dòng “mở từ xa 23:48:40” và tái mặt. “Là em… Em duyệt cái mã đó.” Cô kể hết." },
+    { who: "tham", clue: "cam_ops",
+      text: "Thắm cúi đầu: “Em xuống ngó pháo hoa. Chín phút. Em biết quy định. Nhưng trời ơi, pháo hoa cuối năm…”" },
+    { who: "trang", clue: "thu_de_doa", reveal: "trang_thu",
+      text: "Trang nhìn xấp giấy do chính mình in và thở ra. “Anh Khang bảo tôi giữ bí mật…” Cô quyết định kể hết." },
+    { who: "trang", clue: "nk_cua_81",
+      text: "Trang lắc đầu: “Tôi vào lúc 21:56, ra lúc 00:31. Tôi ở văn phòng cả tối, chỉ vậy thôi.”" }
+  ],
+
+  // Chuỗi chứng minh: mỗi bước chọn một hồ sơ nằm trong "ids". Chứng cứ rẻ nhất đứng đầu mỗi danh sách (gợi ý đi theo đó).
+  chain: [
+    { key: "cause", label: "Điều khiến Khang buông tay", ask: "Ngân có đẩy Khang không, và điều gì thật sự khiến anh buông tay khỏi thanh ray?", ids: ["k_keo_lai", "k_goi_cuoi", "k_giong_gia"],
+      hint: "Hai bàn tay trên lưng Khang trong camera chưa nói bàn tay ấy đẩy hay kéo: hỏi pháp y và chính lan can. Rồi tìm điều gì xảy ra với điện thoại của Khang ngay trước khi anh rơi." },
+    { key: "author", label: "Bàn tay giấu mặt", ask: "Ai đã dựng nên cuộc gọi cuối cùng, dù không đứng trên đài quan sát?", ids: ["k_mau_giong", "k_con_lai_diep"],
+      hint: "Cuộc gọi do máy tự động thực hiện nên giờ quan trọng là lúc nó được cài, không phải lúc nó reo. Xem ai sửa lịch gọi lúc 22:47 và ai có tệp giọng của Bi." },
+    { key: "motive", label: "Động cơ", ask: "Vì sao người đó muốn Khang rơi từ trên cao xuống?", ids: ["k_con_gai_tu", "k_dong_co"],
+      hint: "Khang ghi “Tự. Bảy năm.”. Tìm Lâm Văn Tự là ai, ai là con gái ông, và số điện thoại nào nối tên người ấy với một người trong tiệc." }
+  ],
+
+  explanation: "<p><b>Không ai đẩy anh.</b> Hai bàn tay trên lưng Khang lúc 00:06:38 là của Ngân, và chúng đang kéo. Dấu tay phụ nữ ở mặt trong thanh ray, mảnh sơ mi bị căng vào phía sàn đài, vết nắm giật ở cẳng tay phải, lưng và vai không có vết bầm bàn tay: một người năm mươi hai ký giữ một người tám mươi tư ký, mười bảy phút ròng, bằng giọng nói của mình. Chị khai dối vì quá sợ: vợ cũ, phiên tòa tuần sau, bảo hiểm 14 tỷ đứng tên con, và hai bàn tay đặt trên lưng chồng cũ đúng giây anh rơi.</p>" +
+    "<p><b>Điều thật sự khiến anh buông tay.</b> 00:05:48 điện thoại của Khang đổ chuông, anh bật loa, một giọng bé gái gọi “bố”, nói con không cần bố nữa. Bảy giây sau khi cuộc gọi kết thúc, anh đứng dậy và buông thanh ray. Giọng ấy không phải của Bi: Bi gọi anh là ba, Bi đang ngủ ở nhà bà, và phòng giám định tìm ra nhịp thở đều như máy của giọng tổng hợp ghép từ video “Thư gửi ba mẹ”.</p>" +
+    "<p><b>Giờ quan trọng không phải 00:05:48.</b> Cuộc gọi do dịch vụ gọi tự động phát một tệp dựng sẵn; lúc nó reo, Diệp đang đứng giữa sân khấu trước hai trăm người, ngoại phạm hoàn hảo như mọi người trong sảnh. Nhưng lịch gọi bị sửa lúc 22:47:12 từ máy MC-CONSOLE ở hậu trường sảnh tiệc. Lúc đó Hào ở phòng họp tầng 78, Vũ ở chiếu nghỉ cầu thang, Thắm trước camera phòng kiểm soát, Trang bên máy in tầng 66, Ngân chưa vào tòa tháp. Chỉ còn Diệp, người vào hậu trường lúc 22:44 và ra lúc 22:57.</p>" +
+    "<p><b>Mẫu giọng.</b> Tệp video của Bi bị tải xuống một lần, 21 ngày trước, bằng tài khoản hr.admin của Trưởng phòng Nhân sự; chuyên viên thứ hai đang nghỉ thai sản. Hào giấu việc muốn cách chức Khang, Vũ giấu một món nợ, Thắm giấu một lần duyệt mã không kiểm và chín phút bỏ vị trí, Trang giấu việc in tin nhắn theo lời dặn. Không ai trong họ có giọng của Bi trong tay.</p>" +
+    "<p><b>Bảy năm.</b> Lâm Văn Tự mất 3,2 tỷ trong quỹ Đại Phát, nơi Khang ký báo cáo “chấp nhận toàn phần” trước ngày vỡ nợ, rồi tự kết thúc đời mình ngày 17/8/2018. Con gái ông, Lâm Thu Diệp, khiếu nại và bị bác, đổi sang họ mẹ, rồi xin vào Thiên Phú một tháng sau khi Khang làm giám đốc tài chính. Số 0903 118 412 trên đơn khiếu nại cũng là số của MC Diệp. Cô duyệt thẻ lên đài quan sát cho Khang mỗi giao thừa, nhắn anh 21 đêm “Tự gửi lời chào”, rồi hẹn một cuộc gọi cho đúng lúc anh đứng một mình trên cao, để anh rơi như cha cô đã rơi.</p>"
+};

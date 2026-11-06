@@ -30,7 +30,7 @@ export function menuHTML(save, regionId = REGIONS[0].id) {
     const i = CASES.indexOf(c);
     const st = save.stars[c.id] || 0;
     const info = `<span class="inline-flex items-center gap-2">${starsHTML(st)}<span class="text-xs text-ink-2">${st ? "đã đạt" : "chưa khép hồ sơ"}</span></span>`;
-    return `<button class="case-card" data-action="start" data-i="${i}"
+    const card = `<button class="case-card" data-action="start" data-i="${i}"
         aria-label="Vụ ${c.no}: ${esc(c.title)}">
       <span class="thumb">${ART.scene(c.locations[0].scene)}</span>
       <span class="block p-4 text-left">
@@ -40,6 +40,10 @@ export function menuHTML(save, regionId = REGIONS[0].id) {
         <span class="case-info block mt-3 text-sm">${info}</span>
       </span>
     </button>`;
+    // Vụ đã khép hồ sơ: thêm nút đọc lại cốt truyện ngay dưới thẻ (không lồng nút trong nút)
+    return st && c.story && c.story.length
+      ? `<div class="case-wrap">${card}<button class="btn btn-ghost story-btn" data-action="story" data-i="${i}" aria-label="Đọc lại cốt truyện vụ ${c.no}: ${esc(c.title)}"><i class="fa-solid fa-book-open"></i> Đọc lại cốt truyện</button></div>`
+      : card;
   }).join("");
 
   // Chỉ hiện thanh chọn vùng khi có từ hai vùng trở lên
@@ -401,6 +405,28 @@ const culpritsLine = (c) =>
     ? c.verdict.roles.map((r) => `${esc(r.label)}: <b>${esc(c.suspects.find((s) => s.id === r.who).name)}</b>`).join(" · ")
     : `Thủ phạm: <b>${esc(c.suspects.find((s) => s.id === c.culprit).name)}</b>`;
 
+/* ---------- Cốt truyện đầy đủ (kể theo thời gian) ---------- */
+// Danh sách mốc: { part } là tiêu đề chương, { at, title, text } là một mốc. Chuỗi thuần nên luôn esc()
+export function storyHTML(c) {
+  const rows = (c.story || []).map((e) => e.part
+    ? `<li class="story-part">${esc(e.part)}</li>`
+    : `<li class="story-beat"><span class="story-at">${esc(e.at)}</span><span class="story-body"><b>${esc(e.title)}</b><span>${esc(e.text)}</span></span></li>`).join("");
+  return rows ? `<ol class="story" aria-label="Cốt truyện vụ ${esc(c.title)}">${rows}</ol>` : "";
+}
+
+// Khối gập ở màn thắng/thua: bấm để đọc lại toàn bộ câu chuyện
+const storyBoxHTML = (c) => (c.story && c.story.length)
+  ? `<details class="story-box"><summary><i class="fa-solid fa-book-open"></i> Đọc lại toàn bộ cốt truyện</summary>${storyHTML(c)}</details>`
+  : "";
+
+// Hộp thoại đọc lại cốt truyện của một vụ đã giải, mở từ thẻ vụ ở menu
+export const storySheetHTML = (c) => `<div>
+  <h2>📖 Cốt truyện · ${esc(c.title)}</h2>
+  <p class="muted text-sm">Toàn bộ chuyện đã thật sự xảy ra, kể theo thời gian. Có tiết lộ lời giải.</p>
+  ${storyHTML(c)}
+  <div class="row"><button class="btn btn-ghost" data-action="close">Đóng</button></div>
+</div>`;
+
 // Vụ kế tiếp trong cùng vùng, hoặc -1
 const nextInRegion = (idx) => CASES.findIndex((x, i) => i > idx && x.region === CASES[idx].region);
 
@@ -425,6 +451,7 @@ export function verdictWinHTML(c, idx, wrong, save, hints = 0) {
     <p>${culpritsLine(c)}</p>
     ${hints ? `<p class="muted text-sm"><i class="fa-solid fa-lightbulb"></i> Gợi ý đã dùng: ${hints}</p>` : ""}
     <div class="expl">${c.explanation}</div>
+    ${storyBoxHTML(c)}
     ${finale}
     <div class="row">${next}<button class="btn btn-ghost" data-action="menu">Về danh sách vụ án</button></div>
   </div>`;
@@ -435,6 +462,7 @@ export const verdictLoseHTML = (c, idx) => `<div>
   <p>Bạn đã dùng hết ba mạng. Đây là lời giải của vụ án.</p>
   <p class="mt-1.5">${culpritsLine(c)}</p>
   <div class="expl">${c.explanation}</div>
+  ${storyBoxHTML(c)}
   <div class="row">
     <button class="btn btn-blood" data-action="start" data-i="${idx}"><i class="fa-solid fa-rotate-right"></i> Điều tra lại vụ này</button>
     <button class="btn btn-ghost" data-action="menu">Về danh sách</button>

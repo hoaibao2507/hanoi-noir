@@ -477,6 +477,10 @@ export const actions = {
     O.toast("Hướng dẫn sẽ hiện lại khi bạn vào một vụ án.");
   },
   help: () => O.showSheet(T.helpHTML()),
+  story: (d) => {
+    const c = CASES[Number(d.i)];
+    if (c) O.showSheet(T.storySheetHTML(c));
+  },
   fullscreen: async () => {
     if (!(await toggleFullscreen())) O.toast("Trình duyệt này không bật được toàn màn hình. Hãy dùng “Thêm vào Màn hình chính”.");
   },

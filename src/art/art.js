@@ -4,6 +4,7 @@ import { uid, esc, shade, lin, rect, path, circle, line, blurs, glow } from "./k
 import { sgHouse, wires, sgLobby, sgSecroom, sgGarage, sgPenthouse, sgStreet, sgLab, menuSg } from "./sg.js";
 import { sgVaniGate, sgVaniOffice, sgVaniCeo, sgVaniPrint, sgVaniDock } from "./sg-vani.js";
 import { sgBtxPad, sgBtxLobby, sgBtxHall, sgBtxLounge, sgBtxOps } from "./sg-btx.js";
+import { sgLmDeck, sgLmParty, sgLmOps, sgLmOffice, sgLmGround } from "./sg-lm.js";
 /* =====================================================================
    HANOI NOIR · Minh họa SVG
    Toàn bộ hình ảnh vẽ bằng SVG (không dùng ảnh bitmap).
@@ -113,6 +114,45 @@ const ART = (() => {
       }
       return c + rect(70, 74, 180, 44, "#05070a", 'rx="6" opacity=".85"') + `<text x="160" y="104" text-anchor="middle" font-family="monospace" font-size="20" fill="#ff8a7a" letter-spacing="3">NO SIGNAL</text>`;
     }
+    if (kind === "cam_lm_deck") {
+      let c = rect(0, 0, 320, 190, "#080b1a") + rect(0, 112, 320, 78, "#151a24") + rect(0, 88, 320, 5, "#9aa5b3") + rect(0, 112, 320, 5, "#59636f");
+      for (let i = 0; i <= 8; i++) c += rect(i * 40 - 2, 88, 4, 28, "#59636f");
+      c += circle(60, 40, 22, "#ff6a8a", 'opacity=".25"') + circle(250, 30, 14, "#5fd6ff", 'opacity=".25"') + glow(k, 60, 40, 40, "#ff6a8a", 0.3);
+      // Khang đứng trên bậu ngoài thanh ray (quay lưng), Ngân phía sau hai tay đặt lên lưng
+      c += circle(172, 56, 7, "#caa07c") + rect(163, 63, 18, 40, "#d9d5c8", 'rx="4"') + rect(164, 100, 7, 18, "#2a2d36") + rect(174, 100, 7, 18, "#2a2d36");
+      c += circle(150, 90, 7, "#d9ad88") + rect(141, 97, 17, 36, "#6b6f7a", 'rx="4"') + path("M156 106 L166 82", "none", 'stroke="#d9ad88" stroke-width="5" stroke-linecap="round"') + path("M156 112 L170 92", "none", 'stroke="#d9ad88" stroke-width="5" stroke-linecap="round"');
+      c += rect(160, 70, 24, 10, "#cfe8ff", 'rx="3" opacity=".6"') + `<g class="rain">`;
+      for (let i = 0; i < 26; i++) c += line((i * 41) % 320, (i * 57) % 170, ((i * 41) % 320) - 5, ((i * 57) % 170) + 14, "#8fb3d1", 1.1, 'opacity=".3"');
+      return c + `</g>`;
+    }
+    if (kind === "cam_lm_party") {
+      let c = rect(0, 0, 320, 190, "#0c0a14") + rect(0, 120, 320, 70, "#22160f") + rect(8, 12, 190, 64, "#14173a") + glow(k, 110, 40, 60, "#ffd45a", 0.25);
+      c += rect(224, 52, 96, 76, "#1a1230") + rect(232, 100, 36, 28, "#05080e") + rect(268, 78, 20, 50, "#4a2f1c") + rect(18, 80, 8, 70, "#07060c") + rect(0, 70, 30, 60, "#0d1118") + rect(6, 84, 18, 14, "#4fe08a", 'opacity=".6"');
+      [[70, 132, "#1c2742"], [118, 138, "#202028"], [164, 130, "#2a2230"]].forEach(([x, y, col]) => { c += circle(x, y - 22, 7, "#e6bd96") + rect(x - 8, y - 14, 16, 36, col, 'rx="4"'); });
+      return c + circle(34, 120, 6, "#d9ad88") + rect(26, 126, 16, 30, "#1d3a40", 'rx="4"') + glow(k, 160, 14, 80, "#ffd98e", 0.2);
+    }
+    if (kind === "cam_lm_ops") {
+      return rect(0, 0, 320, 190, "#12181f") + rect(0, 122, 320, 68, "#222a33") + rect(150, 14, 150, 66, "#05080e") + rect(156, 20, 40, 24, "#12304a") + rect(200, 20, 40, 24, "#1c3a2c") + rect(244, 20, 40, 24, "#2a2a40") + rect(156, 48, 40, 24, "#33281c") + rect(200, 48, 40, 24, "#2a2c32") + rect(244, 48, 40, 24, "#12304a") +
+        rect(20, 108, 150, 22, "#4a5560") + rect(34, 70, 60, 38, "#05080e") + rect(40, 76, 48, 26, "#0b1c2c") +
+        circle(124, 78, 9, "#e9c09b") + rect(112, 88, 24, 36, "#2e4b78", 'rx="4"') + rect(104, 112, 14, 10, "#e8e2d0") +
+        glow(k, 160, 14, 90, "#e8f2ff", 0.25);
+    }
+    if (kind === "cam_lm_hall78") {
+      let c = rect(0, 0, 320, 190, "#0e1219") + path("M0 190 L320 190 L240 96 L80 96 Z", "#1c2530") + rect(0, 0, 80, 190, "#1b212b") + rect(240, 0, 80, 190, "#171d27") + rect(80, 66, 160, 30, "#10151c");
+      c += rect(206, 76, 40, 66, "#05080e") + rect(210, 82, 32, 60, "#1d252e") + rect(250, 110, 52, 8, "#c9a227", 'opacity=".5"');
+      c += circle(52, 92, 6, "#d9ad88") + rect(44, 100, 16, 36, "#1b1f2b", 'rx="4"') + rect(54, 98, 6, 10, "#cfe8ff", 'rx="2"');
+      c += circle(188, 100, 6, "#cfc3a8") + rect(180, 108, 16, 30, "#2a2230", 'rx="4"') + circle(210, 104, 6, "#d9ad88") + rect(202, 112, 16, 28, "#555", 'rx="4"');
+      return c + glow(k, 160, 18, 70, "#dff3ff", 0.25);
+    }
+    if (kind === "cam_lm_ground") {
+      let c = rect(0, 0, 320, 190, "#080b18") + path("M0 0 L110 0 L120 110 L0 110 Z", "#14233a") + rect(0, 110, 320, 80, "#161c26") + line(0, 138, 320, 138, "#2c333d", 2, 'opacity=".6"');
+      c += glow(k, 220, 20, 60, "#ff6a8a", 0.3) + circle(220, 20, 14, "#ff6a8a", 'opacity=".25"');
+      for (let i = 0; i < 9; i++) c += rect(10 + i * 11, 10 + (i * 13) % 80, 6, 5, "#ffd58a", 'opacity=".4"');
+      c += path("M196 146 Q214 128 240 136 Q252 150 232 160 Q206 162 196 146 Z", "#0a0c12") + circle(214, 140, 4, "#caa07c", 'opacity=".5"');
+      c += glow(k, 215, 148, 24, "#fff7d0", 0.3) + `<g class="rain">`;
+      for (let i = 0; i < 24; i++) c += line((i * 41) % 320, (i * 57) % 170, ((i * 41) % 320) - 5, ((i * 57) % 170) + 14, "#8fb3d1", 1.1, 'opacity=".28"');
+      return c + `</g>`;
+    }
     return "";
   }
   const CAM_DEFS = (k) => blurs(k);
@@ -154,7 +194,8 @@ const ART = (() => {
   const CAM_KINDS = {
     cam_sg_lobby: 1, cam_sg_garage: 1, cam_sg_sec: 1, cam_sg_cafe: 1, cam_sg_gala: 1,
     cam_vani_gate: 1, cam_vani_office: 1, cam_vani_canteen: 1, cam_vani_alley: 1,
-    cam_btx_hall: 1, cam_btx_pad: 1, cam_btx_ops: 1, cam_btx_nosignal: 1
+    cam_btx_hall: 1, cam_btx_pad: 1, cam_btx_ops: 1, cam_btx_nosignal: 1,
+    cam_lm_deck: 1, cam_lm_party: 1, cam_lm_ops: 1, cam_lm_hall78: 1, cam_lm_ground: 1
   };
 
   // Biểu đồ thủy triều trong ngày: hai đỉnh, mức báo động và khoảng đường ngập
@@ -232,7 +273,12 @@ const ART = (() => {
     sg_btx_lobby:   { kind: "room", wall: "#1c2a40", floor: "#39434d", trim: "#070b12", lamp: "#ffd98e" },
     sg_btx_hall:    { kind: "room", wall: "#1a1426", floor: "#30221b", trim: "#07060c", lamp: "#ffd98e" },
     sg_btx_lounge:  { kind: "room", wall: "#3a2420", floor: "#3a181d", trim: "#0c0807", lamp: "#ffd98e" },
-    sg_btx_ops:     { kind: "room", wall: "#222c36", floor: "#29313a", trim: "#080b0f", lamp: "#e8f2ff" }
+    sg_btx_ops:     { kind: "room", wall: "#222c36", floor: "#29313a", trim: "#080b0f", lamp: "#e8f2ff" },
+    sg_lm_deck:     { kind: "roof", wall: "#232a35", floor: "#2a313b", trim: "#0c0f14", lamp: "#ffb347" },
+    sg_lm_party:    { kind: "room", wall: "#1a1426", floor: "#30221b", trim: "#07060c", lamp: "#ffd98e" },
+    sg_lm_ops:      { kind: "room", wall: "#222c36", floor: "#29313a", trim: "#080b0f", lamp: "#e8f2ff" },
+    sg_lm_office:   { kind: "room", wall: "#2a2f3a", floor: "#3a2c22", trim: "#0a0c12", lamp: "#ffd27a" },
+    sg_lm_ground:   { kind: "roof", wall: "#1c2a40", floor: "#2c333d", trim: "#0a0d12", lamp: "#7fc8ff" }
   };
 
   // Gradient dùng chung cho hai bên của một cảnh (tiền tố k là tiền tố cảnh + "-w")
@@ -327,7 +373,8 @@ const ART = (() => {
   const SCENES = {
     sg_lobby: sgLobby, sg_secroom: sgSecroom, sg_garage: sgGarage, sg_penthouse: sgPenthouse, sg_street: sgStreet, sg_lab: sgLab, menu_sg: menuSg,
     sg_vani_gate: sgVaniGate, sg_vani_office: sgVaniOffice, sg_vani_ceo: sgVaniCeo, sg_vani_print: sgVaniPrint, sg_vani_dock: sgVaniDock,
-    sg_btx_pad: sgBtxPad, sg_btx_lobby: sgBtxLobby, sg_btx_hall: sgBtxHall, sg_btx_lounge: sgBtxLounge, sg_btx_ops: sgBtxOps
+    sg_btx_pad: sgBtxPad, sg_btx_lobby: sgBtxLobby, sg_btx_hall: sgBtxHall, sg_btx_lounge: sgBtxLounge, sg_btx_ops: sgBtxOps,
+    sg_lm_deck: sgLmDeck, sg_lm_party: sgLmParty, sg_lm_ops: sgLmOps, sg_lm_office: sgLmOffice, sg_lm_ground: sgLmGround
   };
 
   return {

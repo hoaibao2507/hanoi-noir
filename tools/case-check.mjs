@@ -42,6 +42,12 @@ export function checkCase(c, idx = CASES.indexOf(c)) {
   const err = (m) => errors.push(m), warn = (m) => warnings.push(m);
 
   for (const f of FIELDS) if (c[f] == null || c[f] === "") err(`thiếu trường "${f}"`);
+  // Cốt truyện kể theo thời gian (src/data/stories.js): ít nhất hai chương và mười mốc, mỗi mốc có at, title, text
+  const story = Array.isArray(c.story) ? c.story : [];
+  const beats = story.filter((e) => !e.part);
+  if (story.filter((e) => e.part).length < 2 || beats.length < 10) err(`cốt truyện (stories.js) cần ≥ 2 chương và ≥ 10 mốc (đang ${story.filter((e) => e.part).length} chương, ${beats.length} mốc)`);
+  for (const e of beats) if (!e.at || !e.title || !e.text) err(`cốt truyện: mốc "${e.title || e.at || "?"}" thiếu at, title hoặc text`);
+  if (story[0] && !story[0].part) err("cốt truyện phải bắt đầu bằng một chương { part }");
   if (c.chain && !c.culprit) err('vụ một thủ phạm (chain) thiếu "culprit"');
   if (!c.chain && !c.verdict) err('cần "chain" (một thủ phạm) hoặc "verdict" (nhiều người)');
   if (c.chain && c.verdict) err('không dùng cả "chain" lẫn "verdict"');
