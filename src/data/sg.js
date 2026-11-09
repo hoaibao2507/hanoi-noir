@@ -1,11 +1,10 @@
 /* =====================================================================
    HANOI NOIR · Vùng Sài Gòn
-   Vụ 1 "Đỉnh Triều Bến Vân Đồn": ba kẻ liên đới, thủ đoạn dựng bằng đồng hồ. Vụ 2 "Mực Chưa Khô" nằm ở sg-vani.js, vụ 3 "Búp Sen Đen" ở sg-bitexco.js.
+   Vụ 1 "Đỉnh Triều Bến Vân Đồn": ba kẻ liên đới, lối xuống hầm bị mở bằng chế độ bảo trì. Vụ 2 "Mực Chưa Khô" nằm ở sg-vani.js, vụ 3 "Búp Sen Đen" ở sg-bitexco.js.
    Dùng các cơ chế mới của vùng này (xem README):
-   - deduce: ghép 2–4 hồ sơ thành kết luận; kết luận là hồ sơ mới (via: "deduce") và có thể làm đầu vào cho suy luận sau
+   - deduce: ghép đúng 2 hồ sơ thành kết luận; kết luận là hồ sơ mới (via: "deduce") và có thể làm đầu vào cho suy luận sau
    - gate: điểm điều tra chỉ hiện sau khi có một hồ sơ (thường là kết luận)
    - lock: điểm điều tra có khóa mã
-   - devices + dev: thiết bị có giờ máy lệch; hết lệch khi kết luận "by" được rút ra
    - world kind "arrive": hồ sơ chỉ có sau một mốc giờ (chờ được, tốn giờ)
    - verdict: phiên xét xử nhiều người, mỗi người một vai và một chứng cứ, kèm các câu dựng lại sự việc
    ===================================================================== */
@@ -19,13 +18,11 @@ export const SG_CASES = [
   id: "s1", no: 1, region: "sg", title: "Đỉnh Triều Bến Vân Đồn", place: "Chung cư Sao Mai Riverside · bến Vân Đồn, Quận 4",
   level: "★★★★★★★ Hốc búa", budget: 15,
   clock: { start: "21:00" },
-  // Hệ thống camera của tòa nhà chạy chậm 17 phút: giờ thật = giờ máy + 17 phút, sau khi rút ra kết luận "k_lech"
-  devices: { dvr: { name: "camera tòa nhà", off: 17, by: "k_lech" } },
   world: [
     { at: "02:30", kind: "arrive", id: "cdr_tham", text: "Nhà mạng gửi sao kê khẩn của số điện thoại Thắm theo yêu cầu của cơ quan điều tra." },
     { at: "04:00", kind: "arrive", id: "sao_ke_gh", text: "Ngân hàng phản hồi yêu cầu khẩn: sao kê tài khoản Gia Hòa Capital đã có." },
   ],
-  intro: "Tối thứ Bảy, triều cường đạt đỉnh lúc 19h20. Đường bến Vân Đồn ngập tới bắp chân, hầm B1 của chung cư Sao Mai Riverside ngập hơn nửa mét. Lúc 20h06, bác Bảy Lành, thợ điện nước của tòa nhà, xuống kiểm tra máy bơm thì thấy ông Đoàn Văn Châu — chủ tịch Châu Phát Logistics, ở căn penthouse tầng 27 — nổi sấp trong nước cạnh chiếc Mercedes của ông. Ban quản lý nói ông xuống hầm xem xe lúc nước dâng rồi trượt chân: một tai nạn do triều cường. Cho đến khi pháp y gọi điện cho cảnh sát. Bạn đến lúc 21h. Camera, nhật ký thẻ, sao kê cuộc gọi — ai cũng mang theo giấy tờ chứng minh mình ở nơi khác, và có những giấy tờ không thể cùng đúng. Không phải con số nào trong tòa nhà này cũng đáng tin.",
+  intro: "Tối thứ Bảy, triều cường đạt đỉnh lúc 19h20. Đường bến Vân Đồn ngập tới bắp chân, hầm B1 của chung cư Sao Mai Riverside ngập hơn nửa mét. Lúc 20h06, bác Bảy Lành, thợ điện nước của tòa nhà, xuống kiểm tra máy bơm thì thấy ông Đoàn Văn Châu — chủ tịch Châu Phát Logistics, ở căn penthouse tầng 27 — nổi sấp trong nước cạnh chiếc Mercedes của ông. Ban quản lý nói ông xuống hầm xem xe lúc nước dâng rồi trượt chân: một tai nạn do triều cường. Cho đến khi pháp y gọi điện cho cảnh sát. Bạn đến lúc 21h. Camera, nhật ký thẻ, sao kê cuộc gọi — ai cũng mang theo giấy tờ chứng minh mình ở nơi khác, và có những giấy tờ không thể cùng đúng. Không phải lời khai nào trong tòa nhà này cũng đáng tin.",
   suspects: [
     { id: "vu", name: "Vũ", role: "Phó tổng giám đốc tài chính · 41 tuổi", bio: "Phụ trách sổ sách Châu Phát. Thứ Hai này công ty bị kiểm toán độc lập vào cuộc.",
       look: { skin: "#e8bf98", hair: "short", hc: "#222", top: "#1f3a5f", acc: "tie", ac: "#8e2c2c" } },
@@ -78,8 +75,8 @@ export const SG_CASES = [
       text: "Ngân khai cô dự tiệc từ thiện “Mái ấm mùa nước nổi” ở khách sạn Quận 1 từ 18h30 đến 22h và phát biểu lúc 18h55. “Khoảng 19h30 Thắm gọi báo đã giao xong hồ sơ cho anh Châu và đang ra về; tôi ra ngoài nghe vài phút rồi vào lại.” Cô nói cô không liên lạc gì với ông Châu từ chiều và không biết ông xuống hầm. Cô là luật sư riêng của ông bảy năm; mọi hợp đồng lớn đều qua tay cô.",
       visual: { k: "who", id: "ngan" },
       alibi: { who: "ngan", from: "18:30", to: "22:00", at: "Tiệc từ thiện · khách sạn Q1" } },
-    { id: "loi_hai", cost: 1, type: "Lời khai", title: "Hải: ngồi trực, giờ camera “tự nhảy”",
-      text: "Hải khai anh ngồi trong phòng bảo vệ suốt từ 19h đến 20h, chỉ nhìn màn hình. Giờ camera “có thể lệch vì thứ Năm mất điện, máy tự nhảy giờ”, anh chưa kịp chỉnh. Lúc 19h21 anh bật chế độ bảo trì cửa thang bộ B1 vì bác Lành gọi báo máy bơm kẹt, cần xuống gấp; “quên tắt, 19h44 mới nhớ tắt”. Anh không biết ai xuống hầm vì mải theo dõi bảng báo ngập, và chưa gặp ông Châu tối nay.",
+    { id: "loi_hai", cost: 1, type: "Lời khai", title: "Hải: ngồi trực, camera CAM-3 “hỏng vì mất điện”",
+      text: "Hải khai anh ngồi trong phòng bảo vệ suốt từ 19h đến 20h, chỉ nhìn màn hình. Camera CAM-3 trước cửa thang bộ B1 “mất tín hiệu từ tối nay, chắc do thứ Năm mất điện làm hỏng đường truyền”, anh chưa kịp gọi thợ. Lúc 19h21 anh bật chế độ bảo trì cửa thang bộ B1 vì bác Lành gọi báo máy bơm kẹt, cần xuống gấp; “quên tắt, 19h44 mới nhớ tắt”. Anh không biết ai xuống hầm vì mải theo dõi bảng báo ngập, và chưa gặp ông Châu tối nay.",
       visual: { k: "who", id: "hai" },
       alibi: { who: "hai", from: "19:00", to: "20:00", at: "Phòng bảo vệ" } },
     { id: "loi_lanh", cost: 1, type: "Lời khai", title: "Bác Lành: Hải gọi lúc 20h",
@@ -87,25 +84,25 @@ export const SG_CASES = [
       visual: { k: "who", id: "lanh" },
       alibi: { who: "lanh", from: "19:00", to: "20:00", at: "Nhà riêng · gần tòa nhà" } },
 
-    /* ---------- Camera (giờ máy: chậm 17 phút) ---------- */
-    { id: "cam_sanh", cost: 2, type: "Camera", title: "Camera sảnh (giờ trên màn hình)",
-      text: "Camera sảnh, giờ ghi trên màn hình: 18:03 Trang rời thang máy, ra cửa chính, quệt nước mắt. 18:58 Thắm bước ra từ thang máy, đứng gần quầy lễ tân bấm điện thoại. 19:08 Thắm rời khung hình theo hành lang cạnh thang bộ. 19:17 Thắm xuất hiện lại từ hành lang, kéo mũ áo mưa vàng chanh; 19:18 cô ra cửa chính. 19:46 bác Lành áo mưa xanh lá bước vào sảnh. Trong khoảng 19:08–19:46, không ai khác đi vào hành lang cạnh thang bộ.",
-      visual: { k: "cam", scene: "cam_sg_lobby", time: "18:58", cam: "CAM-1 SẢNH · giờ máy", alt: "Thắm đứng ở sảnh lúc 18:58 theo giờ máy" },
+    /* ---------- Camera ---------- */
+    { id: "cam_sanh", cost: 2, type: "Camera", title: "Camera sảnh (giờ mạng, chính xác)",
+      text: "Camera sảnh đồng bộ giờ mạng nên chính xác. 18:20 Trang rời thang máy, ra cửa chính, quệt nước mắt. 19:15 Thắm bước ra từ thang máy, đứng gần quầy lễ tân bấm điện thoại. 19:25 Thắm rời khung hình theo hành lang cạnh thang bộ. 19:34 Thắm xuất hiện lại từ hành lang, kéo mũ áo mưa vàng chanh; 19:35 cô ra cửa chính. 20:03 bác Lành áo mưa xanh lá bước vào sảnh. Trong khoảng 19:25–20:03, không ai khác đi vào hành lang cạnh thang bộ.",
+      visual: { k: "cam", scene: "cam_sg_lobby", time: "19:15", cam: "CAM-1 SẢNH · giờ mạng", alt: "Thắm đứng ở sảnh lúc 19:15" },
       spans: [
-        { who: "trang", from: "18:03", to: "18:04", at: "Sảnh chung cư", dev: "dvr" },
-        { who: "tham", from: "18:58", to: "19:08", at: "Sảnh chung cư", dev: "dvr" },
-        { who: "tham", from: "19:08", to: "19:17", at: "Ngoài tầm camera sảnh", dev: "dvr" },
-        { who: "tham", from: "19:17", to: "19:18", at: "Sảnh chung cư", dev: "dvr" },
-        { who: "lanh", from: "19:46", to: "19:47", at: "Sảnh chung cư", dev: "dvr" }
+        { who: "trang", from: "18:20", to: "18:21", at: "Sảnh chung cư" },
+        { who: "tham", from: "19:15", to: "19:25", at: "Sảnh chung cư" },
+        { who: "tham", from: "19:25", to: "19:34", at: "Ngoài tầm camera sảnh" },
+        { who: "tham", from: "19:34", to: "19:35", at: "Sảnh chung cư" },
+        { who: "lanh", from: "20:03", to: "20:04", at: "Sảnh chung cư" }
       ] },
-    { id: "cam_ham", cost: 2, type: "Camera", title: "Camera hầm B1 (giờ trên màn hình)",
-      text: "Camera hầm B1, giờ ghi trên màn hình: 19:07 ông Châu bước ra từ thang riêng, đi về phía dãy xe; cột bê tông che khuất ô số 07. Từ 19:00 đến 19:50 không có xe hay người nào xuống dốc hầm, và tấm chắn lũ ở miệng dốc vẫn nguyên vị trí. Sau đó ông Châu không quay lại thang riêng trong khung hình.",
-      visual: { k: "cam", scene: "cam_sg_garage", time: "19:07", cam: "CAM-2 HẦM B1 · giờ máy", alt: "Ông Châu bước ra từ thang riêng ở hầm B1 lúc 19:07 theo giờ máy" },
-      spans: [{ from: "19:07", to: "19:08", at: "Hầm B1", dev: "dvr" }] },
-    { id: "cam_bv", cost: 1, type: "Camera", title: "Camera phòng bảo vệ (giờ trên màn hình)",
-      text: "Camera phòng bảo vệ, giờ ghi trên màn hình: từ 18:43 đến 19:50 anh Hải ngồi tại bàn điều khiển, không rời ghế. 19:04 anh gõ vào máy chủ quản lý và mở màn hình “cửa thang bộ B1”. 19:27 anh thao tác lần nữa trên cùng màn hình rồi xem điện thoại. 19:52 anh nghe điện thoại, vớ áo mưa chạy ra ngoài.",
-      visual: { k: "cam", scene: "cam_sg_sec", time: "19:04", cam: "CAM-S PHÒNG BẢO VỆ · giờ máy", alt: "Hải ngồi tại máy chủ quản lý lúc 19:04 theo giờ máy" },
-      spans: [{ who: "hai", from: "18:43", to: "19:50", at: "Phòng bảo vệ", dev: "dvr" }] },
+    { id: "cam_ham", cost: 2, type: "Camera", title: "Camera hầm B1 (giờ mạng, chính xác)",
+      text: "Camera hầm B1 đồng bộ giờ mạng nên chính xác. 19:24 ông Châu bước ra từ thang riêng, đi về phía dãy xe; cột bê tông che khuất ô số 07. Từ 19:17 đến 20:07 không có xe hay người nào xuống dốc hầm, và tấm chắn lũ ở miệng dốc vẫn nguyên vị trí. Sau đó ông Châu không quay lại thang riêng trong khung hình.",
+      visual: { k: "cam", scene: "cam_sg_garage", time: "19:24", cam: "CAM-2 HẦM B1 · giờ mạng", alt: "Ông Châu bước ra từ thang riêng ở hầm B1 lúc 19:24" },
+      spans: [{ from: "19:24", to: "19:25", at: "Hầm B1" }] },
+    { id: "cam_bv", cost: 1, type: "Camera", title: "Camera phòng bảo vệ (giờ mạng, chính xác)",
+      text: "Camera phòng bảo vệ đồng bộ giờ mạng nên chính xác: từ 19:00 đến 20:07 anh Hải ngồi tại bàn điều khiển, không rời ghế. 19:21 anh gõ vào máy chủ quản lý và mở màn hình “cửa thang bộ B1”. 19:44 anh thao tác lần nữa trên cùng màn hình rồi xem điện thoại. 20:09 anh nghe điện thoại, vớ áo mưa chạy ra ngoài.",
+      visual: { k: "cam", scene: "cam_sg_sec", time: "19:21", cam: "CAM-S PHÒNG BẢO VỆ · giờ mạng", alt: "Hải ngồi tại máy chủ quản lý lúc 19:21" },
+      spans: [{ who: "hai", from: "19:00", to: "20:07", at: "Phòng bảo vệ" }] },
     { id: "cam_quan", cost: 1, type: "Camera", title: "Camera quán cà phê góc ngã tư",
       text: "Đầu ghi của quán đồng bộ giờ mạng nên giờ chính xác. 19:37 một người mặc áo mưa vàng chanh lội nước từ hướng cổng tòa nhà tới ngã tư, thở dốc, dừng ngay dưới cột điện. 19:38 người đó lên một chiếc xe Grab. Camera quán không phủ phần phố còn lại.",
       visual: { k: "cam", scene: "cam_sg_cafe", time: "19:37", cam: "CAM QUÁN CÀ PHÊ · giờ chuẩn", alt: "Người áo mưa vàng lội nước tới ngã tư lúc 19:37" },
@@ -138,11 +135,11 @@ export const SG_CASES = [
         { who: "lanh", from: "20:06", to: "20:07", at: "Cửa thang bộ B1" }
       ] },
     { id: "dvr_log", cost: 1, type: "Hồ sơ", title: "Nhật ký hệ thống đầu ghi hình",
-      text: "Nhật ký của chính chiếc đầu ghi camera. 16:48 (giờ máy) có một lần đổi giờ thủ công: từ 17:05:12 sang 16:48:12, tài khoản admin_hai — lùi 17 phút. 19:08 (giờ máy) CAM-3, camera trước cửa thang bộ B1 phía sảnh, mất tín hiệu; 19:52 (giờ máy) có tín hiệu trở lại. Trong bảy ngày qua không có sự kiện mất điện nào.",
-      visual: { k: "paper", alt: "Nhật ký hệ thống đầu ghi hình", title: "NHẬT KÝ ĐẦU GHI · GIỜ MÁY",
-        rows: ["16:48 · Đổi giờ thủ công · admin_hai", "17:05:12 → 16:48:12 (lùi 17 phút)", "19:08 · CAM-3 mất tín hiệu", "19:52 · CAM-3 có tín hiệu lại", "7 ngày qua: không mất điện"] },
-      gate: "k_lech",
-      spans: [{ from: "19:08", to: "19:52", at: "CAM-3 trước cửa thang bộ B1 (mất tín hiệu)", dev: "dvr" }] },
+      text: "Nhật ký của chính chiếc đầu ghi camera, giờ mạng chính xác. 19:25 CAM-3, camera trước cửa thang bộ B1 phía sảnh, bị ngắt cổng tín hiệu bằng lệnh thủ công của tài khoản admin_hai; 20:09 cổng được bật lại, cũng bằng admin_hai. Trong bảy ngày qua không có sự kiện mất điện hay đứt đường truyền nào.",
+      visual: { k: "paper", alt: "Nhật ký hệ thống đầu ghi hình", title: "NHẬT KÝ ĐẦU GHI · GIỜ MẠNG",
+        rows: ["19:25 · Ngắt cổng CAM-3 · admin_hai", "Lệnh thủ công, không phải sự cố", "20:09 · Bật lại cổng CAM-3 · admin_hai", "7 ngày qua: điện và mạng ổn định"] },
+      gate: "k_override",
+      spans: [{ from: "19:25", to: "20:09", at: "CAM-3 trước cửa thang bộ B1 (mất tín hiệu)" }] },
     { id: "cua_thangbo", cost: 1, type: "Vật chứng", title: "Cửa thang bộ B1",
       text: "Cửa thang bộ B1 là lối duy nhất từ sảnh xuống hầm không qua thang máy. Phía hầm mở ra không cần thẻ. Từ sảnh xuống phải quẹt thẻ và mỗi lượt đều được ghi. Nhưng bộ điều khiển có chế độ bảo trì cho thợ ra vào tự do: khi bật, cửa không khóa và không ghi lượt nào, và chỉ tài khoản quản trị mới bật được. Tay nắm phía hầm dính một sợi nylon vàng chanh và vệt nước.",
       visual: { k: "paper", alt: "Cửa thang bộ B1", title: "CỬA THANG BỘ B1",
@@ -213,8 +210,8 @@ export const SG_CASES = [
       gate: "k_gia_hoa" },
 
     /* ---------- Lời khai mở bằng cách đưa chứng cứ ---------- */
-    { id: "hai_thu", cost: 0, via: "confront", type: "Lời khai", title: "Hải thừa nhận: chỉnh giờ và mở lối",
-      text: "Hải thừa nhận anh chỉnh lùi giờ đầu ghi 17 phút và rút tín hiệu CAM-3, theo lời nhờ của một người phụ nữ tự xưng “chị Gia Hòa” liên lạc qua Zalo. Hai trăm năm mươi triệu được chuyển vào tài khoản vợ anh hôm thứ Sáu. Anh khẳng định không biết sẽ có người chết, và không biết người phụ nữ đó là ai.",
+    { id: "hai_thu", cost: 0, via: "confront", type: "Lời khai", title: "Hải thừa nhận: mở lối và ngắt camera",
+      text: "Hải thừa nhận anh bật chế độ bảo trì cửa thang bộ B1 và ngắt tín hiệu CAM-3 từ 19:25 tới 20:09, theo lời nhờ của một người phụ nữ tự xưng “chị Gia Hòa” liên lạc qua Zalo. Hai trăm năm mươi triệu được chuyển vào tài khoản vợ anh hôm thứ Sáu. Anh khẳng định không biết sẽ có người chết, và không biết người phụ nữ đó là ai.",
       visual: { k: "who", id: "hai" } },
     { id: "vu_thu", cost: 0, via: "confront", type: "Lời khai", title: "Vũ thừa nhận: nói dối về nơi ở",
       text: "Vũ thừa nhận anh biển thủ 18 tỷ và đang cố che trước đợt kiểm toán. Lời khai “ở văn phòng” là dối: tối nay anh ở căn hộ Thảo Điền cùng Trang, hai người ngồi ăn tối từ trước 19h. Anh giấu vì sợ lộ cả chuyện tiền lẫn chuyện của hai người.",
@@ -224,27 +221,28 @@ export const SG_CASES = [
       visual: { k: "who", id: "trang" } },
 
     /* ---------- Kết luận (suy luận từ các hồ sơ ở trên; xem "deduce") ---------- */
-    { id: "k_lech", cost: 0, via: "deduce", type: "Kết luận", title: "Camera tòa nhà chạy chậm 17 phút",
-      text: "Cùng một sự kiện, giờ trên camera luôn nhỏ hơn giờ trên nhật ký thang máy, thẻ và sổ khách đúng 17 phút. Hệ thống camera của tòa nhà chạy chậm 17 phút: giờ thật = giờ máy + 17 phút. Mọi mốc lấy từ camera đã được hiệu chỉnh trong tab Thời gian. Nhật ký của chính chiếc đầu ghi hình đã mở ra ở phòng bảo vệ.",
-      visual: { k: "skew" } },
     { id: "k_override", cost: 0, via: "deduce", type: "Kết luận", title: "Lối xuống hầm không để lại dấu",
-      text: "Từ 19:21 đến 19:44 cửa thang bộ B1 ở chế độ bảo trì: không khóa, không ghi lượt nào. Chỉ tài khoản quản trị admin_hai bật được chế độ này, và không có lượt quẹt nào ở cửa thang bộ các tầng khác. Lúc đó có thể đi từ sảnh xuống hầm mà không để lại dấu thẻ.",
+      text: "Từ 19:21 đến 19:44 cửa thang bộ B1 ở chế độ bảo trì: không khóa, không ghi lượt nào. Chỉ tài khoản quản trị admin_hai bật được chế độ này, và không có lượt quẹt nào ở cửa thang bộ các tầng khác. Lúc đó có thể đi từ sảnh xuống hầm mà không để lại dấu thẻ. Nhật ký của chính chiếc đầu ghi hình đã mở ra ở phòng bảo vệ.",
       visual: { k: "paper", alt: "Kết luận: lối xuống hầm", title: "KẾT LUẬN",
         rows: ["19:21–19:44: cửa thang bộ B1 mở", "tự do, không ghi lượt", "Chỉ tài khoản admin_hai bật được"], stamp: "ĐÃ XÁC LẬP" } },
-    { id: "k_hai_dvr", cost: 0, via: "deduce", type: "Kết luận", title: "Giờ camera bị chỉnh có chủ ý bởi tài khoản của Hải",
-      text: "Hải khai giờ camera “tự nhảy” vì mất điện thứ Năm. Nhưng nhật ký đầu ghi không có lần mất điện nào trong bảy ngày. Chỉ có một lần đổi giờ thủ công lúc 17:05 hôm nay, lùi 17 phút, do admin_hai thực hiện — trước cả khi nước ngập, và camera trước cửa thang bộ B1 mất tín hiệu đúng khoảng 19:25–20:09 giờ thật.",
-      visual: { k: "paper", alt: "Kết luận: giờ camera bị chỉnh", title: "KẾT LUẬN",
-        rows: ["Không có sự cố điện nào", "17:05 hôm nay: admin_hai lùi giờ 17 phút", "CAM-3 mất tín hiệu 19:25–20:09"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_hai_dvr", cost: 0, via: "deduce", type: "Kết luận", title: "CAM-3 bị ngắt có chủ ý bằng tài khoản của Hải",
+      text: "Hải khai CAM-3 “mất tín hiệu” vì thứ Năm mất điện làm hỏng đường truyền. Nhưng nhật ký đầu ghi không có lần mất điện hay đứt đường truyền nào trong bảy ngày. Cổng của CAM-3 bị ngắt bằng lệnh thủ công của admin_hai lúc 19:25 và chỉ được bật lại lúc 20:09 — đúng quãng cửa thang bộ B1 đang ở chế độ bảo trì.",
+      visual: { k: "paper", alt: "Kết luận: CAM-3 bị ngắt có chủ ý", title: "KẾT LUẬN",
+        rows: ["Không có sự cố điện, đường truyền", "19:25: admin_hai ngắt cổng CAM-3", "20:09: admin_hai bật lại"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_hai_bat", cost: 0, via: "deduce", type: "Kết luận", title: "Chính Hải bấm bật và tắt chế độ bảo trì",
-      text: "Sau hiệu chỉnh, camera phòng bảo vệ ghi Hải gõ vào máy chủ quản lý lúc 19:21 và 19:44 — đúng hai thời điểm bật và tắt chế độ bảo trì. Không ai mượn tài khoản của anh: chính tay anh mở lối xuống hầm.",
+      text: "Camera phòng bảo vệ ghi Hải gõ vào máy chủ quản lý lúc 19:21 và 19:44 — đúng hai thời điểm bật và tắt chế độ bảo trì. Không ai mượn tài khoản của anh: chính tay anh mở lối xuống hầm.",
       visual: { k: "paper", alt: "Kết luận: Hải bật bảo trì", title: "KẾT LUẬN",
         rows: ["Camera: Hải gõ máy lúc 19:21 và 19:44", "Nhật ký: bật 19:21, tắt 19:44", "Hai mốc trùng khít"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_hai_noi_doi", cost: 0, via: "deduce", type: "Kết luận", title: "Lý do mở cửa lúc 19h21 là bịa",
       text: "Hải nói bác Lành gọi báo máy bơm kẹt trước 19:21 nên anh mở cửa cho bác xuống. Bác Lành khẳng định cuộc gọi đầu tiên tối nay là của Hải lúc 20:00, và bác chưa hề gọi cho ai. Lý do bật chế độ bảo trì mà Hải đưa ra không có thật.",
       visual: { k: "paper", alt: "Kết luận: lời khai Hải bị bác", title: "KẾT LUẬN",
         rows: ["Hải: Lành gọi báo bơm kẹt", "Lành: cuộc gọi đầu tiên là của Hải, 20:00", "Lý do mở cửa lúc 19:21: không có thật"], stamp: "MÂU THUẪN" } },
+    { id: "k_loi_xuong", cost: 0, via: "deduce", type: "Kết luận", title: "Thang riêng và dốc hầm: không ai khác xuống hầm",
+      text: "Thang riêng: nhật ký ra vào chỉ có thẻ ông Châu xuống B1 lúc 19:24. Dốc hầm: camera hầm không thấy ai xuống từ 19:17 đến 20:07, tấm chắn lũ còn nguyên. Hai trong ba lối xuống hầm B1 không đưa thêm ai ngoài ông Châu xuống.",
+      visual: { k: "paper", alt: "Kết luận: hai lối xuống hầm", title: "KẾT LUẬN",
+        rows: ["Thang riêng: chỉ thẻ ông Châu 19:24", "Dốc hầm: không ai xuống 19:17–20:07", "Còn lại một lối: thang bộ"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_cua_so", cost: 0, via: "deduce", type: "Kết luận", title: "Chỉ một người đi được xuống hầm lúc ông Châu bị hại",
-      text: "Có ba lối xuống B1. Thang riêng: nhật ký chỉ có thẻ ông Châu lúc 19:24. Dốc hầm: camera hầm không thấy ai xuống từ 19:17 đến 20:07 giờ thật, tấm chắn lũ còn nguyên. Thang bộ: ở chế độ bảo trì không ghi thẻ, nhưng muốn xuống phải đi qua hành lang cạnh thang bộ ở sảnh — và camera sảnh, đã hiệu chỉnh, ghi duy nhất Thắm vào hành lang lúc 19:25 và chỉ trở ra lúc 19:34: chín phút ngay sau khi ông Châu xuống hầm.",
+      text: "Có ba lối xuống B1. Thang riêng và dốc hầm không đưa ai khác xuống. Thang bộ: ở chế độ bảo trì không ghi thẻ, nhưng muốn xuống phải đi qua hành lang cạnh thang bộ ở sảnh — và camera sảnh ghi duy nhất Thắm vào hành lang lúc 19:25 và chỉ trở ra lúc 19:34: chín phút ngay sau khi ông Châu xuống hầm.",
       visual: { k: "paper", alt: "Kết luận: cửa sổ giết người", title: "KẾT LUẬN",
         rows: ["Thang riêng: chỉ thẻ ông Châu 19:24", "Dốc hầm: không ai xuống", "Thang bộ: chỉ Thắm, 19:25–19:34"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_das", cost: 0, via: "deduce", type: "Kết luận", title: "Cuộc gọi 19h30 phát ra từ trong hầm B1",
@@ -252,10 +250,18 @@ export const SG_CASES = [
       visual: { k: "paper", alt: "Kết luận: Thắm ở hầm B1", title: "KẾT LUẬN",
         rows: ["Trạm SMR-DAS-B1 chỉ phủ hầm B1", "Máy Thắm ở B1: 19:27–19:33", "Cuộc gọi 19:30 bắt đầu từ trong hầm"], stamp: "ĐÃ XÁC LẬP" },
       spans: [{ who: "tham", from: "19:27", to: "19:33", at: "Hầm B1" }] },
+    { id: "k_uot_cao", cost: 0, via: "deduce", type: "Kết luận", title: "Quần Thắm ướt cao hơn mực nước ngoài đường 20 cm",
+      text: "Ống quần Thắm ướt tới 55 cm, trong khi cô chủ quán đánh dấu nước ngoài đường tối nay chỉ khoảng 35 cm. Lời giải thích “phải lội nước ngoài đường” của Thắm không đủ để làm ướt quần tới độ cao ấy.",
+      visual: { k: "paper", alt: "Kết luận: vết ướt cao hơn nước ngoài đường", title: "KẾT LUẬN",
+        rows: ["Quần Thắm ướt tới 55 cm", "Nước ngoài đường: khoảng 35 cm", "Chênh 20 cm: lời giải thích không đủ"], stamp: "MÂU THUẪN" } },
     { id: "k_ngap_nuoc", cost: 0, via: "deduce", type: "Kết luận", title: "Vết ướt ở quần Thắm không thể từ ngoài đường",
       text: "Ống quần Thắm ướt tới 55 cm. Nước ngoài đường tối nay chỉ khoảng 35 cm, còn nước ở chỗ ông Châu nổi là 58 cm. Vết ướt cao như vậy chỉ có thể có từ trong hầm B1.",
       visual: { k: "paper", alt: "Kết luận: vết ướt", title: "KẾT LUẬN",
         rows: ["Quần Thắm ướt tới 55 cm", "Nước ngoài đường: 35 cm", "Nước hầm B1: 58 cm"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_soi_giong", cost: 0, via: "deduce", type: "Kết luận", title: "Sợi nylon vàng chanh ở móng tay nạn nhân và ở cửa thang bộ là một",
+      text: "Sợi nylon vàng chanh dưới móng tay phải ông Châu và sợi dính trên tay nắm phía hầm của cửa thang bộ B1 là cùng một loại. Người vừa đi qua cửa thang bộ cũng là người bị ông Châu cào trúng.",
+      visual: { k: "paper", alt: "Kết luận: cùng một sợi nylon", title: "KẾT LUẬN",
+        rows: ["Móng tay nạn nhân: nylon vàng chanh", "Tay nắm cửa thang bộ: nylon vàng chanh", "Cùng một loại"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_soi_vang", cost: 0, via: "deduce", type: "Kết luận", title: "Áo mưa vàng chanh là của Thắm",
       text: "Sợi nylon vàng chanh dưới móng tay nạn nhân và trên tay nắm cửa thang bộ B1 là cùng một loại. Camera sảnh ghi trong tòa nhà tối đó chỉ Thắm mặc áo mưa vàng chanh; bác Lành mặc áo mưa xanh lá.",
       visual: { k: "paper", alt: "Kết luận: sợi nylon vàng", title: "KẾT LUẬN",
@@ -293,17 +299,17 @@ export const SG_CASES = [
   // Ghép hồ sơ thành kết luận: "needs" là tập hồ sơ (không phân biệt thứ tự), "gives" là kết luận nhận được.
   // Một kết luận có thể có nhiều lối đi; kết luận cũng là hồ sơ nên làm đầu vào cho suy luận sau.
   deduce: [
-    { needs: ["cam_sanh", "nk_ravao"], gives: "k_lech" },
-    { needs: ["cam_sanh", "so_khach"], gives: "k_lech" },
-    { needs: ["cam_ham", "nk_ravao"], gives: "k_lech" },
     { needs: ["nk_ravao", "cua_thangbo"], gives: "k_override" },
     { needs: ["dvr_log", "loi_hai"], gives: "k_hai_dvr" },
-    { needs: ["k_lech", "cam_bv", "nk_ravao"], gives: "k_hai_bat" },
+    { needs: ["cam_bv", "nk_ravao"], gives: "k_hai_bat" },
     { needs: ["loi_hai", "loi_lanh"], gives: "k_hai_noi_doi" },
-    { needs: ["k_lech", "cam_sanh", "nk_ravao", "cam_ham"], gives: "k_cua_so" },
+    { needs: ["cam_ham", "nk_ravao"], gives: "k_loi_xuong" },
+    { needs: ["k_loi_xuong", "cam_sanh"], gives: "k_cua_so" },
     { needs: ["cdr_tham", "loi_lanh"], gives: "k_das" },
-    { needs: ["hien_truong", "quan_cafe", "loi_tham"], gives: "k_ngap_nuoc" },
-    { needs: ["phap_y", "cua_thangbo", "cam_sanh"], gives: "k_soi_vang" },
+    { needs: ["quan_cafe", "loi_tham"], gives: "k_uot_cao" },
+    { needs: ["k_uot_cao", "hien_truong"], gives: "k_ngap_nuoc" },
+    { needs: ["phap_y", "cua_thangbo"], gives: "k_soi_giong" },
+    { needs: ["k_soi_giong", "cam_sanh"], gives: "k_soi_vang" },
     { needs: ["grab_food", "thuy_trieu"], gives: "k_vu_trang" },
     { needs: ["dkkd", "hop_dong_vay"], gives: "k_gia_hoa" },
     { needs: ["dkkd", "ket_sat"], gives: "k_gia_hoa" },
@@ -358,18 +364,12 @@ export const SG_CASES = [
         hint: "Tìm kết luận về người có quyền quản trị đầu ghi và kiểm soát ra vào." }
     ],
     facts: [
-      { key: "skew", ask: "Đồng hồ của hệ thống camera tòa nhà sai thế nào?", right: "slow17",
-        options: [
-          { id: "fast17", label: "Nhanh 17 phút" }, { id: "slow17", label: "Chậm 17 phút" },
-          { id: "slow7", label: "Chậm 7 phút" }, { id: "ok", label: "Chính xác, chỉ lời khai bị sai" }
-        ],
-        hint: "So giờ camera với nhật ký thang máy, thẻ hoặc sổ khách cho cùng một sự kiện." },
-      { key: "window", ask: "Ông Châu bị hại trong khoảng nào (giờ thật)?", right: "w1925",
+      { key: "window", ask: "Ông Châu bị hại trong khoảng nào?", right: "w1925",
         options: [
           { id: "w1840", label: "18:40–19:00" }, { id: "w1925", label: "19:25–19:34" },
           { id: "w1938", label: "19:38–19:50" }, { id: "w2000", label: "20:00–20:10" }
         ],
-        hint: "Ông xuống hầm lúc nào, và camera sảnh (đã hiệu chỉnh) ghi ai vắng mặt trong bao lâu?" },
+        hint: "Ông xuống hầm lúc nào, và camera sảnh ghi ai vắng mặt trong bao lâu?" },
       { key: "entry", ask: "Kẻ ra tay xuống hầm B1 bằng lối nào?", right: "stairs",
         options: [
           { id: "lift", label: "Thang riêng của nạn nhân" }, { id: "stairs", label: "Cửa thang bộ B1 trong chế độ bảo trì" },
@@ -379,7 +379,7 @@ export const SG_CASES = [
     ]
   },
 
-  explanation: "<p><b>Một vụ tai nạn được dựng bằng đồng hồ.</b> Ông Châu không trượt chân. Thắm đánh ông choáng rồi dìm xuống nước ngập ở hầm B1 trong khoảng 19h27–19h33; Hải mở sẵn lối xuống hầm và chỉnh lùi giờ camera 17 phút; Ngân dựng kế hoạch, hưởng lợi, và đứng sau tấm ngoại phạm “Thắm đã ra về”.</p><p><b>Chiếc đồng hồ chậm 17 phút.</b> Camera ghi Trang ra cổng lúc 18:03 khi sổ khách ghi 18:20; ghi Thắm ra khỏi thang máy lúc 18:58 khi nhật ký ghi 19:15. Cùng một sự kiện, camera luôn sớm hơn 17 phút. Sau hiệu chỉnh, quãng Thắm “biến mất” khỏi sảnh chín phút (19:25–19:34) nằm ngay sau khi ông Châu xuống hầm (19:24); trước hiệu chỉnh nó lùi sớm 17 phút, tức là trước cả khi ông xuống hầm, nên vô hại.</p><p><b>Vòng kín xuống hầm.</b> Thang riêng chỉ có thẻ ông Châu. Dốc hầm không ai xuống. Thang bộ đang ở chế độ bảo trì nên không ghi thẻ, nhưng muốn xuống phải đi qua hành lang ở sảnh — và camera sảnh chỉ ghi Thắm. Hải bật chế độ bảo trì lúc 19:21 và tắt lúc 19:44; camera phòng bảo vệ (đã hiệu chỉnh) ghi đúng anh bấm, và anh ngồi tại ghế suốt thời gian đó nên không thể là người xuống hầm.</p><p><b>Dấu vết không nói dối.</b> Quần Thắm ướt 55 cm, trong khi nước ngoài đường chỉ 35 cm và nước hầm B1 là 58 cm. Sợi nylon vàng chanh dưới móng tay nạn nhân khớp áo mưa của cô, không phải áo xanh của bác Lành. Điện thoại cô kết nối trạm sóng trong nhà SMR-DAS-B1 từ 19:27 đến 19:33. Cô khai gọi cho Ngân từ ngã tư lúc 19:30, và Ngân xác nhận — nhưng cuộc gọi đó bắt đầu từ trong hầm. Hai lời khai chỉ dựa vào nhau.</p><p><b>Chủ mưu.</b> Gia Hòa Capital cho Châu Phát vay 90 tỷ do Thắm đứng tên, nhưng điện thoại, email và hợp đồng đều là của văn phòng luật sư Ngân. Điều 12 trao 51% cổ phần cho Gia Hòa nếu ông Châu chết trước 30/11, và ông đã ghi sẵn trong két sắt rằng sẽ cho Ngân thôi việc vào thứ Hai. Thứ Sáu, Gia Hòa trả 250 triệu cho vợ Hải và 180 triệu cho Thắm. Ngân gọi ông Châu lúc 19:10 rồi khai rằng không hề liên lạc với ông.</p><p><b>Những người bị loại.</b> Vũ biển thủ 18 tỷ và Trang nợ cờ bạc, nhưng cả hai ở căn hộ Thảo Điền lúc 19:32 theo tài xế Grab Food; từ đó tới bến Vân Đồn khi đường ngập mất ít nhất 45 phút. Bác Lành chỉ vào sảnh lúc 20:03 giờ thật, mặc áo mưa xanh, và là người gọi cảnh sát. Ngân rời bàn tiệc chỉ 14 phút trong khi từ Quận 1 sang bến Vân Đồn mất ít nhất 25 phút một chiều."
+  explanation: "<p><b>Một vụ tai nạn được dựng bằng một cánh cửa.</b> Ông Châu không trượt chân. Thắm đánh ông choáng rồi dìm xuống nước ngập ở hầm B1 trong khoảng 19h27–19h33; Hải mở sẵn lối xuống hầm bằng chế độ bảo trì và ngắt tín hiệu camera CAM-3; Ngân dựng kế hoạch, hưởng lợi, và đứng sau tấm ngoại phạm “Thắm đã ra về”.</p><p><b>Chín phút biến mất.</b> Camera sảnh ghi Thắm đi vào hành lang cạnh thang bộ lúc 19:25 và chỉ trở ra lúc 19:34: chín phút ngay sau khi ông Châu xuống hầm (19:24). Thắm khai mình rời tòa nhà từ 19h18 và đứng chờ xe ngoài đường — lời khai ấy mâu thuẫn với chính camera, nên cô phải dựa vào cuộc gọi với Ngân để có ngoại phạm.</p><p><b>Vòng kín xuống hầm.</b> Thang riêng chỉ có thẻ ông Châu. Dốc hầm không ai xuống. Thang bộ đang ở chế độ bảo trì nên không ghi thẻ, nhưng muốn xuống phải đi qua hành lang ở sảnh — và camera sảnh chỉ ghi Thắm. Hải bật chế độ bảo trì lúc 19:21 và tắt lúc 19:44; camera phòng bảo vệ ghi đúng anh bấm, và anh ngồi tại ghế suốt thời gian đó nên không thể là người xuống hầm.</p><p><b>Dấu vết không nói dối.</b> Quần Thắm ướt 55 cm, trong khi nước ngoài đường chỉ 35 cm và nước hầm B1 là 58 cm. Sợi nylon vàng chanh dưới móng tay nạn nhân khớp áo mưa của cô, không phải áo xanh của bác Lành. Điện thoại cô kết nối trạm sóng trong nhà SMR-DAS-B1 từ 19:27 đến 19:33. Cô khai gọi cho Ngân từ ngã tư lúc 19:30, và Ngân xác nhận — nhưng cuộc gọi đó bắt đầu từ trong hầm. Hai lời khai chỉ dựa vào nhau.</p><p><b>Chủ mưu.</b> Gia Hòa Capital cho Châu Phát vay 90 tỷ do Thắm đứng tên, nhưng điện thoại, email và hợp đồng đều là của văn phòng luật sư Ngân. Điều 12 trao 51% cổ phần cho Gia Hòa nếu ông Châu chết trước 30/11, và ông đã ghi sẵn trong két sắt rằng sẽ cho Ngân thôi việc vào thứ Hai. Thứ Sáu, Gia Hòa trả 250 triệu cho vợ Hải và 180 triệu cho Thắm. Ngân gọi ông Châu lúc 19:10 rồi khai rằng không hề liên lạc với ông.</p><p><b>Những người bị loại.</b> Vũ biển thủ 18 tỷ và Trang nợ cờ bạc, nhưng cả hai ở căn hộ Thảo Điền lúc 19:32 theo tài xế Grab Food; từ đó tới bến Vân Đồn khi đường ngập mất ít nhất 45 phút. Bác Lành chỉ vào sảnh lúc 20:03, mặc áo mưa xanh, và là người gọi cảnh sát. Ngân rời bàn tiệc chỉ 14 phút trong khi từ Quận 1 sang bến Vân Đồn mất ít nhất 25 phút một chiều."
 },
 VANI,
 BITEXCO,

@@ -2,8 +2,7 @@
    HANOI NOIR · Vùng Sài Gòn · Vụ 2 "Mực Chưa Khô"
    Vani Ecommerce (xưởng in áo thun bán trên Amazon) · 59 Võ Văn Hát, Long Trường, TP. Hồ Chí Minh.
    Một thủ phạm (chain), nhưng dùng các cơ chế của vùng Sài Gòn:
-   - deduce: ghép 2–4 hồ sơ thành kết luận; kết luận làm đầu vào cho suy luận sau
-   - devices + dev: báo cáo Zoom và Amazon ghi theo giờ Thái Bình Dương (PT), lệch 15 giờ so với giờ Việt Nam
+   - deduce: ghép đúng 2 hồ sơ thành kết luận; kết luận làm đầu vào cho suy luận sau
    - gate: sao kê của vợ Vũ chỉ xin được khi đã biết gian hàng đó là của ai
    - lock: điện thoại nạn nhân có mã bốn số, suy ra từ khung ảnh và mẩu giấy ghi tay
    - world "arrive": ba hồ sơ về muộn (xe công nghệ, Zoom, Amazon); "gone": camera, thùng rác, sổ áo mẫu hết hạn
@@ -14,14 +13,12 @@ export const VANI = {
   id: "s2", no: 2, region: "sg", title: "Mực Chưa Khô", place: "Vani Ecommerce · 59 Võ Văn Hát, Long Trường, TP. Hồ Chí Minh",
   level: "★★★★★★ Mực lem", budget: 15,
   clock: { start: "23:10" },
-  // Báo cáo Zoom và thư của Amazon ghi theo giờ Thái Bình Dương (UTC−8): giờ Việt Nam = giờ máy + 15 giờ, sau khi rút ra kết luận "k_pst"
-  devices: { pt: { name: "báo cáo Zoom và Amazon (giờ Thái Bình Dương)", off: 900, by: "k_pst" } },
   world: [
     { at: "01:00", kind: "arrive", id: "grab_vu", text: "Công ty gọi xe công nghệ gửi lịch sử chuyến đi của số điện thoại Vũ theo yêu cầu khẩn của cơ quan điều tra." },
     { at: "03:30", kind: "arrive", id: "zoom_log", text: "Zoom gửi báo cáo tham dự cuộc họp “Black Friday Ads Sync” theo yêu cầu của cơ quan điều tra." },
     { at: "05:00", kind: "arrive", id: "br_report", text: "Amazon phản hồi yêu cầu khẩn: bản sao thư trả lời của Brand Registry gửi ông Hiếu đã có." },
   ],
-  intro: "Đêm thứ Tư, hai ngày trước Black Friday. Vani Ecommerce — xưởng in áo thun theo đơn, bán trên Amazon, Etsy và TikTok Shop — đang chạy hết công suất cho 14.000 đơn tồn. Cái tên “Vani” ghép từ tên hai cô con gái sinh đôi của người sáng lập Lý Quang Hiếu: Vân và Ni. 22h48, bác Sáu bảo vệ đi tuần thì thấy ông Hiếu nằm trong kho mực ở cuối xưởng, bên cạnh một vũng mực trắng đổ loang. Biên bản đầu tiên ghi: tai nạn lao động, trượt chân va đầu. Cho đến khi pháp y gọi điện cho cảnh sát. Bạn đến lúc 23h10 và yêu cầu mọi người có mặt tại văn phòng. Ai cũng có một tấm giấy chứng minh mình ở nơi khác, và hầu hết giờ giấc trong chứng cứ đều đúng — trừ những tờ giấy được in ra từ phía bên kia Thái Bình Dương.",
+  intro: "Đêm thứ Tư, hai ngày trước Black Friday. Vani Ecommerce — xưởng in áo thun theo đơn, bán trên Amazon, Etsy và TikTok Shop — đang chạy hết công suất cho 14.000 đơn tồn. Cái tên “Vani” ghép từ tên hai cô con gái sinh đôi của người sáng lập Lý Quang Hiếu: Vân và Ni. 22h48, bác Sáu bảo vệ đi tuần thì thấy ông Hiếu nằm trong kho mực ở cuối xưởng, bên cạnh một vũng mực trắng đổ loang. Biên bản đầu tiên ghi: tai nạn lao động, trượt chân va đầu. Cho đến khi pháp y gọi điện cho cảnh sát. Bạn đến lúc 23h10 và yêu cầu mọi người có mặt tại văn phòng. Ai cũng có một tấm giấy chứng minh mình ở nơi khác, và giờ giấc trong chứng cứ đều chính xác; chỉ có lời khai là có thể sai.",
   suspects: [
     { id: "vu", name: "Vũ", role: "Trưởng phòng tăng trưởng & quảng cáo Amazon · 34 tuổi", bio: "Một trong năm người đầu tiên của Vani, nắm 12% cổ phần. Giữ toàn bộ tài khoản quảng cáo và làm việc hằng ngày với đối tác ở Mỹ.",
       look: { skin: "#e8bf98", hair: "short", hc: "#1f1a17", top: "#4a4f66", acc: "glasses" } },
@@ -190,18 +187,18 @@ export const VANI = {
         rows: ["Đặt 20:34 · Masteri Thảo Điền", "Đón 20:37 · tiền mặt", "Trả khách 20:57 · đầu hẻm 59/12", "Võ Văn Hát, Long Trường", "Khách áo mưa xám, mũ bảo hiểm kín"] },
       spans: [{ who: "vu", from: "20:37", to: "20:57", at: "Trên xe từ Thảo Điền tới Long Trường" }] },
     { id: "zoom_log", cost: 1, type: "Hồ sơ", title: "Báo cáo tham dự Zoom “Black Friday Ads Sync”",
-      text: "Báo cáo tham dự do Zoom gửi theo yêu cầu của cơ quan điều tra. Phòng họp do Marcus Reed (Seattle) chủ trì; múi giờ của báo cáo là giờ Thái Bình Dương của chủ phòng. Người tham dự: Marcus Reed và Lê Quang Vũ. Phiên 1 của Vũ: vào 05:30, rời 05:35, thiết bị laptop, mạng dân cư FPT Telecom, vị trí gần đúng Thảo Điền. Phiên 2: vào 06:07, rời 06:48 (cùng lúc cuộc họp kết thúc), thiết bị iPhone, tắt camera, mạng VNPT có địa chỉ IP tĩnh đăng ký cho Công ty Vani Ecommerce, 59 Võ Văn Hát, Long Trường.",
-      visual: { k: "paper", alt: "Báo cáo tham dự Zoom", title: "ZOOM · BÁO CÁO THAM DỰ (GIỜ PT)",
-        rows: ["Phòng của Marcus Reed (Seattle)", "Vũ · phiên 1: 05:30–05:35 · laptop", "Mạng FPT dân cư · gần Thảo Điền", "Vũ · phiên 2: 06:07–06:48 · iPhone", "IP tĩnh của Vani, Long Trường · tắt cam"] },
+      text: "Báo cáo tham dự do Zoom gửi theo yêu cầu của cơ quan điều tra, ghi theo giờ Việt Nam. Phòng họp do Marcus Reed (Seattle) chủ trì. Người tham dự: Marcus Reed và Lê Quang Vũ. Phiên 1 của Vũ: vào 20:30, rời 20:35, thiết bị laptop, mạng dân cư FPT Telecom, vị trí gần đúng Thảo Điền. Phiên 2: vào 21:07, rời 21:48 (cùng lúc cuộc họp kết thúc), thiết bị iPhone, tắt camera, mạng VNPT có địa chỉ IP tĩnh đăng ký cho Công ty Vani Ecommerce, 59 Võ Văn Hát, Long Trường.",
+      visual: { k: "paper", alt: "Báo cáo tham dự Zoom", title: "ZOOM · BÁO CÁO THAM DỰ",
+        rows: ["Phòng của Marcus Reed (Seattle)", "Vũ · phiên 1: 20:30–20:35 · laptop", "Mạng FPT dân cư · gần Thảo Điền", "Vũ · phiên 2: 21:07–21:48 · iPhone", "IP tĩnh của Vani, Long Trường · tắt cam"] },
       spans: [
-        { who: "vu", from: "05:30", to: "05:35", at: "Nhà riêng · Thảo Điền", dev: "pt" },
-        { who: "vu", from: "06:07", to: "06:48", at: "Vani · Long Trường (mạng của công ty)", dev: "pt" }
+        { who: "vu", from: "20:30", to: "20:35", at: "Nhà riêng · Thảo Điền" },
+        { who: "vu", from: "21:07", to: "21:48", at: "Vani · Long Trường (mạng của công ty)" }
       ] },
     { id: "br_report", cost: 1, type: "Hồ sơ", title: "Thư trả lời của Amazon Brand Registry",
-      text: "Bản sao thư trả lời của Amazon Brand Registry gửi ông Lý Quang Hiếu, Case 7731, gửi lúc 05:12 AM PT (giờ Thái Bình Dương). Bên bị báo cáo: Saigon Rainwear Co., mở gian hàng 8 tháng trước, bán 9 trong 10 mẫu bán chạy nhất của Vani với giá thấp hơn 20%. Người đại diện đăng ký và chủ tài khoản nhận tiền: PHAM THI THU HANG. Địa chỉ nhận hàng trả lại: Căn D-0902, Masteri Thảo Điền.",
+      text: "Bản sao thư trả lời của Amazon Brand Registry gửi ông Lý Quang Hiếu, Case 7731, gửi lúc 20:12 giờ Việt Nam. Bên bị báo cáo: Saigon Rainwear Co., mở gian hàng 8 tháng trước, bán 9 trong 10 mẫu bán chạy nhất của Vani với giá thấp hơn 20%. Người đại diện đăng ký và chủ tài khoản nhận tiền: PHAM THI THU HANG. Địa chỉ nhận hàng trả lại: Căn D-0902, Masteri Thảo Điền.",
       visual: { k: "paper", alt: "Thư Amazon Brand Registry", title: "AMAZON · BRAND REGISTRY · CASE 7731",
-        rows: ["Gửi lúc 05:12 AM PT", "Bên bị báo cáo: Saigon Rainwear Co.", "Bán 9/10 mẫu bán chạy của Vani", "Chủ tài khoản: PHAM THI THU HANG", "Địa chỉ: D-0902 Masteri Thảo Điền"] },
-      spans: [{ from: "05:12", to: "05:13", at: "Amazon gửi thư trả lời cho ông Hiếu", dev: "pt" }] },
+        rows: ["Gửi lúc 20:12 giờ Việt Nam", "Bên bị báo cáo: Saigon Rainwear Co.", "Bán 9/10 mẫu bán chạy của Vani", "Chủ tài khoản: PHAM THI THU HANG", "Địa chỉ: D-0902 Masteri Thảo Điền"] },
+      spans: [{ from: "20:12", to: "20:13", at: "Amazon gửi thư trả lời cho ông Hiếu" }] },
     { id: "sao_ke_hang", cost: 1, type: "Hồ sơ", title: "Sao kê tài khoản của Phạm Thị Thu Hằng",
       text: "Sao kê tài khoản của Phạm Thị Thu Hằng, tám tháng gần nhất: nhận 4,3 tỷ đồng từ Amazon Payments; chuyển khoản lại cho Lê Quang Vũ 1,1 tỷ đồng, nội dung “góp vốn”. Số dư còn lại 1,8 tỷ đồng.",
       visual: { k: "paper", alt: "Sao kê tài khoản của vợ Vũ", title: "SAO KÊ · PHẠM THỊ THU HẰNG",
@@ -220,24 +217,33 @@ export const VANI = {
       visual: { k: "who", id: "trang" } },
 
     /* ---------- Kết luận (suy luận từ các hồ sơ ở trên; xem "deduce") ---------- */
-    { id: "k_pst", cost: 0, via: "deduce", type: "Kết luận", title: "Báo cáo Zoom và Amazon dùng giờ Thái Bình Dương",
-      text: "Vũ khai họp từ 20:30 đến 21:48 (78 phút); báo cáo Zoom ghi 05:30–06:48, cũng 78 phút: lệch đúng 15 giờ. Thư Amazon gửi lúc 05:12 AM PT thì điện thoại ông Hiếu nhận lúc 20:12, cũng lệch 15 giờ. Báo cáo Zoom và thư của Amazon ghi theo giờ Thái Bình Dương (UTC−8): giờ Việt Nam = giờ máy + 15 giờ. Mọi mốc lấy từ hai nguồn này đã được hiệu chỉnh trong tab Thời gian.",
-      visual: { k: "tz" } },
+    { id: "k_sau_bua_an", cost: 0, via: "deduce", type: "Kết luận", title: "Ông Hiếu chết trong khoảng một giờ sau khi rời nhà ăn lúc 20:44",
+      text: "Camera nhà ăn ghi ông Hiếu đặt đũa và đi ra phía xưởng lúc 20:44. Dạ dày ông còn gần nguyên bữa cơm ca 20:30, nên ông chết trong khoảng một giờ sau bữa ăn. Thân nhiệt không dùng được vì ống xả lò sấy chạy sát lưng thi thể.",
+      visual: { k: "paper", alt: "Kết luận: ông Hiếu chết trong một giờ sau 20:44", title: "KẾT LUẬN",
+        rows: ["20:44 · ông Hiếu rời nhà ăn", "Dạ dày: cơm ca 20:30 gần nguyên", "Chết trong ~1 giờ sau bữa ăn", "Thân nhiệt vô hiệu (ống xả lò sấy)"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_khung_gio", cost: 0, via: "deduce", type: "Kết luận", title: "Ông Hiếu bị hại khi xưởng vắng người: 20:44–21:15",
       text: "Ông Hiếu rời nhà ăn lúc 20:44 và dạ dày còn nguyên bữa cơm ca nên ông chết trong khoảng một giờ sau đó. Từ 21:15 tám công nhân chạy máy cách kho mực chừng 15 m, cửa đóng và không ai ra vào. Thân nhiệt không tin được vì ống xả lò sấy. Vậy ông bị hại trong khoảng 20:44–21:15, lúc cả khu xưởng vắng người vì nghỉ ăn cơm ca.",
       visual: { k: "paper", alt: "Kết luận: khung giờ bị hại", title: "KẾT LUẬN",
         rows: ["20:44 · ông Hiếu rời nhà ăn", "Dạ dày: chết trong ~1 giờ sau bữa ăn", "21:15 · công nhân quay lại máy", "Khung giờ bị hại: 20:44–21:15"], stamp: "ĐÃ XÁC LẬP" },
       spans: [{ from: "20:44", to: "21:15", at: "Kho mực (khung giờ bị hại)" }] },
+    { id: "k_cua_hau_noi", cost: 0, via: "deduce", type: "Kết luận", title: "Cửa hậu kho mực chỉ mở từ bên trong, đúng hai lần: 20:59 và 21:12",
+      text: "Cửa hậu kho mực chỉ mở bằng thẻ từ bên ngoài, bên trong có nút thoát hiểm. Nhật ký bộ điều khiển không có lượt quẹt thẻ ngoài nào từ 17:00 đến 23:00, chỉ hai lần “mở từ bên trong bằng nút thoát hiểm”: 20:59 và 21:12. Hai lần cửa mở là do có người đang ở trong kho mực bấm nút.",
+      visual: { k: "paper", alt: "Kết luận: cửa hậu chỉ mở từ trong", title: "KẾT LUẬN",
+        rows: ["Cửa hậu: thẻ từ ngoài, nút thoát trong", "Không quẹt thẻ ngoài nào cả tối", "Chỉ mở từ trong: 20:59 và 21:12"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_cua_hau", cost: 0, via: "deduce", type: "Kết luận", title: "Ông Hiếu mở cửa hậu cho một người từ ngoài vào",
       text: "Hẻm sau là hẻm cụt chỉ có một lối vào. Cửa hậu kho mực không có lượt quẹt thẻ nào cả tối, chỉ được mở từ bên trong lúc 20:59 và 21:12. Camera ngõ sau ghi một người áo mưa xám đi vào cuối hẻm lúc 20:58 và đi ra lúc 21:12. Ông Hiếu mở cửa cho một người từ ngoài vào; người đó ở trong kho mực từ 20:59 tới 21:12 — đúng khung giờ ông bị hại.",
       visual: { k: "paper", alt: "Kết luận: người vào cửa hậu", title: "KẾT LUẬN",
         rows: ["Hẻm cụt, một lối vào", "Cửa hậu: mở từ trong 20:59 và 21:12", "Người áo mưa xám: vào 20:58, ra 21:12", "Một người ngoài được ông Hiếu mở cửa"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_van_phong_chot", cost: 0, via: "deduce", type: "Kết luận", title: "Trang, Ngân và bác Sáu đều có camera che",
+      text: "Camera văn phòng ghi Trang ngồi tại bàn thiết kế từ 19:50 đến 22:12 và Ngân ngồi ở góc tài chính đến 21:03 rồi xuống cầu thang chính, vốn chỉ dẫn ra sảnh trước. Camera cổng ghi xe Ngân ra lúc 21:07, Trang ra lúc 22:15 và bác Sáu ngồi trong chốt từ 18:00 đến 22:40. Ba người này không có khoảng trống nào trong tòa nhà.",
+      visual: { k: "paper", alt: "Kết luận: Trang, Ngân, bác Sáu có camera che", title: "KẾT LUẬN",
+        rows: ["Trang: bàn thiết kế 19:50–22:12", "Ngân: văn phòng đến 21:03, xe ra 21:07", "Bác Sáu: chốt cổng 18:00–22:40"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_vong_kin", cost: 0, via: "deduce", type: "Kết luận", title: "Trong tòa nhà, chỉ còn mười một phút của Thắm chưa có nguồn khác che",
       text: "Trong khung 20:44–21:15: Trang và Ngân (đến 21:03, rồi xe ra cổng 21:07) ở văn phòng tầng 1 hoặc đã rời; Khoa và tám công nhân ngồi ăn liên tục; bác Sáu ngồi trong chốt. Chỉ còn một khoảng trống: chị Thắm rời nhà ăn từ 20:58 đến 21:09, mười một phút mà camera nhà ăn không cho biết chị đi đâu. Hãy tìm nguồn khác che khoảng đó.",
       visual: { k: "paper", alt: "Kết luận: vòng kín trong tòa nhà", title: "KẾT LUẬN",
         rows: ["Trang, Ngân: camera văn phòng, cổng", "Khoa, công nhân: nhà ăn", "Bác Sáu: chốt cổng", "Chưa che: Thắm 20:58–21:09"], stamp: "CÒN MỘT KHOẢNG TRỐNG" } },
     { id: "k_zoom_gap", cost: 0, via: "deduce", type: "Kết luận", title: "Vũ vắng khỏi cuộc họp Zoom 32 phút rồi vào lại từ Long Trường",
-      text: "Sau khi hiệu chỉnh múi giờ, Vũ rời cuộc họp lúc 20:35 và chỉ vào lại lúc 21:07 bằng iPhone, tắt camera, qua địa chỉ IP của Công ty Vani ở Long Trường. Anh khai “họp liên tục, ở nhà”. Trong khoảng 20:35–21:07 anh không có trong cuộc họp; từ 21:07 tới 21:48 anh dự họp ngay từ tòa nhà Vani.",
+      text: "Báo cáo Zoom ghi Vũ rời cuộc họp lúc 20:35 và chỉ vào lại lúc 21:07 bằng iPhone, tắt camera, qua địa chỉ IP của Công ty Vani ở Long Trường. Anh khai “họp liên tục, ở nhà”. Trong khoảng 20:35–21:07 anh không có trong cuộc họp; từ 21:07 tới 21:48 anh dự họp ngay từ tòa nhà Vani.",
       visual: { k: "paper", alt: "Kết luận: Vũ vắng họp", title: "KẾT LUẬN",
         rows: ["Phiên 1: 20:30–20:35 · nhà, Thảo Điền", "Vắng họp: 20:35–21:07", "Phiên 2: 21:07–21:48 · IP của Vani", "Vũ khai: họp liên tục ở nhà"], stamp: "MÂU THUẪN" } },
     { id: "k_xe_den", cost: 0, via: "deduce", type: "Kết luận", title: "Người áo mưa xám là hành khách của chuyến xe Vũ đặt",
@@ -272,13 +278,14 @@ export const VANI = {
 
   // Ghép hồ sơ thành kết luận. Dòng đầu của mỗi kết luận là lối ngắn nhất; thứ tự "needs" là thứ tự gợi ý đi.
   deduce: [
-    { needs: ["zoom_log", "loi_vu"], gives: "k_pst" },
-    { needs: ["br_report", "dt_hieu"], gives: "k_pst" },
-    { needs: ["phap_y", "cam_nha_an", "loi_khoa"], gives: "k_khung_gio" },
-    { needs: ["phap_y", "cam_nha_an", "loi_thap"], gives: "k_khung_gio" },
-    { needs: ["cua_hau", "cam_ngo", "so_do"], gives: "k_cua_hau" },
-    { needs: ["k_khung_gio", "cam_vp", "cam_nha_an", "cam_cong"], gives: "k_vong_kin" },
-    { needs: ["k_pst", "zoom_log"], gives: "k_zoom_gap" },
+    { needs: ["phap_y", "cam_nha_an"], gives: "k_sau_bua_an" },
+    { needs: ["k_sau_bua_an", "loi_khoa"], gives: "k_khung_gio" },
+    { needs: ["k_sau_bua_an", "loi_thap"], gives: "k_khung_gio" },
+    { needs: ["cua_hau", "so_do"], gives: "k_cua_hau_noi" },
+    { needs: ["k_cua_hau_noi", "cam_ngo"], gives: "k_cua_hau" },
+    { needs: ["cam_vp", "cam_cong"], gives: "k_van_phong_chot" },
+    { needs: ["k_khung_gio", "k_van_phong_chot"], gives: "k_vong_kin" },
+    { needs: ["zoom_log", "loi_vu"], gives: "k_zoom_gap" },
     { needs: ["cam_ngo", "grab_vu"], gives: "k_xe_den" },
     { needs: ["phap_y", "may_dtf2"], gives: "k_hung_khi" },
     { needs: ["thung_rac", "so_mau"], gives: "k_ao_mau" },
@@ -328,12 +335,12 @@ export const VANI = {
   // Chuỗi chứng minh: mỗi bước chọn một hồ sơ nằm trong "ids". Thứ tự các bước là thứ tự gợi ý đi (hạn mất hồ sơ đến sớm nhất đi trước).
   chain: [
     { key: "opportunity", label: "Cơ hội", ask: "Ai đã có mặt ở kho mực trong khoảng ông Hiếu bị hại?", ids: ["k_xe_den", "k_zoom_gap"],
-      hint: "Hãy tìm ai nói dối về nơi mình ở trong khoảng 20:44–21:15: xem camera ngõ sau, chuyến xe, và báo cáo Zoom sau khi đổi sang giờ Việt Nam." },
+      hint: "Hãy tìm ai nói dối về nơi mình ở trong khoảng 20:44–21:15: xem camera ngõ sau, chuyến xe, và báo cáo Zoom." },
     { key: "means", label: "Phương tiện", ask: "Kẻ ra tay đã tránh để lại dấu tay bằng cách nào, và vật đó của ai?", ids: ["k_ao_mau"],
       hint: "Tìm vật được dùng để bọc tay: nó nằm ở một nơi bị vứt đi, và có sổ ghi nó thuộc về ai." },
     { key: "motive", label: "Động cơ", ask: "Vì sao người đó cần ông Hiếu im lặng?", ids: ["k_gian_hang_vu", "k_dong_co", "k_dong_tien", "k_tin_hieu"],
       hint: "Tìm ai đứng sau gian hàng đang sao chép mẫu áo của Vani, và người đó mất gì nếu bị lộ." }
   ],
 
-  explanation: "<p><b>Một tai nạn lao động được dựng bằng mực trắng.</b> Ông Hiếu không trượt chân. Ông bị đánh hai lần bằng trục thép của máy DTF số 2, rồi kẻ ra tay đổ một thùng mực trắng lên người ông để dựng cảnh trượt chân: mực chỉ phủ lên vạt áo, đế giày ông sạch bong và không có vệt trượt. Ống xả lò sấy sát lưng làm thân nhiệt lừa người; dạ dày còn nguyên cơm ca 20:30 và camera nhà ăn mới nói đúng khung giờ: ông bị hại giữa 20:44 và 21:15, khi cả xưởng nghỉ ăn.</p><p><b>Người đến bằng cửa hậu.</b> Cửa hậu kho mực không có lượt quẹt thẻ nào cả tối, chỉ mở từ bên trong lúc 20:59 và 21:12: ông Hiếu tự mở cửa cho một người mà ông hẹn gặp riêng, để công nhân khỏi thấy chuyện nội bộ trước Black Friday. Camera ngõ sau ghi người áo mưa xám, mũ bảo hiểm kín đi vào cuối hẻm lúc 20:58 và ra lúc 21:12. Chuyến xe công nghệ của Vũ trả khách ở đầu hẻm ngay phút trước đó.</p><p><b>Tờ giấy in ra từ bên kia Thái Bình Dương.</b> Vũ khai họp Zoom liên tục từ 20:30 đến 21:48 “ở nhà”. Báo cáo Zoom ghi 05:30–06:48 theo giờ Thái Bình Dương, tức đúng 20:30–21:48 giờ Việt Nam. Đổi giờ thì thấy anh rời họp lúc 20:35 và chỉ vào lại lúc 21:07 bằng iPhone, qua IP tĩnh của chính công ty Vani. Cùng một phép đổi giờ cho biết thư Amazon gửi 05:12 sáng bên kia là 20:12 tối ở đây: đó là lúc ông Hiếu biết sự thật và nhắn Vũ.</p><p><b>Găng và động cơ.</b> Chiếc áo mẫu SMPL-0117 trong thùng rác cuối hẻm là vải bọc tay: tay áo xoắn chặt, dính máu và mực trắng, còn xơ vải khớp với xơ trên trục và trong vết thương. Sổ kho ghi 0117 xuất cho Vũ và chưa trả. Saigon Rainwear, gian hàng bán chín mẫu bán chạy nhất của Vani rẻ hơn 20%, do vợ Vũ đứng tên và nhận 4,3 tỷ đồng từ Amazon, chuyển lại cho Vũ 1,1 tỷ. Thỏa thuận cổ đông cấm người thân kinh doanh cạnh tranh: vi phạm là mất 12% cổ phần và đền 5 tỷ. Trang đã gửi cho Vũ file PSD gốc của chính chín mẫu ấy hồi tháng Ba.</p><p><b>Những người bị loại.</b> Ngân biển thủ 640 triệu qua Vi Na Pack, nhưng camera văn phòng ghi cô ở bàn đến 21:03 và xe cô ra cổng lúc 21:07. Trang ngồi vẽ liên tục đến 22:12 trên camera văn phòng; cô giấu chuyện bản quyền chứ không giấu án mạng. Thắm nói dối chuyện “không rời nhà ăn”, nhưng mười một phút vắng mặt của cô nằm trọn trên camera ngõ sau: cô đứng ở hiên gọi cho bên đối thủ, quay lưng về phía cuối hẻm. Khoa ngồi ăn liên tục đến 21:15 và bác Sáu ngồi trong chốt cả tối."
+  explanation: "<p><b>Một tai nạn lao động được dựng bằng mực trắng.</b> Ông Hiếu không trượt chân. Ông bị đánh hai lần bằng trục thép của máy DTF số 2, rồi kẻ ra tay đổ một thùng mực trắng lên người ông để dựng cảnh trượt chân: mực chỉ phủ lên vạt áo, đế giày ông sạch bong và không có vệt trượt. Ống xả lò sấy sát lưng làm thân nhiệt lừa người; dạ dày còn nguyên cơm ca 20:30 và camera nhà ăn mới nói đúng khung giờ: ông bị hại giữa 20:44 và 21:15, khi cả xưởng nghỉ ăn.</p><p><b>Người đến bằng cửa hậu.</b> Cửa hậu kho mực không có lượt quẹt thẻ nào cả tối, chỉ mở từ bên trong lúc 20:59 và 21:12: ông Hiếu tự mở cửa cho một người mà ông hẹn gặp riêng, để công nhân khỏi thấy chuyện nội bộ trước Black Friday. Camera ngõ sau ghi người áo mưa xám, mũ bảo hiểm kín đi vào cuối hẻm lúc 20:58 và ra lúc 21:12. Chuyến xe công nghệ của Vũ trả khách ở đầu hẻm ngay phút trước đó.</p><p><b>Cuộc họp Zoom có một khoảng trống.</b> Vũ khai họp Zoom liên tục từ 20:30 đến 21:48 “ở nhà”. Báo cáo Zoom ghi anh rời họp lúc 20:35 và chỉ vào lại lúc 21:07 bằng iPhone, qua IP tĩnh của chính công ty Vani. Thư Amazon gửi ông Hiếu lúc 20:12: đó là lúc ông biết sự thật và nhắn Vũ.</p><p><b>Găng và động cơ.</b> Chiếc áo mẫu SMPL-0117 trong thùng rác cuối hẻm là vải bọc tay: tay áo xoắn chặt, dính máu và mực trắng, còn xơ vải khớp với xơ trên trục và trong vết thương. Sổ kho ghi 0117 xuất cho Vũ và chưa trả. Saigon Rainwear, gian hàng bán chín mẫu bán chạy nhất của Vani rẻ hơn 20%, do vợ Vũ đứng tên và nhận 4,3 tỷ đồng từ Amazon, chuyển lại cho Vũ 1,1 tỷ. Thỏa thuận cổ đông cấm người thân kinh doanh cạnh tranh: vi phạm là mất 12% cổ phần và đền 5 tỷ. Trang đã gửi cho Vũ file PSD gốc của chính chín mẫu ấy hồi tháng Ba.</p><p><b>Những người bị loại.</b> Ngân biển thủ 640 triệu qua Vi Na Pack, nhưng camera văn phòng ghi cô ở bàn đến 21:03 và xe cô ra cổng lúc 21:07. Trang ngồi vẽ liên tục đến 22:12 trên camera văn phòng; cô giấu chuyện bản quyền chứ không giấu án mạng. Thắm nói dối chuyện “không rời nhà ăn”, nhưng mười một phút vắng mặt của cô nằm trọn trên camera ngõ sau: cô đứng ở hiên gọi cho bên đối thủ, quay lưng về phía cuối hẻm. Khoa ngồi ăn liên tục đến 21:15 và bác Sáu ngồi trong chốt cả tối."
 };

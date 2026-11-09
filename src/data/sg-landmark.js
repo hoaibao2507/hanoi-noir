@@ -3,7 +3,7 @@
    Tòa tháp Landmark 81 · 208 Nguyễn Hữu Cảnh, Bình Thạnh, TP. Hồ Chí Minh. Đêm đếm ngược chào năm mới của Thiên Phú Capital ở sảnh tiệc tầng 79.
    Một người rơi từ đài quan sát tầng 81, người ở cạnh chỉ van nài anh xuống: người khuyên can lại là người bị nghi nhiều nhất.
    Kẻ thật sự đứng sau không có mặt trên đài: một cuộc gọi tự động phát giọng bé gái làm giả, cài sẵn từ 22:47.
-   - deduce: 18 kết luận; vòng loại trừ ở khung giờ cài lịch (22:47), không phải khung giờ cuộc gọi reo (00:05:48)
+   - deduce: 20 kết luận, mỗi lần ghép đúng 2 hồ sơ; vòng loại trừ ở khung giờ cài lịch (22:47), không phải khung giờ cuộc gọi reo (00:05:48)
    - lock: điện thoại nạn nhân có mã bốn số, suy ra từ tờ lịch để bàn (dấu vết ẩn) và lời trợ lý
    - gate: hồ sơ hộ tịch chỉ xin được khi biết kẻ gửi tin nhắn nặc danh vì chuyện của ông Tự
    - world "arrive": bốn hồ sơ về muộn (bản ghi âm khôi phục, nhà mạng, nhật ký dịch vụ gọi tự động, giám định giọng nói)
@@ -295,6 +295,14 @@ export const LANDMARK = {
       text: "Mã QR khách của Ngân chỉ được tạo lúc 23:37 và quét lần đầu lúc 23:44; điện thoại của chị ở Phú Nhuận cho tới 23:30. Chị không thể ngồi ở máy MC-CONSOLE trong khoảng 22:44–22:55, dù chị có nói dối chuyện mình ở đâu lúc 23:44.",
       visual: { k: "paper", alt: "Kết luận: Ngân chưa vào tòa tháp lúc 22:47", title: "KẾT LUẬN",
         rows: ["QR-G-0417 tạo lúc 23:37", "Quét lần đầu lúc 23:44", "Lúc 22:47: chưa vào tòa tháp"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_loai_ba_nguoi", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 Hào, Vũ và Thắm đều ở ngoài hậu trường sảnh tiệc",
+      text: "Hào ở phòng họp tầng 78, Vũ ở chiếu nghỉ cầu thang, Thắm ngồi ở phòng kiểm soát tầng hầm B1. Cả ba đều có camera đặt họ ngoài hậu trường sảnh tiệc lúc lịch gọi bị sửa, nên không ai trong ba người ngồi vào máy MC-CONSOLE.",
+      visual: { k: "paper", alt: "Kết luận: Hào, Vũ, Thắm ngoài hậu trường", title: "KẾT LUẬN",
+        rows: ["Hào: phòng họp tầng 78", "Vũ: chiếu nghỉ cầu thang", "Thắm: phòng kiểm soát B1", "Cả ba ngoài hậu trường lúc 22:47"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_loai_trang_ngan", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 Trang ở máy in tầng 66, Ngân còn ngoài tòa tháp",
+      text: "Máy in tầng 66 ghi tài khoản của Trang in từ 22:46 đến 22:50, còn mã QR khách của Ngân chỉ được tạo lúc 23:37 và quét lần đầu lúc 23:44. Trang đang ở tầng 66 và Ngân chưa vào tòa tháp, nên cả hai không ngồi ở máy MC-CONSOLE khoảng 22:44–22:55.",
+      visual: { k: "paper", alt: "Kết luận: Trang và Ngân ngoài hậu trường", title: "KẾT LUẬN",
+        rows: ["22:46–22:50 · Trang in tại tầng 66", "Ngân: lần quét đầu tiên 23:44", "Cả hai ngoài hậu trường lúc 22:47"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_con_lai_diep", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 22:47 chỉ còn Diệp vắng khỏi sảnh tiệc mà không nơi nào chứng minh",
       text: "Hào và Vũ ở ngoài hậu trường có camera, Thắm ở phòng kiểm soát, Trang ở tầng 66 bên máy in, Ngân chưa vào tòa tháp. Chỉ còn Diệp rời sảnh tiệc qua cửa hậu trường lúc 22:44 và vào lại lúc 22:57, đúng khoảng máy MC-CONSOLE có người đăng nhập, mà không có hồ sơ nào đặt cô ở chỗ nào khác.",
       visual: { k: "paper", alt: "Kết luận: chỉ còn Diệp ở hậu trường", title: "KẾT LUẬN",
@@ -342,7 +350,9 @@ export const LANDMARK = {
     { needs: ["cam_ops", "k_22h47"], gives: "k_loai_tham" },
     { needs: ["thu_de_doa", "k_22h47"], gives: "k_loai_trang" },
     { needs: ["nk_cua_81", "k_22h47"], gives: "k_loai_ngan" },
-    { needs: ["k_loai_hao_vu", "k_loai_tham", "k_loai_trang", "k_loai_ngan"], gives: "k_con_lai_diep" },
+    { needs: ["k_loai_hao_vu", "k_loai_tham"], gives: "k_loai_ba_nguoi" },
+    { needs: ["k_loai_trang", "k_loai_ngan"], gives: "k_loai_trang_ngan" },
+    { needs: ["k_loai_ba_nguoi", "k_loai_trang_ngan"], gives: "k_con_lai_diep" },
     { needs: ["mau_giong_bi", "nk_ivr"], gives: "k_mau_giong" },
     { needs: ["mau_giong_bi", "giam_dinh_giong"], gives: "k_mau_giong" },
     { needs: ["thu_de_doa", "ao_khoac"], gives: "k_ke_bao_thu" },

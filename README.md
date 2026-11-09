@@ -45,7 +45,7 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `src/main.js` | Điểm vào: nạp icon và CSS, ủy quyền sự kiện `data-action` |
 | `src/app.js` | Bộ điều khiển: nối store, luật chơi, sân khấu và giao diện |
 | `src/state/store.js` | Kho trạng thái nhỏ (patch + subscribe) |
-| `src/game/rules.js` | Luật chơi thuần: hành động, đưa chứng cứ, dòng thời gian và alibi (kể cả giờ máy lệch), đồng hồ và diễn biến, suy luận, khóa mã, hồ sơ về muộn, buộc tội một hoặc nhiều người, số sao (không đụng DOM) |
+| `src/game/rules.js` | Luật chơi thuần: hành động, đưa chứng cứ, dòng thời gian và alibi, đồng hồ và diễn biến, suy luận, khóa mã, hồ sơ về muộn, buộc tội một hoặc nhiều người, số sao (không đụng DOM) |
 | `src/game/save.js` | Lưu tiến độ, ván đang chơi và vùng đang xem trên trình duyệt |
 | `src/world/layout.js` | Hằng số thế giới: khung 1600 gốc, thế giới 2400, vị trí cửa |
 | `src/world/doors.js` | Tạo cửa tới các địa điểm khác |
@@ -72,7 +72,7 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `src/art/people.js` | Người trong cảnh (`figure`) và chân dung (`portrait`) dùng chung một bộ vẽ: tỉ lệ 6,9 đầu, vai, tay, bàn tay, giày, nét mặt, tóc, kính, ria |
 | `src/data/cases.js` | Danh sách vùng (`REGIONS`, hiện chỉ có Sài Gòn), loại hồ sơ; gộp các vụ Sài Gòn thành danh sách phẳng `CASES` |
 | `src/data/sg.js` | Vùng Sài Gòn: vụ "Đỉnh Triều Bến Vân Đồn" (nghi phạm, hồ sơ, kết luận, phiên xét xử nhiều người) |
-| `src/data/sg-vani.js` | Vụ "Mực Chưa Khô" (Vani Ecommerce): một thủ phạm, báo cáo Zoom và Amazon ghi giờ Thái Bình Dương, điện thoại có mã, hồ sơ về muộn |
+| `src/data/sg-vani.js` | Vụ "Mực Chưa Khô" (Vani Ecommerce): một thủ phạm, báo cáo Zoom ghi khoảng Vũ vắng họp, điện thoại có mã, hồ sơ về muộn |
 | `src/data/sg-bitexco.js` | Vụ "Búp Sen Đen" (tháp Bitexco): một thủ phạm, giờ chết bị dời bằng thẻ ra vào, vòng loại trừ bốn lớp, điện thoại có mã, hồ sơ về muộn |
 | `src/data/stories.js` | Cốt truyện đầy đủ của từng vụ, kể theo thời gian: hiện sau khi khép hồ sơ (và khi thua), và qua nút "Đọc lại cốt truyện" ở thẻ vụ đã giải |
 | `src/data/sg-landmark.js` | Vụ "Bốn Giây" (Landmark 81): một thủ phạm, cuộc gọi giọng giả hẹn giờ, vòng loại trừ ở khung giờ cài lịch, tải trọng thang máy, điện thoại có mã, hồ sơ về muộn |
@@ -82,8 +82,8 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `tests/hints.test.js` | Gợi ý: làm theo gợi ý từng bước thì mọi vụ đủ chứng cứ và thắng được |
 | `tests/render.test.js` | Số đo nhân vật mà `art.js` gắn vào cảnh (lớp Phaser dùng để làm người thở và đổ bóng) |
 | `tests/analyze.test.js` | Phân tích nền: bản tối ưu trùng bản đọc chín ô gốc ở mọi cỡ ảnh |
-| `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
-| `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": múi giờ, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian và hai lối chứng cứ cho mỗi bước |
+| `tests/sg.test.js` | Kiểm thử vùng Sài Gòn: suy luận ghép hai hồ sơ, khóa mã, hồ sơ về muộn, lời giải và xét xử nhiều người |
+| `tests/sg-vani.test.js` | Kiểm thử vụ "Mực Chưa Khô": báo cáo Zoom, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian và hai lối chứng cứ cho mỗi bước |
 | `tests/case-check.test.js` | Công cụ kiểm tra vụ: mọi vụ sạch lỗi và công cụ bắt được các lỗi dữ liệu hay gặp |
 | `tests/sg-btx.test.js` | Kiểm thử vụ "Búp Sen Đen": giờ chết thật, xưng hô "cậu", vòng loại trừ, ngoại phạm, mã điện thoại, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
 | `tests/story.test.js` | Kiểm thử cốt truyện: mọi vụ đủ chương và mốc, khối gập ở màn thắng/thua, hộp thoại đọc lại, nút ở menu chỉ cho vụ đã giải |
@@ -167,15 +167,15 @@ Các cơ chế này đều theo dữ liệu: vụ nào khai báo thì mới dùn
 
 - **Vùng.** Mỗi vụ có `region` (hiện chỉ còn `"sg"`); `REGIONS` đặt tên, biểu tượng, cảnh nền menu và câu giới thiệu. Chỉ số trong `CASES`
   vẫn là chỉ số vụ dùng cho bản lưu; nút "Vụ tiếp theo" chỉ đi trong cùng vùng.
-- **Suy luận.** `deduce: [{ needs: [id, ...], gives: id }]`. Người chơi chọn 2 đến 4 hồ sơ trong tab Suy luận; đúng tập hồ sơ (không phân
-  biệt thứ tự, thừa hoặc thiếu đều không được) thì nhận kết luận `gives`, không tốn giờ. Kết luận là một hành động `via: "deduce"`, loại
+- **Suy luận.** `deduce: [{ needs: [id, id], gives: id }]`. Người chơi chọn đúng 2 hồ sơ trong tab Suy luận (`MAX_DEDUCE = 2`; chọn hồ sơ thứ ba
+  thì hồ sơ chọn cũ nhất bị bỏ); đúng cặp hồ sơ (không phân biệt thứ tự) thì nhận kết luận `gives`, không tốn giờ. Ghép nhiều hơn hai hồ sơ
+  thì tách thành chuỗi cặp qua kết luận trung gian. Kết luận là một hành động `via: "deduce"`, loại
   "Kết luận": nằm trong hồ sơ như mọi hồ sơ khác nên làm được đầu vào cho suy luận sau, được đưa cho nghi phạm xem, và được viện dẫn khi
   xét xử. Một kết luận có thể có nhiều lối (nhiều dòng cùng `gives`). Trò chơi chỉ xác nhận sự kiện, không bao giờ nói ai là thủ phạm.
 - **Mở khóa bằng kết luận.** Hành động có `gate: id` ẩn khỏi cảnh cho tới khi hồ sơ `id` (thường là một kết luận) đã có.
-- **Giờ máy lệch.** `devices: { dev: { name, off, by } }` khai báo thiết bị chạy lệch `off` phút cho tới khi kết luận `by` được rút ra.
-  Mốc (`spans`) có `dev: "dev"` hiện giờ máy kèm nhãn cảnh báo trong tab Thời gian; sau khi có kết luận, mọi mốc của thiết bị được cộng `off` và
-  ngoại phạm của mọi người được đối chiếu lại, nên có người hết bị bác oan còn người khác bị bác. `off` cũng dùng được cho múi giờ:
-  vụ s2 khai báo báo cáo Zoom và thư Amazon ghi giờ Thái Bình Dương với `off: 900` (giờ Việt Nam = giờ máy + 15 giờ).
+- **Giờ máy lệch (engine còn, không vụ nào dùng).** `devices: { dev: { name, off, by } }` khai báo thiết bị chạy lệch `off` phút cho tới khi kết luận
+  `by` được rút ra; mốc (`spans`) có `dev: "dev"`. Cơ chế này đã được gỡ khỏi s1 (camera chậm 17 phút) và s2 (múi giờ Thái Bình Dương): mọi
+  nguồn giờ trong các vụ hiện nay đều là giờ thật, không vụ mới nào nên dùng lại.
 - **Khóa mã.** `lock: { code, digits, prompt }` trên một hành động mở bàn phím số. Sai `LOCK_TRIES` lần thì thiết bị tự khóa và mất
   `LOCK_PENALTY` giờ. Mã luôn suy ra được từ hồ sơ khác (vụ s1: giờ đỉnh triều cao nhất hôm đó), không phải đoán.
 - **Hồ sơ về muộn.** Diễn biến `{ kind: "arrive", at, id }`: hồ sơ `id` chỉ đọc được từ mốc `at`. Bấm vào thì hỏi có chờ không; chờ tốn số giờ
@@ -188,7 +188,7 @@ Vụ s1 được kiểm thử như một câu đố: `tests/sg.test.js` chơi l�
 không có hồ sơ nào hết hạn, và mọi lựa chọn sai (đảo vai, chứng cứ sai vai, đáp án sai) đều thua.
 
 Vụ s2 "Mực Chưa Khô" (`src/data/sg-vani.js`) dùng lại các cơ chế trên nhưng chỉ có một thủ phạm (`chain` ba bước, mỗi bước chọn một kết luận).
-`tests/sg-vani.test.js` kiểm tra đổi múi giờ, khung giờ bị hại, trạng thái ngoại phạm của từng người, mã điện thoại, hồ sơ về muộn và hai lối chứng cứ mỗi bước.
+`tests/sg-vani.test.js` kiểm tra báo cáo Zoom, khung giờ bị hại, trạng thái ngoại phạm của từng người, mã điện thoại, hồ sơ về muộn và hai lối chứng cứ mỗi bước.
 
 Vụ s3 "Búp Sen Đen" (`src/data/sg-bitexco.js`) không dùng thiết bị lệch giờ mà dựng câu đố trên **giờ chết bị dời**: thẻ của nạn nhân được quẹt khi bà đã chết, nên
 phải tìm giờ chết thật (hộp thư thoại, đồng hồ thông minh), rồi sàng loại trừ lúc đó bằng bốn nguồn (cách bà xưng hô "cậu", đường dây điện đàm cố định,

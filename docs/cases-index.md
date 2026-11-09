@@ -4,22 +4,22 @@ Mỗi vụ: bối cảnh, thủ phạm, cái "aha", cơ chế đã dùng, ai nó
 
 | Vụ | Tên | Thủ phạm | Khóa mã | Hồ sơ về muộn | Cơ chế riêng |
 | -- | --- | -------- | ------- | -------------- | ------------ |
-| s1 | Đỉnh Triều Bến Vân Đồn | Ngân (chủ mưu), Thắm (ra tay), Hải (kỹ thuật) | 1920 (giờ đỉnh triều) | cdr_tham 02:30, sao_ke_gh 04:00 | camera chậm 17 phút (`devices`), xét xử nhiều người (`verdict`) |
-| s2 | Mực Chưa Khô | Vũ | 0309 (sinh nhật đứa chị) | grab_vu 01:00, zoom_log 03:30, br_report 05:00 | múi giờ Thái Bình Dương +15 giờ (`devices`), gate, `chain` toàn kết luận |
+| s1 | Đỉnh Triều Bến Vân Đồn | Ngân (chủ mưu), Thắm (ra tay), Hải (kỹ thuật) | 1920 (giờ đỉnh triều) | cdr_tham 02:30, sao_ke_gh 04:00 | chế độ bảo trì cửa thang bộ + ngắt camera CAM-3, xét xử nhiều người (`verdict`) |
+| s2 | Mực Chưa Khô | Vũ | 0309 (sinh nhật đứa chị) | grab_vu 01:00, zoom_log 03:30, br_report 05:00 | gate, `chain` toàn kết luận |
 | s3 | Búp Sen Đen | Quân | 5249 (tầng sân đáp, tầng đài quan sát) | hop_thu 00:20, nk_thang 02:30, dkkd_sen_vang 03:30, lab_cup 04:30 | giờ chết bị dời bằng thẻ, xưng hô "cậu", vòng loại trừ bốn lớp, 5 lời thú nhận |
 | s4 | Bốn Giây | Diệp | 1708 (ngày 17/8, ngày ông Tự mất) | ghi_am_ngan 01:30, nk_nhamang 02:30, nk_ivr 03:30, giam_dinh_giong 05:00 | người khuyên can bị nghi nhất, cuộc gọi giọng giả hẹn giờ, loại trừ ở khung giờ cài lịch (22:47), tải trọng thang máy, 5 lời thú nhận |
 
 ## s1 · Đỉnh Triều Bến Vân Đồn (`sg.js`)
 - **Bối cảnh:** chung cư Sao Mai Riverside, Quận 4, triều cường 19h20, hầm B1 ngập. Nạn nhân ông Đoàn Văn Châu (chủ tịch Châu Phát Logistics), được coi là trượt chân. Bắt đầu 21:00.
-- **Sự thật:** Thắm dìm ông trong hầm B1 lúc 19:27–19:33; Hải mở lối xuống hầm và chỉnh lùi giờ camera 17 phút; Ngân dựng kế hoạch, hưởng lợi từ điều 12 hợp đồng vay (Gia Hòa Capital).
-- **Aha:** đồng hồ camera chậm 17 phút nên "Thắm biến mất 9 phút" xảy ra sau khi ông xuống hầm, không phải trước; quần Thắm ướt 55 cm khớp nước hầm; cuộc gọi Thắm–Ngân "từ ngã tư" thực ra bắt đầu từ trong hầm (hai lời khai chỉ dựa vào nhau).
+- **Sự thật:** Thắm dìm ông trong hầm B1 lúc 19:27–19:33; Hải mở lối xuống hầm (chế độ bảo trì) và ngắt camera CAM-3; Ngân dựng kế hoạch, hưởng lợi từ điều 12 hợp đồng vay (Gia Hòa Capital).
+- **Aha:** camera sảnh ghi Thắm "biến mất 9 phút" (19:25–19:34) ngay sau khi ông xuống hầm (19:24), trái lời khai "ra về từ 19h18"; tài khoản Hải bật chế độ bảo trì và ngắt CAM-3; quần Thắm ướt 55 cm khớp nước hầm; cuộc gọi Thắm–Ngân "từ ngã tư" thực ra bắt đầu từ trong hầm (hai lời khai chỉ dựa vào nhau).
 - **Người ngoài cuộc:** Vũ biển thủ 18 tỷ, Trang nợ cờ bạc (cả hai ở Thảo Điền theo tài xế Grab Food); bác Bảy Lành phát hiện thi thể, áo mưa xanh.
-- **Buộc tội:** ba vai (chủ mưu, kẻ ra tay, đồng phạm kỹ thuật) + ba câu dựng lại (skew, window, entry).
+- **Buộc tội:** ba vai (chủ mưu, kẻ ra tay, đồng phạm kỹ thuật) + hai câu dựng lại (window, entry).
 
 ## s2 · Mực Chưa Khô (`sg-vani.js`)
 - **Bối cảnh:** Vani Ecommerce (xưởng in áo thun bán trên Amazon), 59 Võ Văn Hát, Long Trường; đêm trước Black Friday. Nạn nhân ông Lý Quang Hiếu, được coi là trượt trên mực trắng. Bắt đầu 23:10.
 - **Sự thật:** Vũ (trưởng phòng quảng cáo, vợ đứng tên gian hàng đối thủ Saigon Rainwear) đi xe công nghệ tới hẻm sau, ông Hiếu mở cửa hậu cho anh; đánh bằng trục thép máy DTF số 2, bọc tay bằng áo mẫu SMPL-0117 của chính Vũ; mực trắng đổ sau để dựng cảnh trượt.
-- **Aha:** Zoom và Amazon ghi giờ Thái Bình Dương (+15 giờ): Vũ "họp liên tục ở nhà" thực ra vắng 20:35–21:07 rồi vào lại từ IP của công ty; khung giờ bị hại 20:44–21:15 từ dạ dày + camera nhà ăn; thân nhiệt vô giá trị (ống xả lò sấy).
+- **Aha:** báo cáo Zoom cho thấy Vũ "họp liên tục ở nhà" thực ra vắng 20:35–21:07 rồi vào lại từ IP của công ty; khung giờ bị hại 20:44–21:15 từ dạ dày + camera nhà ăn; thân nhiệt vô giá trị (ống xả lò sấy).
 - **Người ngoài cuộc:** Ngân biển thủ 640 triệu (Vi Na Pack); Thắm đi nghe điện thoại của đối thủ PrintHub (lộ qua camera ngõ sau); Trang đăng ký bản quyền ở Mỹ; Khoa, bác Sáu có hồ sơ che.
 - **Mã:** điện thoại nạn nhân = ngày sinh của đứa **chị** trong cặp song sinh (03/09, không phải 04/09), viết ngày rồi tháng.
 
@@ -44,7 +44,7 @@ Mỗi vụ: bối cảnh, thủ phạm, cái "aha", cơ chế đã dùng, ai nó
 
 | Nhóm | Đã dùng |
 | ---- | ------- |
-| Thời gian | camera chậm 17 phút (s1); múi giờ +15 giờ (s2); giờ chết bị dời bằng thẻ quẹt giả (s3); khung giờ bị hại từ dạ dày và nhà ăn (s2); thân nhiệt bị nhiễu (s2 lò sấy, s3 mưa lạnh); giờ quyết định là lúc cài lịch chứ không phải lúc cuộc gọi reo (s4) |
+| Thời gian | (đã bỏ camera chậm 17 phút ở s1 và múi giờ +15 giờ ở s2: không dùng giờ máy lệch nữa); giờ chết bị dời bằng thẻ quẹt giả (s3); khung giờ bị hại từ dạ dày và nhà ăn (s2); thân nhiệt bị nhiễu (s2 lò sấy, s3 mưa lạnh); giờ quyết định là lúc cài lịch chứ không phải lúc cuộc gọi reo (s4) |
 | Ngoại phạm | hai lời khai chỉ dựa vào nhau (s1); xác nhận bằng đường dây cố định, camera vận hành (s3); chuyến xe công nghệ + áo mưa (s2); vòng loại trừ nhiều lớp (s2, s3, s4); thủ phạm có ngoại phạm hoàn hảo ở khung giờ cuộc gọi reo (s4) |
 | Mã khóa | giờ đỉnh triều (s1), ngày sinh người chị của cặp song sinh (s2), số tầng trong bảng chỉ dẫn (s3), ngày người thân của nạn nhân mất, khoanh đỏ dưới tấm kính (s4) |
 | Vật chứng | áo mẫu làm găng (s2), cúp pha lê khắc tên người khác để đổ tội (s3), sợi áo mưa dưới móng tay (s1), quần ướt 55 cm (s1), mảnh vải bị kéo vào trong và vết nắm giật (s4) |
@@ -56,7 +56,7 @@ Mỗi vụ: bối cảnh, thủ phạm, cái "aha", cơ chế đã dùng, ai nó
 
 ## Ý tưởng chưa dùng (chọn ba để đưa người dùng chọn, hoặc tự chọn nếu họ giao quyền)
 
-Mỗi ý: địa danh Sài Gòn · cái "aha" · gợi ý cơ chế dữ liệu. Chọn ý có cơ chế **mới** hơn là lặp múi giờ/đồng hồ.
+Mỗi ý: địa danh Sài Gòn · cái "aha" · gợi ý cơ chế dữ liệu. Chọn ý có cơ chế **mới**. Không dùng giờ máy lệch/múi giờ nữa.
 
 1. **Nhà hát Thành phố, đêm diễn kịch:** một diễn viên "chết trên sân khấu" ở cảnh không có trong kịch bản; kịch bản chia phân đoạn có giờ in sẵn (spans) nhưng buổi diễn chạy lệch kịch bản vì khán giả vỗ tay; thủ phạm dùng khoảng đổi cảnh tối đen; hồ sơ về muộn: bản ghi âm đạo diễn.
 2. **Chợ Bến Thành, kho đông lạnh sau giờ đóng cửa:** nhiệt độ kho ghi lại từng lần mở cửa; thi thể đông cứng làm sai giờ chết (đối lập với "thân nhiệt vô giá trị" của s2/s3: lần này nhiệt độ là bằng chứng nhưng bị đảo chiều).

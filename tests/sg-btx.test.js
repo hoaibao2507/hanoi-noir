@@ -68,7 +68,7 @@ test("dữ liệu suy luận nhất quán: đầu vào và kết luận có th�
   const ids = c.actions.map((a) => a.id);
   const seen = new Map();
   for (const d of c.deduce) {
-    assert.ok(d.needs.length >= 2 && d.needs.length <= MAX_DEDUCE, `${d.gives}: cần 2–${MAX_DEDUCE} hồ sơ`);
+    assert.equal(d.needs.length, MAX_DEDUCE, `${d.gives}: cần đúng ${MAX_DEDUCE} hồ sơ`);
     assert.equal(new Set(d.needs).size, d.needs.length);
     for (const n of d.needs) assert.ok(ids.includes(n), `${d.gives}: đầu vào ${n} không có`);
     assert.equal(act(d.gives).via, "deduce");
@@ -152,9 +152,9 @@ test("camera sân đáp: bóng người vác vật dài chỉ gắn vào Quân s
 test("vòng loại trừ lúc 21:51: bốn nguồn che từng người, chỉ còn Quân", () => {
   const roots = ["khay_tra", "hop_thu", "loi_tham", "nk_dien_dam", "cam_vanhanh", "cam_tiec"];
   const g = play(roots);
-  for (const k of ["k_gio_chet", "k_xung_ho", "k_loai_vu", "k_loai_son", "k_quan_vang", "k_con_lai_quan"]) assert.ok(g.done[k], `${k} phải rút ra được`);
-  // Thiếu một mắt xích thì không ra kết luận cuối
-  for (const miss of ["loi_tham", "nk_dien_dam", "cam_vanhanh", "cam_tiec"]) {
+  for (const k of ["k_gio_chet", "k_xung_ho", "k_loai_vu", "k_loai_son", "k_cau_la_quan", "k_quan_vang", "k_con_lai_quan"]) assert.ok(g.done[k], `${k} phải rút ra được`);
+  // Thiếu một mắt xích thì không ra kết luận cuối (Sơn bị loại hai lần: bằng xưng hô "cậu" và bằng camera vận hành, lần sau dùng ở k_diem_mu)
+  for (const miss of ["loi_tham", "nk_dien_dam", "cam_tiec"]) {
     const g2 = play(roots.filter((x) => x !== miss));
     assert.ok(!g2.done.k_con_lai_quan, `thiếu ${miss} vẫn ra k_con_lai_quan`);
   }
@@ -332,12 +332,11 @@ test("mỗi hình giấy tờ gọn trong khung: tối đa năm dòng, không d�
   }
 });
 
-test("hộp thoại mở đầu chỉ nhắc cơ chế mà vụ có: s3 không nhắc giờ máy lệch, s1 và s2 vẫn nhắc", () => {
+test("hộp thoại mở đầu chỉ nhắc cơ chế mà vụ có: không vụ nào còn nhắc giờ máy lệch", () => {
   const html = T.briefingHTML(c);
-  assert.doesNotMatch(html, /giờ máy lệch/);
   assert.match(html, /về muộn/);
   assert.match(html, /mã số/);
   assert.match(html, /Suy luận/);
   assert.match(html, /Búp Sen Đen/);
-  for (const id of ["s1", "s2"]) assert.match(T.briefingHTML(CASES.find((x) => x.id === id)), /giờ máy lệch/, `${id}: vẫn có thiết bị lệch giờ`);
+  for (const x of CASES) assert.doesNotMatch(T.briefingHTML(x), /giờ máy lệch/, `${x.id}: không còn thiết bị lệch giờ`);
 });

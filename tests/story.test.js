@@ -29,9 +29,9 @@ test("mọi vụ đều có cốt truyện: bắt đầu bằng một chương, 
 
 test("cốt truyện nhắc đúng các chi tiết then chốt của từng vụ", () => {
   const all = (id) => CASES.find((c) => c.id === id).story.map((e) => `${e.at} ${e.title || e.part} ${e.text || ""}`).join("\n");
-  assert.match(all("s1"), /17 phút/);
+  assert.match(all("s1"), /CAM-3/);
   assert.match(all("s1"), /19:27–19:33/);
-  assert.match(all("s2"), /Thái Bình Dương/);
+  assert.match(all("s2"), /Zoom/);
   assert.match(all("s2"), /SMPL-0117/);
   assert.match(all("s3"), /21:51:07/);
   assert.match(all("s3"), /22:34/);

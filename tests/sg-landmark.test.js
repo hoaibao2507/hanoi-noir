@@ -68,7 +68,7 @@ test("dữ liệu suy luận nhất quán: đầu vào và kết luận có th�
   const ids = c.actions.map((a) => a.id);
   const seen = new Map();
   for (const d of c.deduce) {
-    assert.ok(d.needs.length >= 2 && d.needs.length <= MAX_DEDUCE, `${d.gives}: cần 2–${MAX_DEDUCE} hồ sơ`);
+    assert.equal(d.needs.length, MAX_DEDUCE, `${d.gives}: cần đúng ${MAX_DEDUCE} hồ sơ`);
     assert.equal(new Set(d.needs).size, d.needs.length);
     for (const n of d.needs) assert.ok(ids.includes(n), `${d.gives}: đầu vào ${n} không có`);
     assert.equal(act(d.gives).via, "deduce");

@@ -2,7 +2,7 @@
    HANOI NOIR · Vùng Sài Gòn · Vụ 3 "Búp Sen Đen"
    Tháp tài chính Bitexco · 2 Hải Triều, Quận 1, TP. Hồ Chí Minh. Đêm kỷ niệm 20 năm Hải Đăng Capital ở sảnh tiệc tầng 50.
    Một thủ phạm (chain), nhưng cái chết bị "dời giờ": tấm thẻ của nạn nhân được quẹt khi bà đã chết.
-   - deduce: 17 kết luận, trong đó sàng loại trừ bốn lớp (xưng hô "cậu", điện đàm của cơ trưởng, camera vận hành, camera sảnh tiệc)
+   - deduce: 19 kết luận (mỗi lần ghép đúng 2 hồ sơ), trong đó sàng loại trừ bốn lớp (xưng hô "cậu", điện đàm của cơ trưởng, camera vận hành, camera sảnh tiệc)
    - lock: điện thoại nạn nhân có mã bốn số, suy ra từ bảng chỉ dẫn các tầng của tòa nhà và mẩu giấy ghi tay
    - gate: sao kê công ty vỏ bọc chỉ xin được khi biết công ty đó của ai; USB của nhà báo chỉ có khi cô ấy thú nhận
    - world "arrive": bốn hồ sơ về muộn (hộp thư thoại, nhật ký thang máy, đăng ký kinh doanh, giám định cúp)
@@ -278,10 +278,18 @@ export const BITEXCO = {
       text: "Trong hộp thư thoại, bà gọi người vừa bước vào là “cậu” và hỏi “ai cho cậu thẻ” — người không có thẻ lên tầng 51. Thắm cho biết bà chỉ gọi hai người là “cậu”: Quân và Vũ; gọi Sơn là “anh Sơn”, gọi Thắm là “cô Thắm”. Người bước vào là Quân hoặc Vũ; không phải Sơn, và không phải một trong ba người phụ nữ.",
       visual: { k: "paper", alt: "Kết luận: cách xưng hô của bà Thục Anh", title: "KẾT LUẬN",
         rows: ["Bà gọi kẻ vào phòng: “cậu”", "Bà chỉ gọi “cậu”: Quân và Vũ", "Gọi Sơn là “anh”, Thắm là “cô”", "Người vào: Quân hoặc Vũ"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_cau_la_quan", cost: 0, via: "deduce", type: "Kết luận", title: "Vũ có điện đàm che, nên “cậu” chỉ còn là Quân",
+      text: "Bà Thục Anh chỉ gọi hai người là “cậu”: Quân và Vũ. Lúc bà bị hại, Vũ ngồi ở phòng phi công gọi điện cố định cho Trạm khí tượng đến 21:56, nên không phải người bước vào phòng chờ. Người bà gọi là “cậu” chỉ còn là Quân.",
+      visual: { k: "paper", alt: "Kết luận: “cậu” chỉ còn là Quân", title: "KẾT LUẬN",
+        rows: ["“Cậu” = Quân hoặc Vũ", "Vũ: điện đàm cố định 21:41–21:56", "Người bước vào phòng chờ: Quân"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_con_lai_quan", cost: 0, via: "deduce", type: "Kết luận", title: "Lúc 21h51, chỉ còn Quân không có nơi nào chứng minh",
       text: "Người bước vào phòng chờ là “cậu” — Quân hoặc Vũ. Vũ ngồi gọi điện cố định ở phòng phi công đến 21:56. Sơn ngồi phòng vận hành. Ngân và Trang quay lại sảnh tiệc lúc 21:35, Thắm vào lại sảnh lúc 21:49, tất cả trên camera. Chỉ còn Quân vắng khỏi sảnh tiệc từ 21:43 đến 21:58, và không có nguồn nào khác che cho anh.",
       visual: { k: "paper", alt: "Kết luận: vòng loại trừ", title: "KẾT LUẬN",
         rows: ["“Cậu” = Quân hoặc Vũ", "Vũ: điện đàm 21:41–21:56", "Ngân, Trang, Thắm: camera sảnh tiệc", "Sơn: camera phòng vận hành", "Còn lại: Quân, vắng 21:43–21:58"], stamp: "ĐÃ XÁC LẬP" } },
+    { id: "k_tang51_kin", cost: 0, via: "deduce", type: "Kết luận", title: "Tầng 51 không cần thẻ và không có camera: nơi ra tay không ai thấy",
+      text: "Trong khoảng 21:16–22:06 cửa thoát hiểm tầng 51 bị chèn mở, người đi cầu thang vào được mà không phải quẹt thẻ; và hành lang tầng 51 không có hình nào từ 19 ngày nay. Ai chọn tầng 51 làm nơi ra tay sẽ không để lại dấu thẻ lẫn hình ảnh.",
+      visual: { k: "paper", alt: "Kết luận: tầng 51 không dấu vết", title: "KẾT LUẬN",
+        rows: ["21:16–22:06 · cửa bị chèn, không cần thẻ", "CAM-51 mất hình 19 ngày", "Không thẻ, không hình: nơi ra tay kín"], stamp: "ĐÃ XÁC LẬP" } },
     { id: "k_diem_mu", cost: 0, via: "deduce", type: "Kết luận", title: "Người chọn tầng 51 làm điểm mù chỉ có thể là Quân",
       text: "Cửa tầng 51 bị chèn mở nên người đi cầu thang vào không cần thẻ, và hành lang không có camera 19 ngày nay. Hai người được báo chuyện camera hỏng là Quân và Sơn. Lúc bà bị hại Sơn ngồi trước camera phòng vận hành. Người biết tầng 51 không ai nhìn thấy và đủ gan đi vào đó là Quân.",
       visual: { k: "paper", alt: "Kết luận: điểm mù tầng 51", title: "KẾT LUẬN",
@@ -321,7 +329,7 @@ export const BITEXCO = {
     { needs: ["nk_cua", "quyen_the"], gives: "k_cua_mo" },
     { needs: ["nk_cua", "tham_thu"], gives: "k_cua_mo" },
     { needs: ["cam_hl51", "thong_bao_cam"], gives: "k_mu_cam" },
-    { needs: ["cam_pad", "nk_cua", "k_gio_chet"], gives: "k_ngu_trang" },
+    { needs: ["nk_cua", "k_gio_chet"], gives: "k_ngu_trang" },
     { needs: ["k_bi_chuyen", "nk_cua"], gives: "k_ngu_trang" },
     { needs: ["k_san_trong", "nk_cua"], gives: "k_ngu_trang" },
     { needs: ["cam_tiec", "k_gio_chet"], gives: "k_quan_vang" },
@@ -329,12 +337,14 @@ export const BITEXCO = {
     { needs: ["nk_dien_dam", "k_gio_chet"], gives: "k_loai_vu" },
     { needs: ["cam_vanhanh", "k_gio_chet"], gives: "k_loai_son" },
     { needs: ["loi_tham", "hop_thu"], gives: "k_xung_ho" },
-    { needs: ["k_xung_ho", "k_loai_vu", "k_loai_son", "k_quan_vang"], gives: "k_con_lai_quan" },
-    { needs: ["k_mu_cam", "k_cua_mo", "k_loai_son"], gives: "k_diem_mu" },
+    { needs: ["k_xung_ho", "k_loai_vu"], gives: "k_cau_la_quan" },
+    { needs: ["k_cau_la_quan", "k_quan_vang"], gives: "k_con_lai_quan" },
+    { needs: ["k_mu_cam", "k_cua_mo"], gives: "k_tang51_kin" },
+    { needs: ["k_tang51_kin", "k_loai_son"], gives: "k_diem_mu" },
     { needs: ["cam_pad", "vu_thu"], gives: "k_san_trong" },
     { needs: ["phieu_tai", "vu_thu"], gives: "k_san_trong" },
     { needs: ["lab_cup", "ban_cup"], gives: "k_cup_hung_khi" },
-    { needs: ["phap_y", "ban_cup", "cam_tiec"], gives: "k_cup_hung_khi" },
+    { needs: ["phap_y", "ban_cup"], gives: "k_cup_hung_khi" },
     { needs: ["dkkd_sen_vang", "loi_ngan"], gives: "k_sen_vang_quan" },
     { needs: ["usb_trang", "trang_thu"], gives: "k_sen_vang_quan" },
     { needs: ["sao_ke_sv", "k_sen_vang_quan"], gives: "k_chuyen_tien" },

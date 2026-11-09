@@ -8,7 +8,7 @@ export const MAX_LIVES = 3;
 export const CONFRONT_COST = 1; // giờ cho mỗi lần đưa chứng cứ
 export const LOCK_TRIES = 3;    // số lần thử mã trước khi thiết bị tự khóa
 export const LOCK_PENALTY = 1;  // giờ mất khi thiết bị tự khóa
-export const MAX_DEDUCE = 4;    // số hồ sơ tối đa ghép được trong một suy luận
+export const MAX_DEDUCE = 2;    // mỗi suy luận ghép đúng hai hồ sơ
 export const MAX_NOTE = 500;    // số ký tự tối đa của một ghi chú
 
 // Trạng thái một vụ đang điều tra

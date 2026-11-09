@@ -277,12 +277,12 @@ function Deduce({ game, c }) {
   const items = game.found.slice().reverse().map((id) => c.actions.find((a) => a.id === id));
   const r = game.ddResult;
   const msg = !r ? null
-    : r.status === "none" ? html`<p class="lkmsg">Những hồ sơ này chưa cho ra kết luận nào. Có thể thiếu một hồ sơ, thừa một hồ sơ, hoặc chúng chưa liên quan tới nhau.</p>`
+    : r.status === "none" ? html`<p class="lkmsg">Hai hồ sơ này chưa cho ra kết luận nào. Có thể chúng chưa liên quan tới nhau, hoặc cần một kết luận khác làm cầu nối.</p>`
     : r.status === "known" ? html`<p class="lkmsg">Kết luận này đã có trong sổ tay.</p>`
     : html`<p class="lkmsg ok">Kết luận mới đã được ghi lại.</p>`;
   const done = conclusionsOf(game, c);
   const chosen = game.dpick.map((id) => c.actions.find((a) => a.id === id).title);
-  return html`<p class="text-[13px] text-ink-2 mb-3">${`Chọn từ 2 đến ${MAX_DEDUCE} hồ sơ có liên quan tới nhau rồi bấm Suy luận. Chỉ đúng tập hồ sơ mới cho ra kết luận; thừa hay thiếu một hồ sơ đều không được. Suy luận không tốn giờ. Kết luận cũng là hồ sơ, nên ghép tiếp được với hồ sơ khác, và có kết luận mở ra điểm điều tra mới.`}</p>
+  return html`<p class="text-[13px] text-ink-2 mb-3">${`Chọn ${MAX_DEDUCE} hồ sơ có liên quan tới nhau rồi bấm Suy luận. Chỉ đúng cặp hồ sơ mới cho ra kết luận. Suy luận không tốn giờ. Kết luận cũng là hồ sơ, nên ghép tiếp được với hồ sơ khác, và có kết luận mở ra điểm điều tra mới.`}</p>
     <div class="lkgrid">${items.length
       ? items.map((a) => {
           const on = game.dpick.includes(a.id);

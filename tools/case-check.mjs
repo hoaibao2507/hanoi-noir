@@ -128,7 +128,7 @@ export function checkCase(c, idx = CASES.indexOf(c)) {
   const seen = new Map();
   const given = new Set();
   for (const d of c.deduce || []) {
-    if (d.needs.length < 2 || d.needs.length > MAX_DEDUCE) err(`${d.gives}: cần 2–${MAX_DEDUCE} hồ sơ (đang ${d.needs.length})`);
+    if (d.needs.length !== MAX_DEDUCE) err(`${d.gives}: cần đúng ${MAX_DEDUCE} hồ sơ (đang ${d.needs.length})`);
     if (new Set(d.needs).size !== d.needs.length) err(`${d.gives}: đầu vào bị lặp`);
     for (const n of d.needs) if (!idSet.has(n)) err(`${d.gives}: đầu vào "${n}" không có`);
     if (d.needs.includes(d.gives)) err(`${d.gives}: tự là đầu vào của chính nó`);

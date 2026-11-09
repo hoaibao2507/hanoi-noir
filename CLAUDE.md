@@ -17,7 +17,7 @@ Ngôn ngữ: toàn bộ chữ trong game, comment và commit đều là **tiến
 ## 1. Tổng quan
 
 - Game điều tra 4 vụ án ở Sài Gòn (`REGIONS` hiện chỉ có `sg`; các vụ Hà Nội đã bị gỡ, menu chỉ hiện thanh chọn vùng khi có từ hai vùng). Cơ chế riêng:
-  suy luận, khóa mã, giờ máy lệch, hồ sơ về muộn, xét xử nhiều người. **Hồ sơ và chứng cứ không được mất theo thời gian** (không dùng diễn biến `gone`/`leave`)
+  suy luận (mỗi lần ghép đúng 2 hồ sơ), khóa mã, hồ sơ về muộn, xét xử nhiều người; **không vụ nào dùng giờ máy lệch/múi giờ** (engine `devices` còn nhưng không dùng). **Hồ sơ và chứng cứ không được mất theo thời gian** (không dùng diễn biến `gone`/`leave`)
   và **ngân sách giờ của vụ ≥ nửa số điểm điều tra** (30 điểm → ≥ 15 giờ); hai điều này có test canh trong `tests/rules.test.js`. Chạy trên trình duyệt, toàn màn hình, panorama kéo ngang.
 - JavaScript thuần (ES module), không framework lớn. Giao diện chủ yếu là chuỗi HTML do `templates.js` sinh ra, gán bằng `innerHTML`; riêng **Sổ tay** là component Preact (`ui/notebook.js`, viết bằng `htm`, không cần biên dịch JSX).
 - Thư viện: Vite 8, Tailwind CSS 4 (`@tailwindcss/vite`), GSAP (hoạt ảnh UI), Phaser 4.2.1 (nền cảnh + hiệu ứng),
@@ -42,8 +42,8 @@ src/
   game/rules.js       LUẬT CHƠI THUẦN (không DOM, không localStorage)
   game/save.js        localStorage: số sao, ván đang chơi, vùng đang xem
   data/cases.js       TYPES, REGIONS (chỉ sg); CASES = SG_CASES (phẳng: s1, s2, s3, s4) + casesOf(region)
-  data/sg.js          Vùng Sài Gòn: vụ s1 "Đỉnh Triều Bến Vân Đồn" (suy luận, khóa mã, giờ máy lệch, xét xử nhiều người); gộp thêm vụ s2 từ sg-vani.js, vụ s3 từ sg-bitexco.js và vụ s4 từ sg-landmark.js
-  data/sg-vani.js     Vụ s2 "Mực Chưa Khô" (Vani Ecommerce, một thủ phạm: suy luận, múi giờ Thái Bình Dương, khóa mã, hồ sơ về muộn)
+  data/sg.js          Vùng Sài Gòn: vụ s1 "Đỉnh Triều Bến Vân Đồn" (suy luận, khóa mã, xét xử nhiều người); gộp thêm vụ s2 từ sg-vani.js, vụ s3 từ sg-bitexco.js và vụ s4 từ sg-landmark.js
+  data/sg-vani.js     Vụ s2 "Mực Chưa Khô" (Vani Ecommerce, một thủ phạm: suy luận, khóa mã, hồ sơ về muộn)
   data/sg-bitexco.js  Vụ s3 "Búp Sen Đen" (tháp Bitexco, một thủ phạm: giờ chết bị dời bằng thẻ ra vào, vòng loại trừ bốn lớp, khóa mã, hồ sơ về muộn)
   data/stories.js     Cốt truyện đầy đủ của từng vụ (STORIES[id]: mảng { part } và { at, title, text }, chuỗi thuần), cases.js gắn vào `c.story`; hiện ở màn thắng/thua và nút "Đọc lại cốt truyện" ở thẻ vụ đã giải
   data/sg-landmark.js Vụ s4 "Bốn Giây" (Landmark 81, một thủ phạm: người khuyên can bị nghi nhất, cuộc gọi giọng giả hẹn giờ, vòng loại trừ ở khung giờ cài lịch, tải trọng thang máy, khóa mã, hồ sơ về muộn)
@@ -88,8 +88,8 @@ tests/
   fixture.js          Vụ mẫu (không thuộc game) để thử gone/leave, chain, confront, links, spans/alibi
   rules.test.js       Luật chơi (trên vụ mẫu), cửa (cả 5–6 cửa), tính toàn vẹn dữ liệu mọi vụ, ngân sách giờ ≥ nửa số điểm, không hồ sơ mất theo thời gian
   save.test.js        Lưu/đọc ván đang chơi (mock localStorage)
-  sg.test.js          Vùng Sài Gòn: suy luận, giờ máy lệch, khóa mã, hồ sơ về muộn, lời giải, xét xử nhiều người, giao diện s1
-  sg-vani.test.js     Vụ s2: múi giờ PT, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian, lời giải và hai lối chứng cứ mỗi bước
+  sg.test.js          Vùng Sài Gòn: suy luận ghép hai hồ sơ, nguồn giờ khớp nhau, khóa mã, hồ sơ về muộn, lời giải, xét xử nhiều người, giao diện s1
+  sg-vani.test.js     Vụ s2: báo cáo Zoom, khung giờ bị hại, ngoại phạm, mã điện thoại, hồ sơ về muộn, hồ sơ không mất theo thời gian, lời giải và hai lối chứng cứ mỗi bước
   case-check.test.js  Công cụ kiểm tra vụ: mọi vụ sạch lỗi, và bắt được các lỗi dữ liệu hay gặp
   sg-btx.test.js      Vụ s3: giờ chết thật, xưng hô "cậu", vòng loại trừ, ngoại phạm, mã 5249, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước, giấy tờ gọn trong khung
   story.test.js       Cốt truyện (stories.js): mọi vụ đủ chương và mốc, khối gập ở màn thắng/thua, hộp thoại đọc lại, nút ở menu chỉ cho vụ đã giải, esc HTML
@@ -149,11 +149,11 @@ tab ("sus"|"ho"|"mx"|"lk"|"dd"|"tl")` — trường mới phải chịu được
 | Nhãn nghi phạm | `cycleMark` | Chỉ là ghi chú người chơi (chưa rõ / nghi ngờ / loại trừ) |
 | Buộc tội (một thủ phạm) | `judge`, `loseLife` | `judge(c, culprit, picks)`: đúng người **và** cả 3 bước `chain` (mỗi bước chọn 1 hồ sơ nằm trong `ids`). Sai = mất 1 mạng, hết 3 mạng → `over` |
 | Sao | `starsFor(wrong)`, `recordWin` | 0 sai = 3★, 1 sai = 2★, còn lại 1★; lưu bản tốt nhất |
-| Suy luận | `pickDeduce`, `tryDeduce`, `deductionFor`, `closeDeductions` | Vụ có `deduce[{needs,gives}]`: ghép 2–`MAX_DEDUCE` hồ sơ, đúng cả tập thì nhận kết luận `gives` (hành động `via:"deduce"`, loại "Kết luận"), không tốn giờ |
+| Suy luận | `pickDeduce`, `tryDeduce`, `deductionFor`, `closeDeductions` | Vụ có `deduce[{needs,gives}]`: ghép đúng `MAX_DEDUCE` = 2 hồ sơ (chọn thêm thì bỏ hồ sơ chọn cũ nhất), đúng cặp thì nhận kết luận `gives` (hành động `via:"deduce"`, loại "Kết luận"), không tốn giờ |
 | Mở khóa | `gated`, `unlocksOf` | Hành động có `gate: id` ẩn tới khi hồ sơ `id` (thường là kết luận) đã có |
 | Khóa mã | `attemptLock` | `lock:{code,digits,prompt}`: sai `LOCK_TRIES` lần thì thiết bị tự khóa, mất `LOCK_PENALTY` giờ. Trạng thái: `open`/`wrong`/`locked`/`closed` |
 | Hồ sơ về muộn | `pendingMinutes`, `isPending`, `arrivalOf`, `waitHours`, `waitFor` | Diễn biến `kind:"arrive"`: hồ sơ chỉ đọc được từ mốc `at`; chờ tốn số giờ nguyên tới mốc |
-| Giờ máy lệch | `devices`, `closeDeductions` | Mốc `dev` lệch `off` phút tới khi kết luận `by` được rút ra, rồi alibi được đối chiếu lại |
+| Giờ máy lệch | `devices`, `closeDeductions` | (engine còn, **không vụ nào dùng**) Mốc `dev` lệch `off` phút tới khi kết luận `by` được rút ra, rồi alibi được đối chiếu lại |
 | Ghi chú và tìm | `setNote`, `toggleFav`, `filterClues`, `fold`, `noteKey` | Chỉ là nháp của người chơi, không ảnh hưởng luật. `filterClues` tìm không dấu, mọi từ phải khớp (tiêu đề, nội dung, loại, tên người khai, ghi chú), trả mới nhất trước. `setNote` rỗng thì xóa, cắt ở `MAX_NOTE` |
 | Tổng quan địa điểm | `overviewOf` | Mỗi địa điểm: `done/left/waiting/wakeAt/current`. Dùng `remainingAt` nên không đếm điểm còn bị `gate` hay đã `gone` |
 | Gợi ý | `nextStep`, `spotOf` | Không tốn giờ, không ảnh hưởng sao. `nextStep` tìm hồ sơ then chốt (`chain`/`verdict.roles`) đầu tiên còn thiếu rồi đi ngược qua `gate`/`deduce`/`confront`/`arrive` ra việc cần làm (`go`/`wait`/`deduce`/`confront`/`accuse`). `game.hints` đếm số lần mở, `game.hintId` là điểm đang nhấp nháy |
@@ -175,16 +175,16 @@ Xuất `TYPES` (loại hồ sơ → `cls`+icon FA: Lời khai, Vật chứng, Ca
 
 | # | id | Tên | Địa điểm chính | Độ khó | Giờ | Bắt đầu | Thủ phạm | Tính năng thêm |
 | - | -- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | s1 | Đỉnh Triều Bến Vân Đồn | Chung cư Sao Mai Riverside, Quận 4 (6 địa điểm, 30 điểm điều tra) | ★★★★★★★ | 15 | 21:00 | nhiều người (`verdict`) | deduce, lock, devices, arrive |
-| 2 | s2 | Mực Chưa Khô | Vani Ecommerce, 59 Võ Văn Hát, Long Trường (6 địa điểm, 29 điểm điều tra, có án mạng) | ★★★★★★ | 15 | 23:10 | vu | deduce, lock, devices (giờ Thái Bình Dương, +15 giờ), arrive, gate, `chain` ba bước toàn bằng kết luận |
-| 3 | s3 | Búp Sen Đen | Tháp tài chính Bitexco, 2 Hải Triều, Quận 1 (6 địa điểm, 30 điểm điều tra, có án mạng) | ★★★★★★★ | 15 | 23:20 | quan | deduce (17 kết luận), lock (5249), arrive (4 hồ sơ), gate (2), confront (5 người thú nhận chuyện riêng), `chain` ba bước khóa `time`/`access`/`motive`; không dùng devices |
-| 4 | s4 | Bốn Giây | Tòa tháp Landmark 81, 208 Nguyễn Hữu Cảnh, Bình Thạnh (6 địa điểm, 30 điểm điều tra, có người rơi từ tầng 81) | ★★★★★★★ | 15 | 00:30 | diep | deduce (18 kết luận, 28 dòng), lock (1708), arrive (4 hồ sơ), gate (1), confront (5 người thú nhận chuyện riêng), `chain` ba bước khóa `cause`/`author`/`motive`; không dùng devices |
+| 1 | s1 | Đỉnh Triều Bến Vân Đồn | Chung cư Sao Mai Riverside, Quận 4 (6 địa điểm, 30 điểm điều tra) | ★★★★★★★ | 15 | 21:00 | nhiều người (`verdict`) | deduce (17 kết luận), lock, arrive, gate (2): chế độ bảo trì cửa thang bộ và ngắt camera CAM-3 |
+| 2 | s2 | Mực Chưa Khô | Vani Ecommerce, 59 Võ Văn Hát, Long Trường (6 địa điểm, 29 điểm điều tra, có án mạng) | ★★★★★★ | 15 | 23:10 | vu | deduce (14 kết luận), lock, arrive, gate, `chain` ba bước toàn bằng kết luận |
+| 3 | s3 | Búp Sen Đen | Tháp tài chính Bitexco, 2 Hải Triều, Quận 1 (6 địa điểm, 30 điểm điều tra, có án mạng) | ★★★★★★★ | 15 | 23:20 | quan | deduce (19 kết luận), lock (5249), arrive (4 hồ sơ), gate (2), confront (5 người thú nhận chuyện riêng), `chain` ba bước khóa `time`/`access`/`motive`; không dùng devices |
+| 4 | s4 | Bốn Giây | Tòa tháp Landmark 81, 208 Nguyễn Hữu Cảnh, Bình Thạnh (6 địa điểm, 30 điểm điều tra, có người rơi từ tầng 81) | ★★★★★★★ | 15 | 00:30 | diep | deduce (20 kết luận), lock (1708), arrive (4 hồ sơ), gate (1), confront (5 người thú nhận chuyện riêng), `chain` ba bước khóa `cause`/`author`/`motive`; không dùng devices |
 
 (Mỗi vụ có `clock`, `world` (chỉ `arrive`), `confront`; s1 dùng `verdict`, s2, s3 và s4 dùng `chain`. Khóa của các bước `chain` là tự do, chỉ cần đủ ba bước và khác nhau.)
 
 ### Lược đồ một vụ
 Xem `docs/new-case.md` mục 5 (lược đồ đầy đủ) và mục 4 (luật ngầm: alibi/spans, suy luận, gợi ý, đưa chứng cứ, ngân sách).
-Tóm tắt: `{ id, no, region, title, place, level, budget, clock, world(chỉ arrive), devices?, intro, suspects[6], locations[{id,name,time,scene,hs}], actions[], culprit + chain[3] | verdict, confront[], deduce[], explanation }`.
+Tóm tắt: `{ id, no, region, title, place, level, budget, clock, world(chỉ arrive), intro, suspects[6], locations[{id,name,time,scene,hs}], actions[], culprit + chain[3] | verdict, confront[], deduce[], explanation }`.
 
 - Mỗi action thuộc **đúng một** vị trí `hs` (trừ `via:"confront"`, không có vị trí). Test kiểm tra điều này.
 - Cảnh Sài Gòn: `sg_lobby`, `sg_secroom`, `sg_garage`, `sg_penthouse`, `sg_street`, `sg_lab` (+ nền menu `menu_sg`); vụ s2: `sg_vani_gate`, `sg_vani_office`, `sg_vani_ceo`, `sg_vani_print`, `sg_vani_dock` (và dùng lại `sg_lab`); vụ s3: `sg_btx_pad` (cảnh đầu tiên, cũng là hình thẻ vụ ở menu), `sg_btx_lobby`, `sg_btx_hall`, `sg_btx_lounge`, `sg_btx_ops` (và dùng lại `sg_lab`); vụ s4: `sg_lm_deck` (cảnh đầu tiên, cũng là hình thẻ vụ ở menu), `sg_lm_party`, `sg_lm_ops`, `sg_lm_office`, `sg_lm_ground` (và dùng lại `sg_lab`).
@@ -265,7 +265,7 @@ Một IIFE trả `ART = { scene(key, doors), portrait(look, id), evidence(visual
 (helper `rect/path/circle/line/txt/glow/haze/lin/frame`, `figure()` vẽ người, `tube()` nhà ống, `lantern`, `vase`…).
 - Cảnh đã đăng ký trong `SCENES`: các cảnh `sg_*`, `sg_vani_*`, `sg_btx_*`, `sg_lm_*` và `menu_sg` (cảnh Hà Nội đã gỡ; khóa lạ rơi về `menu_sg`).
 - `scene()` bọc cảnh bằng `widen()` (thế giới 2400, hai bên + cửa) trừ `menu_sg`.
-- `evidence(v)`: `paper` (giấy tờ), `cam` (khung camera, các loại `cam_sg_*`, `cam_vani_*`, `cam_btx_*`, `cam_lm_*`), `tide`, `skew` (camera chậm 17 phút), `tz` (Thái Bình Dương +15 giờ); `who` dùng `portrait`.
+- `evidence(v)`: `paper` (giấy tờ), `cam` (khung camera, các loại `cam_sg_*`, `cam_vani_*`, `cam_btx_*`, `cam_lm_*`), `tide`, `skew`/`tz` (hình giờ máy lệch, còn trong art.js nhưng không vụ nào dùng); `who` dùng `portrait`.
 - ID gradient/filter phải duy nhất toàn trang (dùng tiền tố cảnh `k` hoặc `uid()`).
 
 ### 6.9 Lớp hình ảnh nâng cao (xem thêm README, mục "Hình ảnh")

@@ -1,4 +1,4 @@
-/* Kiểm thử vùng Sài Gòn: vụ "Đỉnh Triều Bến Vân Đồn" và các cơ chế mới (suy luận, khóa mã, chờ kết quả, giờ máy lệch, xét xử nhiều người). */
+/* Kiểm thử vùng Sài Gòn: vụ "Đỉnh Triều Bến Vân Đồn" và các cơ chế mới (suy luận ghép đúng hai hồ sơ, khóa mã, chờ kết quả, xét xử nhiều người). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CASES, TYPES, casesOf, REGIONS } from "../src/data/cases.js";
@@ -54,7 +54,7 @@ test("dữ liệu suy luận nhất quán: hồ sơ vào/ra có thật, kết lu
   const ids = c.actions.map((a) => a.id);
   const seen = new Map();
   for (const d of c.deduce) {
-    assert.ok(d.needs.length >= 2 && d.needs.length <= MAX_DEDUCE, `${d.gives}: cần 2–${MAX_DEDUCE} hồ sơ`);
+    assert.equal(d.needs.length, MAX_DEDUCE, `${d.gives}: cần đúng ${MAX_DEDUCE} hồ sơ`);
     assert.equal(new Set(d.needs).size, d.needs.length, `${d.gives}: hồ sơ đầu vào bị lặp`);
     for (const n of d.needs) assert.ok(ids.includes(n), `${d.gives}: đầu vào ${n} không có`);
     assert.ok(ids.includes(d.gives), `${d.gives} không có trong actions`);
@@ -78,14 +78,11 @@ test("kết luận không vòng lặp: rút được toàn bộ từ các hồ s
   for (const d of c.deduce) assert.ok(g.done[d.gives], `${d.gives} không bao giờ rút ra được`);
 });
 
-test("thiết bị, khóa, cổng mở khóa và diễn biến trỏ tới dữ liệu có thật", () => {
+test("khóa, cổng mở khóa và diễn biến trỏ tới dữ liệu có thật; vụ không còn giờ máy lệch", () => {
   const ids = c.actions.map((a) => a.id);
-  for (const [k, d] of Object.entries(c.devices)) {
-    assert.ok(ids.includes(d.by), `${k}: kết luận hiệu chỉnh ${d.by} không có`);
-    assert.equal(act(d.by).via, "deduce");
-  }
+  assert.equal(c.devices, undefined, "vụ không dùng giờ máy lệch");
   for (const a of c.actions) {
-    for (const s of a.spans || []) if (s.dev) assert.ok(c.devices[s.dev], `${a.id}: thiết bị ${s.dev} không có`);
+    for (const s of a.spans || []) assert.equal(s.dev, undefined, `${a.id}: mốc không được lệch giờ`);
     if (a.gate) assert.ok(ids.includes(a.gate), `${a.id}: gate ${a.gate} không có`);
     if (a.lock) {
       assert.equal(a.lock.code.length, a.lock.digits, `${a.id}: độ dài mã`);
@@ -99,31 +96,30 @@ test("thiết bị, khóa, cổng mở khóa và diễn biến trỏ tới dữ 
     "vụ dùng đủ gate, khóa mã và hồ sơ về muộn");
 });
 
-test("suy luận: đúng tập hồ sơ (không phân biệt thứ tự) mới cho kết luận; thừa hoặc thiếu đều không", () => {
-  const base = withDone(["cam_sanh", "nk_ravao", "so_khach", "loi_tham"]);
-  assert.ok(deductionFor(c, ["nk_ravao", "cam_sanh"]), "thứ tự không quan trọng");
+test("suy luận: chỉ đúng cặp hồ sơ (không phân biệt thứ tự) mới cho kết luận; cặp khác không", () => {
+  const base = withDone(["cua_thangbo", "nk_ravao", "cam_sanh", "loi_tham"]);
+  assert.ok(deductionFor(c, ["nk_ravao", "cua_thangbo"]), "thứ tự không quan trọng");
   const pick = (g, ids) => ids.reduce((x, id) => pickDeduce(x, id), g);
 
-  const ok = tryDeduce(pick(base, ["nk_ravao", "cam_sanh"]), c);
+  const ok = tryDeduce(pick(base, ["nk_ravao", "cua_thangbo"]), c);
   assert.equal(ok.ddResult.status, "new");
-  assert.equal(ok.ddResult.gives, "k_lech");
-  assert.ok(ok.done.k_lech && ok.found.includes("k_lech"));
+  assert.equal(ok.ddResult.gives, "k_override");
+  assert.ok(ok.done.k_override && ok.found.includes("k_override"));
   assert.deepEqual(ok.dpick, [], "chọn xong thì bỏ chọn");
-  assert.deepEqual(ok.ddFrom.k_lech.slice().sort(), ["cam_sanh", "nk_ravao"], "ghi lại kết luận rút ra từ đâu");
+  assert.deepEqual(ok.ddFrom.k_override.slice().sort(), ["cua_thangbo", "nk_ravao"], "ghi lại kết luận rút ra từ đâu");
   assert.equal(ok.hours, base.hours, "suy luận không tốn giờ");
 
-  const extra = tryDeduce(pick(base, ["cam_sanh", "nk_ravao", "loi_tham"]), c);
-  assert.equal(extra.ddResult.status, "none", "thừa một hồ sơ thì không ra");
-  assert.equal(extra.ddTries, 1);
   const lack = tryDeduce(pick(base, ["cam_sanh", "loi_tham"]), c);
   assert.equal(lack.ddResult.status, "none", "hai hồ sơ không liên quan");
+  assert.equal(lack.ddTries, 1);
 
-  const again = tryDeduce(pick(ok, ["cam_sanh", "nk_ravao"]), c);
+  const again = tryDeduce(pick(ok, ["cua_thangbo", "nk_ravao"]), c);
   assert.equal(again.ddResult.status, "known", "kết luận đã có thì báo đã có");
-  assert.equal(again.found.filter((x) => x === "k_lech").length, 1, "không ghi hai lần");
+  assert.equal(again.found.filter((x) => x === "k_override").length, 1, "không ghi hai lần");
 });
 
-test("suy luận: chỉ chọn được hồ sơ đã thu, bỏ chọn được, tối đa MAX_DEDUCE hồ sơ, và cần ít nhất hai hồ sơ", () => {
+test("suy luận: chỉ chọn được hồ sơ đã thu, bỏ chọn được, chọn tối đa hai hồ sơ (MAX_DEDUCE), và cần đủ hai hồ sơ", () => {
+  assert.equal(MAX_DEDUCE, 2);
   const g = withDone(["cam_sanh", "nk_ravao", "so_khach", "cam_ham", "dkkd"]);
   assert.equal(pickDeduce(g, "hop_dong_vay"), g, "hồ sơ chưa thu không chọn được");
   let x = pickDeduce(g, "cam_sanh");
@@ -133,14 +129,14 @@ test("suy luận: chỉ chọn được hồ sơ đã thu, bỏ chọn được,
   assert.deepEqual(x.dpick, [], "bấm lại để bỏ chọn");
   for (const id of ["cam_sanh", "nk_ravao", "so_khach", "cam_ham", "dkkd"]) x = pickDeduce(x, id);
   assert.equal(x.dpick.length, MAX_DEDUCE);
-  assert.deepEqual(x.dpick, ["nk_ravao", "so_khach", "cam_ham", "dkkd"], "chọn thêm thì bỏ hồ sơ chọn cũ nhất");
+  assert.deepEqual(x.dpick, ["cam_ham", "dkkd"], "chọn thêm thì bỏ hồ sơ chọn cũ nhất");
 });
 
-test("kết luận làm đầu vào cho suy luận sau: k_lech rồi k_cua_so, k_gia_hoa rồi k_dong_co và k_tra_tien", () => {
+test("kết luận làm đầu vào cho suy luận sau: k_loi_xuong rồi k_cua_so, k_gia_hoa rồi k_dong_co và k_tra_tien", () => {
   const g1 = play(["cam_sanh", "nk_ravao", "cam_ham"]);
-  assert.ok(g1.done.k_lech && g1.done.k_cua_so, "k_cua_so cần k_lech, nên không rút ra nếu thiếu k_lech");
-  const noLech = closeDeductions(withDone(["cam_sanh", "cam_ham"]), c);
-  assert.ok(!noLech.done.k_cua_so);
+  assert.ok(g1.done.k_loi_xuong && g1.done.k_cua_so, "k_cua_so cần k_loi_xuong");
+  const noLoi = closeDeductions(withDone(["cam_sanh", "cam_ham"]), c);
+  assert.ok(!noLoi.done.k_cua_so, "thiếu nhật ký ra vào thì không rút ra k_loi_xuong, nên không có k_cua_so");
   const g2 = play(["dkkd", "hop_dong_vay"]);
   assert.ok(g2.done.k_gia_hoa && g2.done.k_dong_co, "hợp đồng vay + đăng ký kinh doanh dẫn tới động cơ");
   const viaSafe = play(["dkkd", "hop_dong_vay"]);
@@ -154,47 +150,41 @@ test("gate: nhật ký đầu ghi và sao kê Gia Hòa ẩn cho tới khi có k�
   const L = c.locations.find((x) => x.hs.some((h) => h[0] === "dvr_log"));
   assert.ok(!remainingAt(g0, c, L).some(([id]) => id === "dvr_log"), "chưa mở thì không tính là còn điểm điều tra");
   assert.ok(!T.hotspotsHTML(g0, c, L).includes('data-id="dvr_log"'), "chưa mở thì không hiện trên cảnh");
-  const g1 = play(["cam_sanh", "nk_ravao"]);
+  const g1 = play(["nk_ravao", "cua_thangbo"]);
+  assert.ok(g1.done.k_override);
   assert.equal(gated(g1, c, "dvr_log"), false);
   assert.ok(isOpen(g1, c, "dvr_log"));
   assert.ok(T.hotspotsHTML(g1, c, L).includes('data-id="dvr_log"'));
-  assert.deepEqual(unlocksOf(c, "k_lech").spots.map((a) => a.id), ["dvr_log"]);
-  assert.equal(unlocksOf(c, "k_lech").devs.length, 1);
+  assert.deepEqual(unlocksOf(c, "k_override").spots.map((a) => a.id), ["dvr_log"]);
+  assert.equal(unlocksOf(c, "k_override").devs.length, 0, "không còn thiết bị lệch giờ");
   assert.equal(gated(g0, c, "sao_ke_gh"), true);
   assert.deepEqual(unlocksOf(c, "k_gia_hoa").spots.map((a) => a.id), ["sao_ke_gh"]);
 });
 
-test("giờ máy lệch: chưa hiệu chỉnh thì giữ giờ máy; hiệu chỉnh xong thì cộng 17 phút và các nguồn giờ khớp nhau", () => {
+test("các nguồn giờ của vụ đều là giờ thật: camera, nhật ký thẻ và sổ khách khớp nhau từng sự kiện, không mốc nào lệch giờ", () => {
   const ids = ["cam_sanh", "nk_ravao", "so_khach", "cam_ham"];
-  const before = timelineEvents(withDone(ids), c);
-  const camThamBefore = before.find((e) => e.clue === "cam_sanh" && e.who === "tham" && e.from === "18:58");
-  assert.ok(camThamBefore && camThamBefore.dev && !camThamBefore.dev.fixed, "chưa hiệu chỉnh: giờ máy 18:58");
-
-  const after = timelineEvents(closeDeductions(withDone(ids), c), c);
-  const camTham = after.find((e) => e.clue === "cam_sanh" && e.who === "tham" && e.dev.rawFrom === "18:58");
-  assert.equal(camTham.from, "19:15");
-  assert.ok(camTham.dev.fixed && camTham.dev.off === 17);
-  // Ba cặp sự kiện được hai nguồn cùng ghi phải khớp nhau sau hiệu chỉnh
-  const start = (clue, who, at) => after.find((e) => e.clue === clue && e.at === at && (!who || e.who === who)).from;
+  const ev = timelineEvents(withDone(ids), c);
+  assert.ok(ev.every((e) => !e.dev), "không mốc nào mang cờ giờ máy lệch");
+  const start = (clue, who, at) => ev.find((e) => e.clue === clue && e.at === at && (!who || e.who === who)).from;
+  assert.equal(start("cam_sanh", "tham", "Sảnh chung cư"), "19:15");
   assert.equal(start("cam_sanh", "tham", "Sảnh chung cư"), start("nk_ravao", "tham", "Sảnh chung cư"), "Thắm ra thang máy: camera = nhật ký");
-  assert.equal(after.find((e) => e.clue === "cam_sanh" && e.who === "trang").from, after.find((e) => e.clue === "so_khach" && e.who === "trang" && e.at === "Sảnh chung cư").from, "Trang rời tòa nhà: camera = sổ khách");
-  assert.equal(after.find((e) => e.clue === "cam_ham").from, after.find((e) => e.clue === "nk_ravao" && e.at === "Hầm B1").from, "ông Châu xuống B1: camera = nhật ký");
+  assert.equal(ev.find((e) => e.clue === "cam_sanh" && e.who === "trang").from, ev.find((e) => e.clue === "so_khach" && e.who === "trang" && e.at === "Sảnh chung cư").from, "Trang rời tòa nhà: camera = sổ khách");
+  assert.equal(ev.find((e) => e.clue === "cam_ham").from, ev.find((e) => e.clue === "nk_ravao" && e.at === "Hầm B1").from, "ông Châu xuống B1: camera = nhật ký");
+  // Thắm vắng khỏi sảnh chín phút, ngay sau khi ông Châu xuống hầm
+  const gap = ev.find((e) => e.clue === "cam_sanh" && e.who === "tham" && e.at === "Ngoài tầm camera sảnh");
+  assert.deepEqual([gap.from, gap.to], ["19:25", "19:34"]);
+  assert.ok(minutes(gap.from) > minutes(ev.find((e) => e.clue === "cam_ham").from));
   // Giờ chỉ quay vòng trong ngày
-  assert.equal(after.every((e) => /^\d{2}:\d{2}$/.test(e.from) && /^\d{2}:\d{2}$/.test(e.to)), true);
+  assert.equal(ev.every((e) => /^\d{2}:\d{2}$/.test(e.from) && /^\d{2}:\d{2}$/.test(e.to)), true);
 });
 
-test("ngoại phạm lật khi hiệu chỉnh giờ: bác Lành hết bị bác oan, Thắm bị bác, Hải được xác nhận ở phòng bảo vệ", () => {
+test("ngoại phạm: Thắm bị camera bác ngay, Hải được camera phòng bảo vệ xác nhận, bác Lành không vướng gì", () => {
   const stm = ["loi_tham", "loi_lanh", "loi_hai", "cam_sanh", "cam_bv", "nk_ravao"];
   const status = (g, who) => alibisOf(g, c).find((a) => a.who === who).status;
-  const raw = withDone(stm);
-  assert.equal(status(raw, "lanh"), "clash", "giờ máy: bác Lành tưởng ở sảnh lúc 19:46 trong khi khai ở nhà");
-  assert.equal(status(raw, "tham"), "open", "giờ máy: khoảng vắng của Thắm nằm trước khi ông Châu xuống hầm nên vô hại");
-  assert.equal(status(raw, "hai"), "open");
-  const fixed = closeDeductions(raw, c);
-  assert.ok(fixed.done.k_lech);
-  assert.equal(status(fixed, "lanh"), "open", "đã hiệu chỉnh: bác Lành vào sảnh lúc 20:03, sau giờ ông khai");
-  assert.equal(status(fixed, "tham"), "clash", "đã hiệu chỉnh: Thắm vắng khỏi sảnh 19:25–19:34 và ra cửa lúc 19:34, không phải 19:18");
-  assert.equal(status(fixed, "hai"), "proof", "đã hiệu chỉnh: camera phòng bảo vệ bao trọn 19:00–20:00");
+  const g = closeDeductions(withDone(stm), c);
+  assert.equal(status(g, "lanh"), "open", "bác Lành vào sảnh lúc 20:03, sau giờ ông khai ở nhà");
+  assert.equal(status(g, "tham"), "clash", "Thắm vắng khỏi sảnh 19:25–19:34 và ra cửa lúc 19:35, không phải 19:18");
+  assert.equal(status(g, "hai"), "proof", "camera phòng bảo vệ bao trọn 19:00–20:00");
 });
 
 test("Vũ và Trang: lời khai bị bác nhưng đó là lời dối về chuyện riêng, và đều ở Thảo Điền lúc 19:32", () => {
@@ -278,7 +268,7 @@ const PLAN = ["cam_sanh", "nk_ravao", "cam_ham", "cua_thangbo", "dkkd", "hop_don
 const GOOD = {
   who: { mastermind: "ngan", killer: "tham", tech: "hai" },
   evid: { mastermind: "k_dong_co", killer: "k_cua_so", tech: "k_override" },
-  facts: { skew: "slow17", window: "w1925", entry: "stairs" }
+  facts: { window: "w1925", entry: "stairs" }
 };
 
 test("lời giải ngắn nhất đi được và còn dư giờ; thiếu một mắt xích thì không đủ chứng cứ", () => {
@@ -298,7 +288,7 @@ test("mỗi vai đều có ít nhất hai lối chứng cứ độc lập, đề
   const routes = {
     mastermind: [["dkkd", "hop_dong_vay"], ["loi_ngan", "dt_nan_nhan"], ["dkkd", "ket_sat", "thuy_trieu", "note_ket", "hop_dong_vay"]],
     killer: [["cam_sanh", "nk_ravao", "cam_ham"], ["cdr_tham", "loi_lanh"], ["hien_truong", "quan_cafe", "loi_tham"], ["phap_y", "cua_thangbo", "cam_sanh"]],
-    tech: [["nk_ravao", "cua_thangbo"], ["cam_sanh", "nk_ravao", "dvr_log", "loi_hai"], ["loi_hai", "loi_lanh"]]
+    tech: [["nk_ravao", "cua_thangbo"], ["nk_ravao", "cua_thangbo", "dvr_log", "loi_hai"], ["loi_hai", "loi_lanh"], ["cam_bv", "nk_ravao"]]
   };
   for (const r of c.verdict.roles) {
     let ok = 0;
@@ -340,14 +330,13 @@ test("không có lối tắt đoán mò: chọn nhầm một chứng cứ, một
   assert.equal(bad({ evid: { tech: "cam_sanh" } }).win, false, "hồ sơ gốc không đủ làm chứng cứ");
   assert.equal(bad({ evid: { tech: null } }).win, false, "thiếu chứng cứ");
   // Dựng lại sai
-  assert.equal(bad({ facts: { skew: "fast17" } }).win, false);
   assert.equal(bad({ facts: { window: "w1938" } }).win, false);
   assert.equal(bad({ facts: { entry: "lanh" } }).win, false);
   assert.equal(bad({ facts: { entry: undefined } }).win, false);
   // Mỗi phần được chấm riêng để phản hồi
-  const r = judgeVerdict(c, { who: { mastermind: "ngan", killer: "tham", tech: "lanh" }, evid: { mastermind: "k_dong_co", killer: "k_cua_so" }, facts: { skew: "slow17" } });
+  const r = judgeVerdict(c, { who: { mastermind: "ngan", killer: "tham", tech: "lanh" }, evid: { mastermind: "k_dong_co", killer: "k_cua_so" }, facts: { window: "w1925" } });
   assert.deepEqual(r.roles.map((x) => [x.key, x.whoOk, x.evOk]), [["mastermind", true, true], ["killer", true, true], ["tech", false, false]]);
-  assert.deepEqual(r.facts.map((x) => [x.key, x.ok]), [["skew", true], ["window", false], ["entry", false]]);
+  assert.deepEqual(r.facts.map((x) => [x.key, x.ok]), [["window", true], ["entry", false]]);
   assert.equal(r.right, false);
   assert.ok(r.roles.every((x) => x.hint));
 });
@@ -379,15 +368,14 @@ test("giao diện vụ Sài Gòn dựng được: HUD, sổ tay mọi tab, xét 
   assert.match(nb, /Suy luận \(\d+\/\d+\)/);
   assert.match(nb, /Rút ra từ/);
   assert.match(nb, /Đã mở điểm điều tra: <b>Nhật ký hệ thống đầu ghi hình<\/b>/);
-  assert.match(notebookHTML({ ...g, tab: "tl" }, c), /đã hiệu chỉnh/);
-  assert.match(notebookHTML({ ...withDone(["cam_sanh"]), tab: "tl" }, c), /chưa hiệu chỉnh/);
+  assert.doesNotMatch(notebookHTML({ ...g, tab: "tl" }, c), /hiệu chỉnh|giờ máy/, "vụ không còn giờ máy lệch");
   assert.match(T.accuseHTML(g, c, { who: {}, evid: {}, facts: {} }), /Phiên xét xử/);
   assert.match(T.accuseHTML(g, c, { who: {}, evid: {}, facts: {} }), /Chủ mưu/);
   const lock = T.lockHTML(c, act("ket_sat"), "19", 1);
   assert.match(lock, /data-action="lock-key"/);
   assert.match(lock, /Còn 2 lần thử/);
   assert.match(T.waitHTML(newGame(idx, c), c, act("cdr_tham")), /Chờ 6 giờ/);
-  assert.match(T.deduceResultHTML(c, "k_lech"), /Kết luận mới/);
+  assert.match(T.deduceResultHTML(c, "k_override"), /Kết luận mới/);
   const wrong = T.wrongVerdictHTML(2, judgeVerdict(c, { who: { mastermind: "ngan", killer: "tham", tech: "lanh" } }), c);
   assert.match(wrong, /Còn lại <b>2<\/b> mạng/);
   assert.match(T.verdictWinHTML(c, idx, 0, { stars: { s1: 3 }, unlocked: 0 }), /Chủ mưu: <b>Ngân<\/b>/);

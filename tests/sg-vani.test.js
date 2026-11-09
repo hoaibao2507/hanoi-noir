@@ -1,4 +1,4 @@
-/* Kiểm thử vụ s2 "Mực Chưa Khô" (Vani Ecommerce): múi giờ Thái Bình Dương, khung giờ bị hại, ngoại phạm, khóa mã, hồ sơ về muộn và lời giải. */
+/* Kiểm thử vụ s2 "Mực Chưa Khô" (Vani Ecommerce): báo cáo Zoom, khung giờ bị hại, ngoại phạm, khóa mã, hồ sơ về muộn và lời giải. */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CASES, casesOf } from "../src/data/cases.js";
@@ -49,7 +49,7 @@ test("dữ liệu suy luận nhất quán: đầu vào và kết luận có th�
   const ids = c.actions.map((a) => a.id);
   const seen = new Map();
   for (const d of c.deduce) {
-    assert.ok(d.needs.length >= 2 && d.needs.length <= MAX_DEDUCE, `${d.gives}: cần 2–${MAX_DEDUCE} hồ sơ`);
+    assert.equal(d.needs.length, MAX_DEDUCE, `${d.gives}: cần đúng ${MAX_DEDUCE} hồ sơ`);
     assert.equal(new Set(d.needs).size, d.needs.length);
     for (const n of d.needs) assert.ok(ids.includes(n), `${d.gives}: đầu vào ${n} không có`);
     assert.equal(act(d.gives).via, "deduce");
@@ -70,14 +70,11 @@ test("dữ liệu suy luận nhất quán: đầu vào và kết luận có th�
   for (const d of c.deduce) assert.ok(g.done[d.gives], `${d.gives} không bao giờ rút ra được`);
 });
 
-test("đồ vật của vụ trỏ tới dữ liệu có thật: thiết bị, gate, khóa, diễn biến, chuỗi chứng minh", () => {
+test("đồ vật của vụ trỏ tới dữ liệu có thật: gate, khóa, diễn biến, chuỗi chứng minh; không còn giờ máy lệch", () => {
   const ids = c.actions.map((a) => a.id);
-  for (const d of Object.values(c.devices)) {
-    assert.equal(act(d.by).via, "deduce");
-    assert.equal(d.off, 900, "Thái Bình Dương sau Việt Nam 15 giờ");
-  }
+  assert.equal(c.devices, undefined, "vụ không dùng giờ máy lệch");
   for (const a of c.actions) {
-    for (const s of a.spans || []) if (s.dev) assert.ok(c.devices[s.dev]);
+    for (const s of a.spans || []) assert.equal(s.dev, undefined, `${a.id}: mốc không được lệch giờ`);
     if (a.gate) assert.ok(ids.includes(a.gate));
     if (a.lock) assert.match(a.lock.code, new RegExp(`^\\d{${a.lock.digits}}$`));
   }
@@ -86,19 +83,15 @@ test("đồ vật của vụ trỏ tới dữ liệu có thật: thiết bị, g
   for (const st of c.chain) for (const i of st.ids) assert.equal(act(i).via, "deduce", `${st.key}: chứng cứ của bước phải là kết luận`);
 });
 
-test("múi giờ: chưa hiệu chỉnh giữ nguyên giờ Thái Bình Dương; hiệu chỉnh xong thì cộng 15 giờ và khớp lời khai Vũ", () => {
-  const raw = timelineEvents(withDone(["zoom_log"]), c).filter((e) => e.who === "vu");
-  assert.deepEqual(raw.map((e) => [e.from, e.to, e.dev.fixed]), [["05:30", "05:35", false], ["06:07", "06:48", false]]);
+test("báo cáo Zoom ghi giờ Việt Nam: hai phiên của Vũ khớp thẳng lên dòng thời gian, thư Amazon khớp điện thoại ông Hiếu", () => {
+  const ev = timelineEvents(withDone(["zoom_log"]), c).filter((e) => e.who === "vu");
+  assert.deepEqual(ev.map((e) => [e.from, e.to, e.dev || null]), [["20:30", "20:35", null], ["21:07", "21:48", null]]);
   const g = closeDeductions(withDone(["zoom_log", "loi_vu"]), c);
-  assert.ok(g.done.k_pst);
-  const fixed = timelineEvents(g, c).filter((e) => e.clue === "zoom_log");
-  assert.deepEqual(fixed.map((e) => [e.from, e.to]), [["20:30", "20:35"], ["21:07", "21:48"]]);
-  // Hai lối cùng ra một kết luận; thư Amazon 05:12 PT khớp điện thoại ông Hiếu 20:12
-  const g2 = closeDeductions(withDone(["br_report", "dt_hieu"]), c);
-  assert.ok(g2.done.k_pst);
-  assert.equal(timelineEvents(g2, c).find((e) => e.clue === "br_report").from, "20:12");
+  assert.ok(g.done.k_zoom_gap, "báo cáo Zoom ghép với lời khai của Vũ ra khoảng vắng họp");
+  assert.equal(timelineEvents(withDone(["br_report"]), c).find((e) => e.clue === "br_report").from, "20:12");
   assert.match(act("dt_hieu").text, /20:12/);
-  assert.match(act("br_report").text, /05:12 AM PT/);
+  assert.match(act("br_report").text, /20:12/);
+  assert.doesNotMatch(act("br_report").text + act("zoom_log").text, /Thái Bình Dương|\bPT\b/);
   // Khoảng Vũ vắng họp: 20:35–21:07 là 32 phút
   assert.match(act("k_zoom_gap").title, /32 phút/);
 });
@@ -113,8 +106,8 @@ test("ngoại phạm: Vũ bị bác, Trang/Khoa/bác Sáu được xác nhận, 
   assert.equal(st("sau"), "proof");
   assert.equal(st("ngan"), "clash", "Ngân ở văn phòng đến 21:03, không ở nhà");
   assert.equal(st("tham"), "clash", "Thắm rời nhà ăn ra hiên 20:59–21:08");
-  // Trước khi đổi múi giờ, riêng báo cáo Zoom chưa bác được lời Vũ, nhưng chuyến xe đã bác
-  assert.equal(alibisOf(withDone(["loi_vu", "zoom_log"]), c)[0].status, "open");
+  // Báo cáo Zoom và chuyến xe, mỗi thứ riêng một mình đã bác được lời Vũ
+  assert.equal(alibisOf(withDone(["loi_vu", "zoom_log"]), c)[0].status, "clash");
   assert.equal(alibisOf(withDone(["loi_vu", "grab_vu"]), c)[0].status, "clash");
 });
 
@@ -254,11 +247,9 @@ test("giao diện vụ s2 dựng được: HUD, sổ tay mọi tab, chuỗi ch�
   let g = play(PLAN);
   assert.match(T.hudHTML(g, c, c.locations[0]), /Sài Gòn · Vụ 2/);
   for (const tab of ["sus", "ho", "dd", "tl"]) assert.ok(notebookHTML({ ...g, tab }, c).length > 200, tab);
-  assert.match(notebookHTML({ ...g, tab: "tl" }, c), /đã hiệu chỉnh|chưa hiệu chỉnh|Thái Bình Dương/);
-  const raw = notebookHTML({ ...withDone(["zoom_log"]), tab: "tl" }, c);
-  assert.match(raw, /chưa hiệu chỉnh/);
-  const fixed = notebookHTML({ ...closeDeductions(withDone(["zoom_log", "loi_vu"]), c), tab: "tl" }, c);
-  assert.match(fixed, /giờ thật = giờ máy \+ 15 giờ/);
+  const tl = notebookHTML({ ...closeDeductions(withDone(["zoom_log", "loi_vu"]), c), tab: "tl" }, c);
+  assert.doesNotMatch(tl, /hiệu chỉnh|giờ máy|Thái Bình Dương/, "vụ không còn giờ máy lệch");
+  assert.match(tl, /20:30–20:35/);
   assert.match(T.accuseHTML(g, c, { culprit: null, steps: {} }), /Cơ hội/);
   for (const L of c.locations) {
     const svg = ART.scene(L.scene, []);

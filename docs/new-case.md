@@ -38,7 +38,7 @@ Hồ sơ về muộn: id + giờ đến; điểm bị gate: id + kết luận m�
 ```
 
 Nguyên tắc câu đố đã chạy tốt ở bốn vụ:
-- Người chơi bị dẫn tới **giờ sai** hoặc **người sai** trước (thẻ quẹt 22:34, camera chậm 17 phút, giờ Thái Bình Dương), rồi một hồ sơ đến muộn hoặc khóa mã lật lại.
+- Người chơi bị dẫn tới **giờ sai** hoặc **người sai** trước (thẻ quẹt 22:34 khi nạn nhân đã chết, lời khai "ra về từ 19h18"), rồi một hồ sơ đến muộn hoặc khóa mã lật lại.
 - Thủ phạm có **ngoại phạm đẹp ở khung giờ người ta tưởng** là giờ án mạng; sơ hở nằm ở khung giờ thật.
 - Mỗi người ngoài cuộc **nói dối một chuyện riêng** (biển thủ, đi làm cho đối thủ, chở hàng lậu...) và lộ ra bằng "đưa chứng cứ"; chỉ thủ phạm là không bao giờ thú nhận.
 - Mỗi người ngoài cuộc phải bị loại bằng **hồ sơ độc lập** (camera, nhật ký giờ mạng, đường dây cố định), không bằng lời khai của chính họ.
@@ -48,7 +48,9 @@ Nguyên tắc câu đố đã chạy tốt ở bốn vụ:
 ## 4. Luật ngầm và bẫy (đã làm mất thời gian ở các vụ trước)
 
 **Suy luận (`deduce`)**
-- 2–4 đầu vào, đầu vào có thể là hồ sơ gốc hoặc kết luận khác. Hai dòng không được có cùng **tập** đầu vào (kể cả đảo thứ tự): chỉ dòng đầu có tác dụng, `check-case` báo lỗi.
+- **Đúng 2 đầu vào** (`MAX_DEDUCE = 2`, `check-case` báo lỗi nếu khác), đầu vào có thể là hồ sơ gốc hoặc kết luận khác. Hai dòng không được có cùng **tập** đầu vào (kể cả đảo thứ tự): chỉ dòng đầu có tác dụng, `check-case` báo lỗi.
+- Muốn ghép từ 3–4 hồ sơ thì tách thành chuỗi cặp: ghép hai hồ sơ ra một **kết luận trung gian** (có hình `paper` và văn bản riêng) rồi ghép kết luận đó với hồ sơ tiếp theo; vòng loại trừ nhiều người thì ghép theo cặp rồi ghép hai kết quả với nhau.
+- **Không dùng giờ máy lệch/múi giờ**: mọi camera, nhật ký, báo cáo đều ghi giờ thật (giờ Việt Nam), `devices` và `dev` không có trong vụ nào.
 - Nhiều dòng cùng `gives` = nhiều lối. **Dòng đầu tiên của mỗi `gives` là lối mà gợi ý dẫn người chơi đi**, và thứ tự trong `needs` là thứ tự gợi ý làm. Đặt hồ sơ không phải chờ lên trước hồ sơ về muộn để khỏi mất giờ chờ.
 - Gợi ý (`nextStep`) duyệt các bước `chain` theo thứ tự; mỗi bước chỉ cần **một** `ids` đã có là coi như xong và đi tiếp. Vì thế lộ trình gợi ý có thể dừng sớm hơn lối "kỹ nhất". Đặt kết luận mạnh nhất lên đầu `ids`.
 - Kết luận không đặt trên bản đồ (`via:"deduce"`, `cost:0`, `type:"Kết luận"`). Văn bản kết luận không nên nhắc hồ sơ mà một lối khác không cần; được phép gom ý nếu nhiều lối.
@@ -86,7 +88,7 @@ Nguyên tắc câu đố đã chạy tốt ở bốn vụ:
 - Hình giấy tờ (`visual.k:"paper"`): ≤ 5 dòng, mỗi dòng ≤ 41 ký tự, tiêu đề ≤ 33 ký tự (viết hoa rộng hơn nên ngắn hơn nữa). Dấu mộc (`stamp`) che vùng x ≥ 196, y 122–158 ≈ dòng 2–3: giữ hai dòng đó ngắn.
 - Khung camera (`k:"cam"`): `scene` phải là loại đã vẽ trong `camBody` và đăng ký trong `CAM_KINDS` (art.js); nếu không sẽ rơi im lặng về cảnh sảnh của s1 (`check-case` bắt).
 - Thông điệp mở đầu (`intro`) là HTML tin cậy; mọi chuỗi khác được `esc()`.
-- Hộp thoại mở đầu tự nhắc cơ chế vụ có (giờ máy lệch chỉ khi có `devices`, hồ sơ về muộn, mã số).
+- Hộp thoại mở đầu tự nhắc cơ chế vụ có (hồ sơ về muộn, mã số).
 
 ## 5. Lược đồ một vụ
 
@@ -95,7 +97,6 @@ export const TEN_VU = {
   id: "s4", no: 4, region: "sg", title: "…", place: "…", level: "★★★★★★★ …", budget: 15,
   clock: { start: "HH:MM" },
   world: [{ at: "HH:MM", kind: "arrive", id: "ho_so_id", text: "…" }],
-  devices?: { dev: { name, off /* phút */, by: "k_id" } },      // thiết bị lệch giờ tới khi kết luận by có; span có dev: "dev"
   intro: "HTML mở đầu",
   suspects: [{ id, name, role, bio, look: { skin, hair, hc, top, acc, ac? } }],
   //   hair: short|long|bun|bald|hat   acc: glasses|mustache|scarf|tie|none   (ac = màu cà vạt/khăn)  sex?: "m"|"f"
