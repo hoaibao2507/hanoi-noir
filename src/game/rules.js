@@ -173,11 +173,9 @@ export function closeDeductions(game, c) {
   return g;
 }
 
-// Kết luận (hoặc hồ sơ) mà việc có được "id" sẽ mở ra: điểm điều tra có gate = id, và thiết bị được hiệu chỉnh
+// Kết luận (hoặc hồ sơ) mà việc có được "id" sẽ mở ra: các điểm điều tra có gate = id
 export function unlocksOf(c, id) {
-  const spots = c.actions.filter((a) => a.gate === id && !a.via);
-  const devs = Object.values(c.devices || {}).filter((d) => d.by === id);
-  return { spots, devs };
+  return { spots: c.actions.filter((a) => a.gate === id && !a.via) };
 }
 
 // Kết nối được viết sẵn cho cặp hồ sơ này trong dữ liệu vụ, hoặc null
@@ -261,33 +259,24 @@ const overlaps = (a, b) => minutesOf(a.from) < minutesOf(b.to) && minutesOf(b.fr
 const covers = (outer, inner) =>
   minutesOf(outer.from) <= minutesOf(inner.from) && minutesOf(outer.to) >= minutesOf(inner.to);
 
-// Cộng (hoặc trừ) số phút vào một mốc "HH:MM", quay vòng trong ngày
-const shiftTime = (hhmm, mins) => {
-  const m = (((minutesOf(hhmm) + mins) % (24 * 60)) + 24 * 60) % (24 * 60);
-  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-};
 
 // Mốc đã ghi: các khoảng giờ từ hồ sơ đã thu, theo thứ tự thời gian.
 // Mốc chỉ gắn người khi mọi hồ sơ trong "needs" đã thu; trước đó người là null và pending là true.
-// Mốc có "dev" lấy giờ từ một thiết bị lệch giờ (c.devices): giữ nguyên giờ máy cho tới khi kết luận "by" của thiết bị được
-// rút ra, sau đó cộng độ lệch "off". Mọi so sánh ngoại phạm đều dùng giờ đã hiệu chỉnh nếu có.
+
 export function timelineEvents(game, c) {
   const out = [];
   c.actions.forEach((a) => {
     if (!game.done[a.id]) return;
     (a.spans || []).forEach((s) => {
       const known = (s.needs || []).every((id) => game.done[id]);
-      const dev = s.dev && c.devices ? c.devices[s.dev] : null;
-      const fixed = !!dev && !!game.done[dev.by];
       out.push({
         clue: a.id,
         title: a.title,
-        from: fixed ? shiftTime(s.from, dev.off) : s.from,
-        to: fixed ? shiftTime(s.to, dev.off) : s.to,
+        from: s.from,
+        to: s.to,
         at: s.at,
         who: known ? s.who || null : null,
-        pending: !known && !!s.who,
-        dev: dev ? { name: dev.name, fixed, off: dev.off, rawFrom: s.from, rawTo: s.to } : null
+        pending: !known && !!s.who
       });
     });
   });

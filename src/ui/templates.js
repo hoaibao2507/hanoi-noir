@@ -232,14 +232,10 @@ export function reactionHTML(c, who, clueId, r, reveal, news = []) {
 // Tên địa điểm có điểm điều tra này
 const placeOf = (c, id) => (c.locations.find((L) => L.hs.some((h) => h[0] === id)) || {}).name || "";
 
-// Những gì một kết luận đã mở ra: điểm điều tra mới và thiết bị được hiệu chỉnh
+// Những gì một kết luận đã mở ra: điểm điều tra mới
 function effectsHTML(c, id) {
-  const { spots, devs } = unlocksOf(c, id);
-  const rows = [
-    ...spots.map((a) => `<div class="banner mt-2"><i class="fa-solid fa-lock-open"></i> Đã mở điểm điều tra: <b>${esc(a.title)}</b> · ${esc(placeOf(c, a.id))}</div>`),
-    ...devs.map((d) => `<div class="banner mt-2"><i class="fa-regular fa-clock"></i> Giờ ${esc(d.name)} đã được hiệu chỉnh trong tab Thời gian.</div>`)
-  ];
-  return rows.join("");
+  const { spots } = unlocksOf(c, id);
+  return spots.map((a) => `<div class="banner mt-2"><i class="fa-solid fa-lock-open"></i> Đã mở điểm điều tra: <b>${esc(a.title)}</b> · ${esc(placeOf(c, a.id))}</div>`).join("");
 }
 
 // Hộp thoại khi vừa rút ra một kết luận mới
@@ -255,12 +251,11 @@ export function deduceResultHTML(c, id) {
 }
 
 /* ---------- Hộp thoại kiểu hồ sơ giấy ---------- */
-// Chỉ nhắc những cơ chế mà vụ này thật sự có (giờ máy lệch, hồ sơ về muộn, mã số)
+// Chỉ nhắc những cơ chế mà vụ này thật sự có (hồ sơ về muộn, mã số)
 const briefingExtra = (c) => {
   if (!c.deduce) return "";
   const late = (c.world || []).some((w) => w.kind === "arrive"), code = c.actions.some((a) => a.lock);
   const parts = [];
-  if (c.devices) parts.push("một số thiết bị có <b>giờ máy lệch</b>");
   if (late || code) parts.push(`một số hồ sơ ${late ? "chỉ <b>về muộn</b>" : ""}${late && code ? " hoặc " : ""}${code ? "cần <b>mã số</b>" : ""}`);
   parts.push(c.verdict ? "phiên xét xử cần chỉ ra <b>nhiều người</b> cùng vai trò của từng người" : "phiên buộc tội vẫn chỉ cần một người, nhưng mỗi bước phải dựa trên một <b>kết luận</b> do chính bạn rút ra");
   const body = parts.slice(0, -1).concat(`và ${parts[parts.length - 1]}`).join("; ");

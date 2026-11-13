@@ -12,6 +12,8 @@
 import { VANI } from "./sg-vani.js";
 import { BITEXCO } from "./sg-bitexco.js";
 import { LANDMARK } from "./sg-landmark.js";
+import { METRO } from "./sg-metro.js";
+import { COLDROOM } from "./sg-coldroom.js";
 
 export const SG_CASES = [
 {
@@ -383,5 +385,7 @@ export const SG_CASES = [
 },
 VANI,
 BITEXCO,
-LANDMARK
+LANDMARK,
+METRO,
+COLDROOM
 ];

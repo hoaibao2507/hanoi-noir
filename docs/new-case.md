@@ -50,7 +50,7 @@ Nguyên tắc câu đố đã chạy tốt ở bốn vụ:
 **Suy luận (`deduce`)**
 - **Đúng 2 đầu vào** (`MAX_DEDUCE = 2`, `check-case` báo lỗi nếu khác), đầu vào có thể là hồ sơ gốc hoặc kết luận khác. Hai dòng không được có cùng **tập** đầu vào (kể cả đảo thứ tự): chỉ dòng đầu có tác dụng, `check-case` báo lỗi.
 - Muốn ghép từ 3–4 hồ sơ thì tách thành chuỗi cặp: ghép hai hồ sơ ra một **kết luận trung gian** (có hình `paper` và văn bản riêng) rồi ghép kết luận đó với hồ sơ tiếp theo; vòng loại trừ nhiều người thì ghép theo cặp rồi ghép hai kết quả với nhau.
-- **Không dùng giờ máy lệch/múi giờ**: mọi camera, nhật ký, báo cáo đều ghi giờ thật (giờ Việt Nam), `devices` và `dev` không có trong vụ nào.
+- **Không có giờ máy lệch/múi giờ**: mọi camera, nhật ký, báo cáo đều ghi giờ thật (giờ Việt Nam); engine không hỗ trợ `devices`/`dev`.
 - Nhiều dòng cùng `gives` = nhiều lối. **Dòng đầu tiên của mỗi `gives` là lối mà gợi ý dẫn người chơi đi**, và thứ tự trong `needs` là thứ tự gợi ý làm. Đặt hồ sơ không phải chờ lên trước hồ sơ về muộn để khỏi mất giờ chờ.
 - Gợi ý (`nextStep`) duyệt các bước `chain` theo thứ tự; mỗi bước chỉ cần **một** `ids` đã có là coi như xong và đi tiếp. Vì thế lộ trình gợi ý có thể dừng sớm hơn lối "kỹ nhất". Đặt kết luận mạnh nhất lên đầu `ids`.
 - Kết luận không đặt trên bản đồ (`via:"deduce"`, `cost:0`, `type:"Kết luận"`). Văn bản kết luận không nên nhắc hồ sơ mà một lối khác không cần; được phép gom ý nếu nhiều lối.
@@ -80,7 +80,7 @@ Nguyên tắc câu đố đã chạy tốt ở bốn vụ:
 - Mỗi hồ sơ gốc đặt đúng một chỗ trên bản đồ; kết luận và lời khai `via` không đặt.
 
 **Buộc tội**
-- `chain`: đúng 3 bước, khóa tự do nhưng khác nhau (`opportunity/means/motive` ở s2, `time/access/motive` ở s3, `cause/author/motive` ở s4), mỗi bước có `label`, `ask`, `hint`, `ids` (các **kết luận** được chấp nhận làm chứng cứ).
+- `chain`: đúng 3 bước, khóa tự do nhưng khác nhau (`opportunity/means/motive` ở s2, `time/access/motive` ở s3, `cause/author/motive` ở s4, `when/escape/motive` ở s5, `freeze/hands/motive` ở s6), mỗi bước có `label`, `ask`, `hint`, `ids` (các **kết luận** được chấp nhận làm chứng cứ).
 - `verdict` (nhiều người) thay cho `chain`: xem s1.
 - `culprit` bắt buộc với `chain`.
 

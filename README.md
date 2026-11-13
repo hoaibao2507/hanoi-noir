@@ -1,8 +1,8 @@
 # Hanoi Noir · Vụ Án Sài Gòn
 
-Trò chơi điều tra chạy trên trình duyệt, hiện có bốn vụ ở Sài Gòn: *Đỉnh Triều Bến Vân Đồn* (ba kẻ liên đới, một án mạng được dựng
+Trò chơi điều tra chạy trên trình duyệt, hiện có sáu vụ ở Sài Gòn: *Đỉnh Triều Bến Vân Đồn* (ba kẻ liên đới, một án mạng được dựng
 thành tai nạn bằng đồng hồ), *Mực Chưa Khô* (Vani Ecommerce), *Búp Sen Đen* (tháp Bitexco, một cái chết bị dời giờ bằng tấm thẻ của nạn nhân) và
-*Bốn Giây* (tòa tháp Landmark 81, một người rơi khỏi đài quan sát khi người ở cạnh đang van nài anh xuống: người khuyên can bị nghi nhất, còn kẻ thật sự đứng sau chỉ cần một cuộc gọi hẹn giờ). Các vụ ở phố cổ Hà Nội đã được gỡ bỏ. Hồ sơ và chứng cứ không biến mất theo
+*Bốn Giây* (tòa tháp Landmark 81, một người rơi khỏi đài quan sát khi người ở cạnh đang van nài anh xuống: người khuyên can bị nghi nhất, còn kẻ thật sự đứng sau chỉ cần một cuộc gọi hẹn giờ) và *Hai Phút Một Ga* (tuyến metro số 1, một người chết trên chuyến tàu cuối: mọi chặng đều hai phút nên con tàu là một cái đồng hồ, và kẻ ra tay biến khỏi tuyến bằng cách đổi sang đoàn tàu ngược chiều trên sân ga đảo ga Ba Son, không để lại lượt quẹt thẻ nào) và *Âm Mười Tám Độ* (kho lạnh chợ Bến Thành, một người chết cứng ở buồng −18°C: cái lạnh làm giờ chết bị đẩy sớm lên hơn ba tiếng, vì thi thể thật ra đã bị cấp đông nhanh trong tủ −40°C rồi mới chuyển sang). Các vụ ở phố cổ Hà Nội đã được gỡ bỏ. Hồ sơ và chứng cứ không biến mất theo
 thời gian, và ngân sách giờ của mỗi vụ tối thiểu bằng nửa số điểm điều tra (30 điểm thì ít nhất 15 giờ). Menu có bộ chọn vùng, chỉ hiện khi có từ hai vùng trở lên.
 Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc dùng mũi tên để xem hai bên,
 đi qua cửa để sang địa điểm khác, nút chức năng nằm ở bốn góc.
@@ -13,7 +13,7 @@ Mỗi cảnh là một thế giới panorama phủ kín màn hình: kéo hoặc 
 npm install
 npm run dev      # máy chủ phát triển (Vite)
 npm run build    # tạo dist/index.html: một file duy nhất, mở trực tiếp được
-npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải bốn vụ Sài Gòn (không cần trình duyệt)
+npm test         # kiểm thử luật chơi, cửa đi, tính toàn vẹn dữ liệu và lời giải sáu vụ Sài Gòn (không cần trình duyệt)
 npm run lint     # ESLint: biến chưa khai báo, biến thừa...
 npm run e2e      # build rồi mở dist/index.html bằng Chrome thật, chơi vài bước (cần Chrome hoặc Edge đã cài)
 npm run check-case -- s3 --table   # công cụ tác giả: kiểm tra dữ liệu một vụ (bỏ tên vụ để kiểm tra tất cả)
@@ -68,6 +68,8 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `src/art/sg-vani.js` | Cảnh vụ "Mực Chưa Khô" (cổng, văn phòng, phòng giám đốc, xưởng in, hẻm sau) |
 | `src/art/sg-btx.js` | Cảnh vụ "Búp Sen Đen" (sân đáp tầng 52, sảnh tầng 1, sảnh tiệc tầng 50, phòng chờ VIP tầng 51, phòng vận hành) |
 | `src/art/sg-lm.js` | Cảnh vụ "Bốn Giây" (đài quan sát tầng 81, sảnh tiệc tầng 79, phòng kiểm soát tầng B1, văn phòng tầng 66, sân bục tầng 3) |
+| `src/art/sg-mt.js` | Cảnh vụ "Hai Phút Một Ga" (toa 3 đoàn tàu ĐT-12, sảnh soát vé ga Bến Thành, Trung tâm điều hành OCC, sân ga đảo Ba Son nhìn xiên tới điểm tụ, văn phòng Ban An toàn) |
+| `src/art/sg-cs.js` | Cảnh vụ "Âm Mười Tám Độ" (Buồng 2 −18°C, phòng máy và tủ cấp đông −40°C, bãi dỡ hàng và bàn đóng gói, văn phòng Hợp tác xã, phòng bảo vệ cổng Nam) |
 | `src/ui/coach.js` | Hướng dẫn lần đầu chơi |
 | `src/art/people.js` | Người trong cảnh (`figure`) và chân dung (`portrait`) dùng chung một bộ vẽ: tỉ lệ 6,9 đầu, vai, tay, bàn tay, giày, nét mặt, tóc, kính, ria |
 | `src/data/cases.js` | Danh sách vùng (`REGIONS`, hiện chỉ có Sài Gòn), loại hồ sơ; gộp các vụ Sài Gòn thành danh sách phẳng `CASES` |
@@ -75,6 +77,8 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `src/data/sg-vani.js` | Vụ "Mực Chưa Khô" (Vani Ecommerce): một thủ phạm, báo cáo Zoom ghi khoảng Vũ vắng họp, điện thoại có mã, hồ sơ về muộn |
 | `src/data/sg-bitexco.js` | Vụ "Búp Sen Đen" (tháp Bitexco): một thủ phạm, giờ chết bị dời bằng thẻ ra vào, vòng loại trừ bốn lớp, điện thoại có mã, hồ sơ về muộn |
 | `src/data/stories.js` | Cốt truyện đầy đủ của từng vụ, kể theo thời gian: hiện sau khi khép hồ sơ (và khi thua), và qua nút "Đọc lại cốt truyện" ở thẻ vụ đã giải |
+| `src/data/sg-metro.js` | Vụ "Hai Phút Một Ga" (metro số 1): một thủ phạm, bảng giờ chạy tàu cố định hai phút một ga, đổi đoàn tàu trên sân ga đảo không để lại lượt quẹt, vòng ra-vào cùng một ga, vòng loại trừ ở 22:03, điện thoại có mã số hiệu đoàn tàu, hồ sơ về muộn |
+| `src/data/sg-coldroom.js` | Vụ "Âm Mười Tám Độ" (kho lạnh chợ Bến Thành): một thủ phạm, cái lạnh làm giờ chết bị đẩy sớm lên, thi thể cấp đông nhanh rồi chuyển qua cửa chuyển hàng không cảm biến, số học tải trọng xe nâng, vòng loại trừ ở 23:26–23:44, điện thoại có mã nhiệt độ hai buồng, hồ sơ về muộn |
 | `src/data/sg-landmark.js` | Vụ "Bốn Giây" (Landmark 81): một thủ phạm, cuộc gọi giọng giả hẹn giờ, vòng loại trừ ở khung giờ cài lịch, tải trọng thang máy, điện thoại có mã, hồ sơ về muộn |
 | `src/styles/main.css` | Token thiết kế (`@theme`) và các thành phần giao diện |
 | `tests/rules.test.js` | Kiểm thử đơn vị luật chơi và dữ liệu các vụ (`npm test`), gồm ngân sách giờ ≥ nửa số điểm và không có hồ sơ mất theo thời gian |
@@ -87,6 +91,8 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
 | `tests/case-check.test.js` | Công cụ kiểm tra vụ: mọi vụ sạch lỗi và công cụ bắt được các lỗi dữ liệu hay gặp |
 | `tests/sg-btx.test.js` | Kiểm thử vụ "Búp Sen Đen": giờ chết thật, xưng hô "cậu", vòng loại trừ, ngoại phạm, mã điện thoại, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
 | `tests/story.test.js` | Kiểm thử cốt truyện: mọi vụ đủ chương và mốc, khối gập ở màn thắng/thua, hộp thoại đọc lại, nút ở menu chỉ cho vụ đã giải |
+| `tests/sg-metro.test.js` | Kiểm thử vụ "Hai Phút Một Ga": bảng giờ tính từng giây, đổi đoàn tàu ở Ba Son, vòng 14 phút 42 giây, vòng loại trừ lúc 22:03, ngoại phạm, mã 1207, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
+| `tests/sg-coldroom.test.js` | Kiểm thử vụ "Âm Mười Tám Độ": phép tính giờ và tải trọng, cấp đông nhanh, cửa chuyển hàng, vòng loại trừ lúc 23:26–23:44, ngoại phạm, mã 1840, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
 | `tests/sg-landmark.test.js` | Kiểm thử vụ "Bốn Giây": bàn tay kéo chứ không đẩy, cuộc gọi giọng giả, vòng loại trừ lúc 22:47, ngoại phạm, mã 1708, cổng mở khóa, hồ sơ về muộn, hai lối chứng cứ mỗi bước |
 | `tests/notebook.test.js` | Sổ tay: tìm hồ sơ không dấu, lọc theo loại, đánh dấu sao, ghi chú, tổng quan địa điểm |
 | `tools/case-check.mjs` | `npm run check-case`: kiểm tra mọi luật dữ liệu chung của một vụ, lộ trình gợi ý và bảng ngoại phạm |
@@ -120,10 +126,10 @@ Chrome luôn giữ thanh địa chỉ trên trang web thường, nên có hai c�
   mốc chồng giờ ở nơi khác, "Được xác nhận" nếu có mốc bao trọn khoảng khai ở đúng nơi đó. Việc này không tốn giờ.
 - Đồng hồ và diễn biến: mỗi vụ có `clock.start` (giờ bắt đầu) và mảng `world`. Mỗi giờ điều tra là một giờ trôi qua; di chuyển
   không tốn giờ nên không làm đồng hồ chạy. Engine vẫn hỗ trợ diễn biến `gone` (mất một hồ sơ chưa thu) và `leave` (nghi phạm rời thành phố), nhưng
-  **bốn vụ Sài Gòn không dùng chúng**: `tests/rules.test.js` bắt buộc mọi vụ trong trò chơi chỉ có diễn biến `arrive` (hồ sơ về muộn). Các luật `gone`/`leave`
+  **sáu vụ Sài Gòn không dùng chúng**: `tests/rules.test.js` bắt buộc mọi vụ trong trò chơi chỉ có diễn biến `arrive` (hồ sơ về muộn). Các luật `gone`/`leave`
   được kiểm thử bằng vụ mẫu `tests/fixture.js`. Diễn biến được báo ngay khi đồng hồ tới mốc và ghi trong tab Thời gian.
 - Ngân sách giờ: `budget` của mỗi vụ phải tối thiểu bằng nửa số điểm điều tra trên bản đồ (`test` kiểm tra `budget * 2 >= tổng số hs`).
-  Hiện s1 có 30 điểm, 15 giờ; s2 có 29 điểm, 15 giờ; s3 có 30 điểm, 15 giờ; s4 có 30 điểm, 15 giờ.
+  Hiện s1 có 30 điểm, 15 giờ; s2 có 29 điểm, 15 giờ; s3 có 30 điểm, 15 giờ; s4 có 30 điểm, 15 giờ; s5 có 30 điểm, 15 giờ; s6 có 30 điểm, 15 giờ.
 
 ## Hình ảnh: ánh sáng, nhân vật và chuyển cảnh
 
@@ -173,9 +179,6 @@ Các cơ chế này đều theo dữ liệu: vụ nào khai báo thì mới dùn
   "Kết luận": nằm trong hồ sơ như mọi hồ sơ khác nên làm được đầu vào cho suy luận sau, được đưa cho nghi phạm xem, và được viện dẫn khi
   xét xử. Một kết luận có thể có nhiều lối (nhiều dòng cùng `gives`). Trò chơi chỉ xác nhận sự kiện, không bao giờ nói ai là thủ phạm.
 - **Mở khóa bằng kết luận.** Hành động có `gate: id` ẩn khỏi cảnh cho tới khi hồ sơ `id` (thường là một kết luận) đã có.
-- **Giờ máy lệch (engine còn, không vụ nào dùng).** `devices: { dev: { name, off, by } }` khai báo thiết bị chạy lệch `off` phút cho tới khi kết luận
-  `by` được rút ra; mốc (`spans`) có `dev: "dev"`. Cơ chế này đã được gỡ khỏi s1 (camera chậm 17 phút) và s2 (múi giờ Thái Bình Dương): mọi
-  nguồn giờ trong các vụ hiện nay đều là giờ thật, không vụ mới nào nên dùng lại.
 - **Khóa mã.** `lock: { code, digits, prompt }` trên một hành động mở bàn phím số. Sai `LOCK_TRIES` lần thì thiết bị tự khóa và mất
   `LOCK_PENALTY` giờ. Mã luôn suy ra được từ hồ sơ khác (vụ s1: giờ đỉnh triều cao nhất hôm đó), không phải đoán.
 - **Hồ sơ về muộn.** Diễn biến `{ kind: "arrive", at, id }`: hồ sơ `id` chỉ đọc được từ mốc `at`. Bấm vào thì hỏi có chờ không; chờ tốn số giờ
@@ -203,7 +206,13 @@ nên **giờ quyết định là 22:47**, khi lịch gọi bị sửa từ máy 
 Cơ chế mới: nhật ký tải trọng thang máy làm chứng "chỉ có hai người trên đài" (84 kg và 52 kg), giọng nói tổng hợp, ngoại phạm hoàn hảo ở khung giờ cuộc gọi reo, số điện thoại nối hai hồ sơ.
 `chain` ba bước dùng khóa `cause`, `author`, `motive`. Mã điện thoại 1708 là ngày 17/8 khoanh đỏ dưới tấm kính bàn (dấu vết ẩn) theo lời của Trang (ngày rồi tháng).
 `tests/sg-landmark.test.js` kiểm tra các lối chứng cứ, vòng loại trừ, ngoại phạm, mã, cổng mở khóa, hồ sơ về muộn và hình giấy tờ gọn trong khung.
-Tìm lời giải theo chiều rộng của `tests/rules.test.js` chạy trên vụ mẫu, vì kết luận của bốn vụ Sài Gòn không đặt trên bản đồ (đã có kiểm thử lời giải riêng).
+Vụ s5 "Hai Phút Một Ga" (`src/data/sg-metro.js`) là vụ **con tàu là cái đồng hồ**: ông Thịnh (Trưởng ban An toàn) ngồi chết ở ghế cuối toa 3 của chuyến cuối U-07, nhưng thật ra bị tiêm kali giữa ga Nhà hát và ga Ba Son lúc 22:03:20, bởi người áo mưa ngồi sát bên rồi xuống ở Ba Son 22:04:10. Mọi chặng đều 2 phút cố định; ở sân ga đảo Ba Son, U-07 và đoàn ngược chiều D-05 cùng đứng 46 giây, nên người áo mưa chỉ bước ngang sân ga sang D-05, về Bến Thành 22:08 và ra cổng 22:11:40: cổng Ba Son không ghi gì, sổ thẻ chỉ thấy một người vào Bến Thành 21:56:58 rồi ra chính Bến Thành sau 14 phút 42 giây, đúng bằng hai chặng bốn phút cộng vài phút đi bộ. Đó là Phương (Trưởng phòng Kế hoạch & Biểu đồ), người ba tuần trước đã dời giờ D-05 hai phút "để đồng bộ chuyển tải"; động cơ là 11 biên bản nghiệm thu phanh khống và 2,4 tỷ chảy về công ty anh rể. Kiên (nhà thầu) là người bị nghi lộ liễu nhất nhưng có camera sân ga Ba Son đặt anh ngoài toa 3.
+Cơ chế mới: bảng giờ cố định làm chứng và phép tính số học giữa các mốc; đổi đoàn tàu không để lại dấu thẻ; vòng ra-vào cùng một ga; bốn hồ sơ về muộn (ổ ghi hình trên tàu, sao kê thẻ toàn tuyến, nhật ký sửa biểu đồ, độc chất). `chain` ba bước dùng khóa `when`, `escape`, `motive`. Mã điện thoại 1207 là số hiệu đoàn tàu rồi số hiệu chuyến: nhãn "ĐT-12" dưới tay vịn ghế cuối (dấu vết ẩn), U-07 trên bảng giờ, theo lời của Trang.
+`tests/sg-metro.test.js` kiểm tra bảng giờ, đổi đoàn tàu, vòng ra-vào, vòng loại trừ, ngoại phạm, mã, cổng mở khóa, hồ sơ về muộn và hình giấy tờ gọn trong khung.
+Vụ s6 "Âm Mười Tám Độ" (`src/data/sg-coldroom.js`) là vụ **cái lạnh nói dối**: ông Đông (Trưởng ban Kho lạnh Hợp tác xã Chợ Bến Thành) ngồi chết cứng ở Buồng 2 (−18°C), đông tới lõi; bảng quy đổi của pháp y đòi ít nhất chín tiếng trong buồng ấy, sổ cửa Buồng 2 chỉ mở một lần lúc 19:12, nên ai dự tiệc tất niên đều có ngoại phạm. Thật ra ông còn sống tới 22:33:40, bị đánh vào gáy rồi đẩy bằng xe nâng (tải 98 kg trừ pallet 20 kg = đúng 78 kg thi thể) vào tủ cấp đông nhanh Buồng 3 (−40°C, chương trình P-180, 23:53:41 tới 02:53:41), và lúc 02:58 được chuyển sang Buồng 2 qua một cửa chuyển hàng không cảm biến: cảm biến nhiệt chỉ thấy buồng nóng thêm 1,3°C trong bốn phút. Giải phẫu cho thấy tinh thể đá nhỏ, đều (cấp đông nhanh) và phổi khô (chết trước khi vào chỗ lạnh). Thủ phạm là Hạnh (Phó chủ nhiệm Hợp tác xã), rời tiệc lúc 22:05 và không hồ sơ nào đặt chị ở đâu; năm người còn lại đều có hồ sơ độc lập ở chỗ khác lúc xe nâng chạy (23:26–23:44) và đều nói dối một chuyện riêng. Chị nói "không rành kỹ thuật" nhưng chiều thứ Năm đã hỏi Hưng (thợ máy lạnh) P-180 mấy tiếng thì lõi đông như nằm cả đêm. Động cơ: lô 4C là gà đông quá hạn mười tháng, bị in lại tem NSX 12/2025 trên 310 thùng, nửa lô đã chảy về Bếp ăn Bình An (công ty của chồng chị) nuôi chín trường mầm non; thứ Hai ông Đông định nộp bản kiểm kê cho Chi cục. Hưng là người bị nghi đầu tiên (hay cãi nạn nhân, ghi chú chưa gửi của ông viết "Nói với H lần cuối") nhưng có phiếu công lệnh ở Quận 4.
+Cơ chế mới: giờ chết bị đẩy sớm lên bởi cái lạnh (ngược với s3); thi thể cấp đông nhanh làm giả mốc "chín tiếng"; lối vào Buồng 2 không cảm biến, phát hiện bằng chênh lệch nhiệt; số học tải trọng xe nâng; năm ngoại phạm hồ sơ độc lập che đúng khung 23:26–23:44; ghi chú "H" mơ hồ; bốn hồ sơ về muộn (cảm biến nhiệt, giải phẫu, camera cửa hàng, video tiệc), một cổng mở khóa (đăng ký kinh doanh Bình An) và mã 1840 (nhiệt độ hai buồng bỏ dấu âm, nhãn đồng là dấu vết ẩn). `chain` ba bước dùng khóa `freeze`, `hands`, `motive`.
+`tests/sg-coldroom.test.js` kiểm tra các phép tính, cấp đông nhanh, cửa chuyển hàng, vòng loại trừ, ngoại phạm, mã, cổng mở khóa, hồ sơ về muộn và hình giấy tờ gọn trong khung.
+Tìm lời giải theo chiều rộng của `tests/rules.test.js` chạy trên vụ mẫu, vì kết luận của sáu vụ Sài Gòn không đặt trên bản đồ (đã có kiểm thử lời giải riêng).
 
 ## Thêm địa điểm hoặc điểm điều tra
 

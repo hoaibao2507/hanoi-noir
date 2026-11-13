@@ -827,7 +827,6 @@ body[data-screen="menu"] .pan { display: none !important; }
 }
 
 /* Mốc từ thiết bị chưa hiệu chỉnh: viền đỏ nhạt để nhớ rằng giờ có thể sai */
-.tl-row.raw { box-shadow: inset 3px 0 0 rgba(214, 90, 69, 0.55); }
 .banner.warn { color: #f6d9d2; background: rgba(214, 90, 69, 0.16); border-color: rgba(214, 90, 69, 0.5); font-weight: 500; font-size: 13px; }
 
 /* Bàn phím số của khóa mã */

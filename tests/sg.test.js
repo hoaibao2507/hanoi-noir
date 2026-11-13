@@ -78,11 +78,9 @@ test("kết luận không vòng lặp: rút được toàn bộ từ các hồ s
   for (const d of c.deduce) assert.ok(g.done[d.gives], `${d.gives} không bao giờ rút ra được`);
 });
 
-test("khóa, cổng mở khóa và diễn biến trỏ tới dữ liệu có thật; vụ không còn giờ máy lệch", () => {
+test("khóa, cổng mở khóa và diễn biến trỏ tới dữ liệu có thật", () => {
   const ids = c.actions.map((a) => a.id);
-  assert.equal(c.devices, undefined, "vụ không dùng giờ máy lệch");
   for (const a of c.actions) {
-    for (const s of a.spans || []) assert.equal(s.dev, undefined, `${a.id}: mốc không được lệch giờ`);
     if (a.gate) assert.ok(ids.includes(a.gate), `${a.id}: gate ${a.gate} không có`);
     if (a.lock) {
       assert.equal(a.lock.code.length, a.lock.digits, `${a.id}: độ dài mã`);
@@ -156,7 +154,6 @@ test("gate: nhật ký đầu ghi và sao kê Gia Hòa ẩn cho tới khi có k�
   assert.ok(isOpen(g1, c, "dvr_log"));
   assert.ok(T.hotspotsHTML(g1, c, L).includes('data-id="dvr_log"'));
   assert.deepEqual(unlocksOf(c, "k_override").spots.map((a) => a.id), ["dvr_log"]);
-  assert.equal(unlocksOf(c, "k_override").devs.length, 0, "không còn thiết bị lệch giờ");
   assert.equal(gated(g0, c, "sao_ke_gh"), true);
   assert.deepEqual(unlocksOf(c, "k_gia_hoa").spots.map((a) => a.id), ["sao_ke_gh"]);
 });
@@ -164,7 +161,6 @@ test("gate: nhật ký đầu ghi và sao kê Gia Hòa ẩn cho tới khi có k�
 test("các nguồn giờ của vụ đều là giờ thật: camera, nhật ký thẻ và sổ khách khớp nhau từng sự kiện, không mốc nào lệch giờ", () => {
   const ids = ["cam_sanh", "nk_ravao", "so_khach", "cam_ham"];
   const ev = timelineEvents(withDone(ids), c);
-  assert.ok(ev.every((e) => !e.dev), "không mốc nào mang cờ giờ máy lệch");
   const start = (clue, who, at) => ev.find((e) => e.clue === clue && e.at === at && (!who || e.who === who)).from;
   assert.equal(start("cam_sanh", "tham", "Sảnh chung cư"), "19:15");
   assert.equal(start("cam_sanh", "tham", "Sảnh chung cư"), start("nk_ravao", "tham", "Sảnh chung cư"), "Thắm ra thang máy: camera = nhật ký");

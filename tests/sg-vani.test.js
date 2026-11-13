@@ -70,11 +70,9 @@ test("dữ liệu suy luận nhất quán: đầu vào và kết luận có th�
   for (const d of c.deduce) assert.ok(g.done[d.gives], `${d.gives} không bao giờ rút ra được`);
 });
 
-test("đồ vật của vụ trỏ tới dữ liệu có thật: gate, khóa, diễn biến, chuỗi chứng minh; không còn giờ máy lệch", () => {
+test("đồ vật của vụ trỏ tới dữ liệu có thật: gate, khóa, diễn biến, chuỗi chứng minh", () => {
   const ids = c.actions.map((a) => a.id);
-  assert.equal(c.devices, undefined, "vụ không dùng giờ máy lệch");
   for (const a of c.actions) {
-    for (const s of a.spans || []) assert.equal(s.dev, undefined, `${a.id}: mốc không được lệch giờ`);
     if (a.gate) assert.ok(ids.includes(a.gate));
     if (a.lock) assert.match(a.lock.code, new RegExp(`^\\d{${a.lock.digits}}$`));
   }
@@ -85,7 +83,7 @@ test("đồ vật của vụ trỏ tới dữ liệu có thật: gate, khóa, di
 
 test("báo cáo Zoom ghi giờ Việt Nam: hai phiên của Vũ khớp thẳng lên dòng thời gian, thư Amazon khớp điện thoại ông Hiếu", () => {
   const ev = timelineEvents(withDone(["zoom_log"]), c).filter((e) => e.who === "vu");
-  assert.deepEqual(ev.map((e) => [e.from, e.to, e.dev || null]), [["20:30", "20:35", null], ["21:07", "21:48", null]]);
+  assert.deepEqual(ev.map((e) => [e.from, e.to]), [["20:30", "20:35"], ["21:07", "21:48"]]);
   const g = closeDeductions(withDone(["zoom_log", "loi_vu"]), c);
   assert.ok(g.done.k_zoom_gap, "báo cáo Zoom ghép với lời khai của Vũ ra khoảng vắng họp");
   assert.equal(timelineEvents(withDone(["br_report"]), c).find((e) => e.clue === "br_report").from, "20:12");

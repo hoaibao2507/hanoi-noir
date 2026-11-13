@@ -251,13 +251,10 @@ function Links({ game, c }) {
 const conclusionIds = (c) => [...new Set(c.deduce.map((d) => d.gives))];
 const conclusionsOf = (game, c) => conclusionIds(c).filter((id) => game.done[id]);
 
-// Những gì một kết luận đã mở ra: điểm điều tra mới và thiết bị được hiệu chỉnh
+// Những gì một kết luận đã mở ra: điểm điều tra mới
 function Effects({ c, id }) {
-  const { spots, devs } = unlocksOf(c, id);
-  return [
-    ...spots.map((a) => html`<div class="banner mt-2"><${Icon} n="lock-open" /> Đã mở điểm điều tra: <b>${a.title}</b> · ${placeOf(c, a.id)}</div>`),
-    ...devs.map((d) => html`<div class="banner mt-2"><${Icon} r n="clock" /> Giờ ${d.name} đã được hiệu chỉnh trong tab Thời gian.</div>`)
-  ];
+  const { spots } = unlocksOf(c, id);
+  return spots.map((a) => html`<div class="banner mt-2"><${Icon} n="lock-open" /> Đã mở điểm điều tra: <b>${a.title}</b> · ${placeOf(c, a.id)}</div>`);
 }
 
 function Conclusion({ game, c, id }) {
@@ -319,41 +316,25 @@ function Alibi({ c, a }) {
   </div>`;
 }
 
-// Mốc lấy từ thiết bị lệch giờ: chưa hiệu chỉnh thì cảnh báo, đã hiệu chỉnh thì ghi giờ máy gốc
-const DevBadge = ({ e }) => !e.dev ? null : e.dev.fixed
-  ? html`<span class="ltag k-lh"><${Icon} r n="clock" /> ${`đã hiệu chỉnh · giờ máy ${e.dev.rawFrom}–${e.dev.rawTo}`}</span>`
-  : html`<span class="ltag k-mt"><${Icon} r n="clock" /> ${`giờ máy ${e.dev.name} · chưa hiệu chỉnh`}</span>`;
 
 function TimelineEvent({ c, e }) {
   const who = e.who ? html` · <b>${nameOf(c, e.who)}</b>` : e.pending ? html` · <i class="text-ink-2">Chưa rõ là ai</i>` : null;
-  return html`<div class=${cx("tl-row", e.dev && !e.dev.fixed && "raw")}>
+  return html`<div class="tl-row">
     <span class="tl-time">${`${e.from}–${e.to}`}</span>
     <div>
       <p class="text-sm">${e.at}${who}</p>
       <p class="text-xs text-ink-2">${e.title}</p>
-      <${DevBadge} e=${e} />
+
     </div>
   </div>`;
 }
 
-// Độ lệch giờ máy: tròn giờ thì ghi bằng giờ (múi giờ), còn lại ghi bằng phút
-const offLabel = (off) => {
-  const a = Math.abs(off);
-  return a >= 60 && a % 60 === 0 ? `${a / 60} giờ` : `${a} phút`;
-};
-
-function DevicesNote({ game, c }) {
-  return Object.values(c.devices || {}).map((d) => game.done[d.by]
-    ? html`<div class="banner mb-3"><${Icon} r n="clock" /> ${`Giờ ${d.name} đã được hiệu chỉnh: giờ thật = giờ máy ${d.off >= 0 ? "+" : "−"} ${offLabel(d.off)}.`}</div>`
-    : html`<div class="banner warn mb-3"><${Icon} n="triangle-exclamation" /> ${`Các mốc có nhãn “giờ máy” lấy từ ${d.name}. Chưa chắc giờ trên thiết bị này đúng: hãy đối chiếu với các nguồn giờ khác.`}</div>`);
-}
 
 function Timeline({ game, c }) {
   const alibis = alibisOf(game, c);
   const events = timelineEvents(game, c);
   const world = eventsDone(game, c);
-  return html`<${DevicesNote} game=${game} c=${c} />
-    <h4 class="mt-2 mb-1">${`Diễn biến · đồng hồ ${clockAt(game, c)}`}</h4>
+  return html`<h4 class="mt-2 mb-1">${`Diễn biến · đồng hồ ${clockAt(game, c)}`}</h4>
     ${world.length
       ? world.map((w) => html`<div class="tl-row"><span class="tl-time">${w.at}</span><p class="text-sm">${w.text}</p></div>`)
       : html`<p class="text-ink-2 italic text-sm">Chưa có diễn biến nào. Đồng hồ đang chạy.</p>`}

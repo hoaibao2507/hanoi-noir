@@ -108,7 +108,6 @@ export function checkCase(c, idx = CASES.indexOf(c)) {
       else if (s.from >= s.to) warn(`${a.id}: mốc ${s.from}–${s.to} không tăng dần (qua nửa đêm chưa được hỗ trợ)`);
       if (s.who && !sus.has(s.who)) err(`${a.id}: mốc có who "${s.who}" không phải nghi phạm`);
       for (const n of s.needs || []) if (!idSet.has(n)) err(`${a.id}: mốc needs "${n}" không có`);
-      if (s.dev && !(c.devices && c.devices[s.dev])) err(`${a.id}: mốc dev "${s.dev}" chưa khai trong devices`);
     }
     const v = a.visual;
     if (!v) { err(`${a.id}: thiếu visual`); continue; }
@@ -170,7 +169,6 @@ export function checkCase(c, idx = CASES.indexOf(c)) {
     if (!w.text) err(`world ${w.id}: thiếu text`);
   }
   info.arrivals = (c.world || []).length;
-  for (const d of Object.values(c.devices || {})) if (!idSet.has(d.by) || act(d.by).via !== "deduce") err(`devices: kết luận hiệu chỉnh "${d.by}" phải là kết luận`);
 
   /* ---------- Buộc tội ---------- */
   if (c.chain) {

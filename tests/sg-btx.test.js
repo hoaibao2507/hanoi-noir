@@ -91,7 +91,6 @@ test("dữ liệu suy luận nhất quán: đầu vào và kết luận có th�
 
 test("đồ vật của vụ trỏ tới dữ liệu có thật: gate, khóa, hồ sơ về muộn, chuỗi chứng minh; không có thiết bị lệch giờ", () => {
   const ids = c.actions.map((a) => a.id);
-  assert.equal(c.devices, undefined, "vụ này không dựa vào giờ máy lệch");
   for (const a of c.actions) {
     if (a.gate) assert.ok(ids.includes(a.gate), `${a.id}: gate trỏ tới ${a.gate}`);
     if (a.lock) assert.match(a.lock.code, new RegExp(`^\\d{${a.lock.digits}}$`));

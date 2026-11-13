@@ -1,10 +1,12 @@
 import { WORLD_W, COMP_W, OX } from "../world/layout.js";
 import { portrait } from "./people.js";
-import { uid, esc, shade, lin, rect, path, circle, line, blurs, glow } from "./kit.js";
+import { uid, esc, shade, lin, rect, path, circle, line, txt, blurs, glow } from "./kit.js";
 import { sgHouse, wires, sgLobby, sgSecroom, sgGarage, sgPenthouse, sgStreet, sgLab, menuSg } from "./sg.js";
 import { sgVaniGate, sgVaniOffice, sgVaniCeo, sgVaniPrint, sgVaniDock } from "./sg-vani.js";
 import { sgBtxPad, sgBtxLobby, sgBtxHall, sgBtxLounge, sgBtxOps } from "./sg-btx.js";
 import { sgLmDeck, sgLmParty, sgLmOps, sgLmOffice, sgLmGround } from "./sg-lm.js";
+import { sgMtCar, sgMtGate, sgMtOcc, sgMtPlat, sgMtOffice } from "./sg-mt.js";
+import { sgCsCold, sgCsBlast, sgCsDock, sgCsOffice, sgCsHall } from "./sg-cs.js";
 /* =====================================================================
    HANOI NOIR · Minh họa SVG
    Toàn bộ hình ảnh vẽ bằng SVG (không dùng ảnh bitmap).
@@ -153,6 +155,91 @@ const ART = (() => {
       for (let i = 0; i < 24; i++) c += line((i * 41) % 320, (i * 57) % 170, ((i * 41) % 320) - 5, ((i * 57) % 170) + 14, "#8fb3d1", 1.1, 'opacity=".28"');
       return c + `</g>`;
     }
+    if (kind === "cam_mt_car") {
+      let c = rect(0, 0, 320, 190, "#10161e") + rect(0, 128, 320, 62, "#1d242d") + rect(0, 0, 320, 16, "#0a0d12");
+      for (let i = 0; i < 4; i++) c += rect(14 + i * 76, 24, 64, 52, "#0a1224") + rect(14 + i * 76, 24, 64, 52, "none", 'stroke="#05070b" stroke-width="3"') + circle(34 + i * 76, 44, 2, "#ffd58a", 'opacity=".7"') + circle(52 + i * 76, 56, 2, "#7be6e0", 'opacity=".6"');
+      c += rect(56, 76, 214, 30, "#1b4058", 'rx="4"') + rect(56, 104, 214, 20, "#2f6a8a", 'rx="3"') + rect(56, 124, 214, 28, "#0f141b");
+      c += circle(214, 70, 8, "#d9ae88") + rect(200, 78, 26, 42, "#8a8f98", 'rx="5"') + rect(204, 112, 18, 8, "#f3ead2", 'rx="1"');
+      c += circle(170, 66, 10, "#9fd6c0") + circle(170, 70, 6, "#d9ae88") + rect(156, 76, 30, 50, "#9fd6c0", 'rx="7" opacity=".95"') + rect(162, 66, 16, 6, "#dfe8ee", 'opacity=".8" rx="2"');
+      c += line(30, 112, 52, 112, "#cfd8e0", 3, 'opacity=".5"');
+      return c + glow(k, 160, 14, 110, "#eaf4ff", 0.22);
+    }
+    if (kind === "cam_mt_cab") {
+      let c = rect(0, 0, 320, 190, "#0c1118") + rect(80, 14, 160, 74, "#05070b") + path("M96 88 L160 24 L224 88 Z", "#10243a", 'opacity=".8"');
+      for (let i = 0; i < 6; i++) c += circle(160 + (i - 2.5) * 6, 40 + i * 6, 2, "#ffd58a", 'opacity=".8"');
+      c += line(60, 14, 100, 90, "#2a313a", 4) + line(260, 14, 220, 90, "#2a313a", 4);
+      c += rect(40, 100, 240, 20, "#2a3038") + rect(70, 92, 54, 12, "#4a5560") + circle(200, 104, 4, "#4fe08a") + circle(214, 104, 4, "#ffd27a") + circle(228, 104, 4, "#ff6b5a");
+      c += rect(0, 120, 320, 70, "#161c24") + rect(112, 126, 60, 48, "#2a313a", 'rx="6"');
+      c += circle(142, 118, 9, "#dfae85") + rect(132, 124, 20, 34, "#1d3b5a", 'rx="4"') + rect(130, 110, 24, 6, "#14202c", 'rx="2"');
+      c += rect(258, 40, 44, 120, "#10151b") + rect(262, 46, 36, 64, "#1d252e");
+      return c + glow(k, 160, 10, 90, "#e8f2ff", 0.22);
+    }
+    if (kind === "cam_mt_gate") {
+      let c = rect(0, 0, 320, 190, "#10161e") + rect(0, 128, 320, 62, "#222a33") + rect(80, 12, 160, 22, "#0b4d3a");
+      for (let i = 0; i < 4; i++) c += rect(30 + i * 52, 78, 30, 60, "#59636f", 'rx="3"') + rect(35 + i * 52, 84, 20, 8, "#4fe0a0");
+      c += rect(240, 78, 36, 60, "#59636f", 'rx="3"') + rect(246, 84, 24, 8, "#ffd27a") + rect(290, 70, 24, 80, "#2a4a5a", 'rx="3"');
+      c += circle(266, 116, 8, "#9fd6c0") + rect(256, 124, 20, 36, "#9fd6c0", 'rx="6"') + rect(254, 108, 24, 8, "#9fd6c0", 'rx="4" opacity=".9"');
+      c += circle(118, 106, 7, "#d9ae88") + rect(108, 114, 20, 34, "#8a8f98", 'rx="4"');
+      c += circle(60, 108, 7, "#efc9a7") + rect(50, 116, 20, 34, "#2e4a6b", 'rx="4"');
+      return c + glow(k, 160, 14, 100, "#eaf4ff", 0.22);
+    }
+    if (kind === "cam_mt_occ") {
+      let c = rect(0, 0, 320, 190, "#0e1319") + rect(30, 10, 260, 66, "#05080e") + rect(36, 16, 248, 54, "#0a1a2a") + line(50, 44, 270, 44, "#2f9a74", 3);
+      for (let i = 0; i < 14; i++) c += circle(50 + i * 17, 44, i === 2 ? 4 : 2.5, i === 2 ? "#ffd27a" : "#eaf4ff");
+      c += rect(74, 28, 22, 8, "#2fc990", 'rx="3"') + rect(74, 50, 22, 8, "#f0a050", 'rx="3"') + glow(k, 85, 44, 30, "#ffd27a", 0.4);
+      c += rect(0, 120, 320, 70, "#1a212a") + rect(60, 100, 150, 24, "#4a5560") + rect(76, 70, 70, 34, "#05080e") + rect(82, 76, 58, 22, "#0b1c2c");
+      c += circle(110, 88, 9, "#e9c09b") + rect(98, 98, 24, 34, "#355a7a", 'rx="4"') + rect(100, 82, 22, 6, "#10151b", 'rx="3"');
+      c += rect(220, 90, 70, 40, "#05080e") + rect(226, 96, 58, 28, "#12304a");
+      return c + glow(k, 160, 10, 90, "#e8f2ff", 0.22);
+    }
+    if (kind === "cam_mt_plat") {
+      let c = rect(0, 0, 320, 190, "#0c1118") + path("M0 0 L320 0 L168 78 L152 78 Z", "#151c26") + rect(150, 70, 20, 16, "#05070b");
+      c += path("M0 36 L150 80 L150 96 L0 190 Z", "#2c5068") + path("M320 36 L170 80 L170 96 L320 190 Z", "#2c5a50");
+      c += path("M40 70 L150 84 L150 92 L40 150 Z", "#10161e") + path("M280 70 L170 84 L170 92 L280 150 Z", "#10161e");
+      c += path("M72 120 L88 112 L100 168 L66 168 Z", "#d9c27a", 'opacity=".55"') + path("M248 120 L232 112 L220 168 L254 168 Z", "#bfe6d2", 'opacity=".55"');
+      c += path("M100 190 L150 96 L170 96 L220 190 Z", "#4a525c");
+      c += circle(132, 102, 5, "#d9ae88") + rect(126, 107, 12, 28, "#5a5e68", 'rx="3"') + rect(127, 133, 4, 14, "#222") + rect(133, 133, 4, 14, "#222");
+      c += circle(186, 110, 6, "#9fd6c0") + rect(178, 116, 16, 34, "#9fd6c0", 'rx="5"') + rect(176, 104, 20, 7, "#9fd6c0", 'rx="3" opacity=".9"') + path("M178 124 L158 118", "none", 'stroke="#9fd6c0" stroke-width="4" stroke-linecap="round" opacity=".6"');
+      return c + glow(k, 160, 12, 90, "#eaf4ff", 0.2);
+    }
+    if (kind === "cam_cs_cong") {
+      let c = rect(0, 0, 320, 190, "#0b1118") + rect(0, 128, 320, 62, "#1b222b") + path("M40 190 L40 74 Q160 -12 280 74 L280 190 Z", "#18202a") + path("M84 190 L84 88 Q160 24 236 88 L236 190 Z", "#05080d");
+      for (let i = 0; i < 6; i++) c += rect(100 + i * 4, 118 + i * 11, 120 - i * 8, 8, i % 2 ? "#2a333d" : "#222a33");
+      c += rect(116, 44, 88, 14, "#0b4d3a") + txt(160, 55, "XUỐNG HẦM B1", 9, "#f3f1ea", 'text-anchor="middle"');
+      c += circle(158, 100, 7, "#d9ae88") + rect(146, 107, 24, 40, "#4a4036", 'rx="6"') + rect(150, 140, 8, 20, "#222") + rect(160, 140, 8, 20, "#222") + rect(142, 118, 10, 12, "#f3ead2", 'rx="1"');
+      c += rect(250, 120, 44, 50, "#2a2f35") + circle(272, 130, 4, "#ffd58a", 'opacity=".7"');
+      return c + glow(k, 160, 20, 90, "#dff3ff", 0.22);
+    }
+    if (kind === "cam_cs_dock") {
+      let c = rect(0, 0, 320, 190, "#0c1016") + rect(0, 140, 320, 50, "#171b20") + rect(20, 40, 200, 100, "#d4dadf", 'rx="6"') + rect(24, 100, 196, 36, "#aeb7bf");
+      c += rect(36, 52, 110, 60, "#ffe8a8", 'rx="6"') + rect(36, 52, 110, 60, "none", 'rx="6" stroke="#3a444e" stroke-width="4"') + path("M62 112 Q76 78 100 96 L120 112 Z", "#3f5a3a") + circle(92, 82, 11, "#dfae85") + path("M82 74 Q92 64 104 72", "none", 'stroke="#2a1e16" stroke-width="5"');
+      c += circle(60, 142, 18, "#10151b") + circle(170, 142, 18, "#10151b") + rect(160, 70, 52, 12, "#3a444e", 'rx="3"');
+      c += rect(240, 0, 54, 190, "#2a2f35") + rect(236, 0, 62, 14, "#1a1d21") + rect(300, 30, 16, 120, "#10151b");
+      return c + glow(k, 90, 82, 70, "#ffe8a8", 0.3) + glow(k, 150, 12, 60, "#dff3ff", 0.2);
+    }
+    if (kind === "cam_cs_t2") {
+      let c = rect(0, 0, 320, 190, "#0e0c0a") + path("M0 190 L320 190 L220 96 L100 96 Z", "#2a2218") + path("M0 0 L100 96 L100 190 L0 190 Z", "#1c1814") + path("M320 0 L220 96 L220 190 L320 190 Z", "#17130f") + rect(100, 52, 120, 44, "#0a0806");
+      c += rect(132, 58, 56, 38, "#2a241e") + rect(138, 90, 44, 4, "#ffd27a", 'opacity=".8"') + glow(k, 160, 94, 50, "#ffd27a", 0.4);
+      c += line(0, 120, 100, 96, "#6a5a40", 3) + rect(10, 110, 8, 70, "#4a3d30");
+      c += circle(214, 112, 7, "#efc9a7") + rect(204, 120, 20, 38, "#7a3b4a", 'rx="5"') + rect(204, 108, 20, 6, "#2a1a14", 'rx="3"');
+      return c + glow(k, 160, 14, 90, "#e8f2ff", 0.2);
+    }
+    if (kind === "cam_cs_store") {
+      let c = rect(0, 0, 320, 190, "#12161c") + rect(0, 128, 320, 62, "#2a2d33");
+      for (let r = 0; r < 3; r++) for (let i = 0; i < 8; i++) c += rect(10 + i * 18, 26 + r * 28, 14, 22, ["#e9b949", "#5aa0d6", "#e07a5a", "#7fc08a"][(i + r) % 4]);
+      c += rect(170, 100, 130, 40, "#59636f", 'rx="3"') + rect(178, 84, 40, 20, "#05080e") + rect(184, 88, 28, 10, "#4fe0a0", 'opacity=".7"');
+      c += circle(240, 78, 8, "#f4d6bd") + rect(228, 86, 24, 44, "#c0392b", 'rx="5"') + rect(230, 90, 20, 8, "#f3f1ea", 'opacity=".9"') + path("M232 70 Q240 58 250 70", "none", 'stroke="#2a1a14" stroke-width="6"');
+      c += circle(120, 108, 7, "#d9ae88") + rect(110, 116, 20, 36, "#5a5e68", 'rx="4"');
+      return c + glow(k, 160, 12, 100, "#eaf4ff", 0.24);
+    }
+    if (kind === "cam_cs_tiec") {
+      let c = rect(0, 0, 320, 190, "#0a0b14") + rect(0, 130, 320, 60, "#1c1a1c") + rect(0, 20, 320, 26, "#a93226") + rect(0, 46, 320, 6, "#5a1a14");
+      for (let i = 0; i < 6; i++) c += circle(30 + i * 52, 64, 9, "#ff6a5a") + line(30 + i * 52, 46, 30 + i * 52, 56, "#d9c27a", 2) + glow(k, 30 + i * 52, 64, 20, "#ff6a5a", 0.3);
+      c += rect(30, 80, 120, 70, "#251a20") + rect(36, 86, 108, 58, "#3a2230") + txt(90, 120, "SEN", 18, "#d9c27a", 'text-anchor="middle"');
+      c += path("M190 156 L190 120 Q198 96 230 94 L290 94 Q310 100 312 130 L312 156 Z", "#e6e9ec") + circle(212, 156, 12, "#10151b") + circle(290, 156, 12, "#10151b") + rect(204, 104, 40, 18, "#0b1220", 'rx="3"');
+      c += circle(168, 100, 7, "#f1d0b4") + rect(157, 108, 22, 40, "#5a2a3a", 'rx="5"') + path("M170 114 L186 120", "none", 'stroke="#f1d0b4" stroke-width="5" stroke-linecap="round"') + circle(204, 106, 6, "#d9ae88") + rect(196, 112, 16, 34, "#4a4a52", 'rx="4"');
+      return c + glow(k, 160, 12, 80, "#ffd58a", 0.2);
+    }
     return "";
   }
   const CAM_DEFS = (k) => blurs(k);
@@ -195,7 +282,9 @@ const ART = (() => {
     cam_sg_lobby: 1, cam_sg_garage: 1, cam_sg_sec: 1, cam_sg_cafe: 1, cam_sg_gala: 1,
     cam_vani_gate: 1, cam_vani_office: 1, cam_vani_canteen: 1, cam_vani_alley: 1,
     cam_btx_hall: 1, cam_btx_pad: 1, cam_btx_ops: 1, cam_btx_nosignal: 1,
-    cam_lm_deck: 1, cam_lm_party: 1, cam_lm_ops: 1, cam_lm_hall78: 1, cam_lm_ground: 1
+    cam_lm_deck: 1, cam_lm_party: 1, cam_lm_ops: 1, cam_lm_hall78: 1, cam_lm_ground: 1,
+    cam_mt_car: 1, cam_mt_cab: 1, cam_mt_gate: 1, cam_mt_occ: 1, cam_mt_plat: 1,
+    cam_cs_cong: 1, cam_cs_dock: 1, cam_cs_t2: 1, cam_cs_store: 1, cam_cs_tiec: 1
   };
 
   // Biểu đồ thủy triều trong ngày: hai đỉnh, mức báo động và khoảng đường ngập
@@ -222,39 +311,6 @@ const ART = (() => {
       `</svg>`;
   }
 
-  // Hai đồng hồ: cùng một sự kiện, camera chậm 17 phút so với giờ thật
-  // Mặt đồng hồ kim: tâm (cx, cy), nhãn dưới mặt, giờ hh:mm, màu viền
-  function clockFace(cx, cy, label, hh, mm, col) {
-    const ah = ((hh % 12) + mm / 60) * 30, am = mm * 6;
-    const pt = (deg, r) => `${cx + r * Math.sin((deg * Math.PI) / 180)} ${cy - r * Math.cos((deg * Math.PI) / 180)}`;
-    let s = `<circle cx="${cx}" cy="${cy}" r="46" fill="#f5efe0" stroke="${col}" stroke-width="5"/>`;
-    for (let i = 0; i < 12; i++) s += `<line x1="${pt(i * 30, 38).split(" ")[0]}" y1="${pt(i * 30, 38).split(" ")[1]}" x2="${pt(i * 30, 43).split(" ")[0]}" y2="${pt(i * 30, 43).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2"/>`;
-    s += `<line x1="${cx}" y1="${cy}" x2="${pt(ah, 24).split(" ")[0]}" y2="${pt(ah, 24).split(" ")[1]}" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>`;
-    s += `<line x1="${cx}" y1="${cy}" x2="${pt(am, 36).split(" ")[0]}" y2="${pt(am, 36).split(" ")[1]}" stroke="#2b2b2b" stroke-width="2.6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="#2b2b2b"/>`;
-    return s + `<text x="${cx}" y="${cy + 66}" text-anchor="middle" font-family="monospace" font-size="11" fill="#e8eef4">${label}</text>`;
-  }
-
-  // Hai đồng hồ: cùng một cuộc họp, giờ Thái Bình Dương sớm hơn giờ Việt Nam 15 giờ
-  function tzView() {
-    return `<svg viewBox="0 0 320 190" role="img" aria-label="Hai đồng hồ lệch nhau 15 giờ: Thái Bình Dương 5 giờ 30 sáng, Việt Nam 20 giờ 30 tối">` +
-      `<rect width="320" height="190" fill="#14202e"/>` + clockFace(70, 78, "SEATTLE (PT) 05:30", 5, 30, "#3b6fa0") + clockFace(250, 78, "VIỆT NAM 20:30", 8, 30, "#c9a227") +
-      `<path d="M126 78 L194 78" stroke="#ff4fa3" stroke-width="3" stroke-dasharray="6 4"/><path d="M188 70 L198 78 L188 86" fill="none" stroke="#ff4fa3" stroke-width="3"/>` +
-      `<text x="160" y="68" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="700" fill="#ff8ac0">+15 giờ</text>` +
-      `<text x="160" y="182" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#cfe8ff">giờ Việt Nam = giờ Thái Bình Dương + 15 giờ</text>` +
-      `</svg>`;
-  }
-
-  // Hai đồng hồ: cùng một sự kiện, camera chậm 17 phút so với giờ thật
-  function skewView() {
-    const clock = clockFace;
-    return `<svg viewBox="0 0 320 190" role="img" aria-label="Hai đồng hồ lệch nhau 17 phút: camera 18 giờ 03, giờ thật 18 giờ 20">` +
-      `<rect width="320" height="190" fill="#14202e"/>` + clock(70, 78, "CAMERA 18:03", 6, 3, "#3b6fa0") + clock(250, 78, "GIỜ THẬT 18:20", 6, 20, "#c9a227") +
-      `<path d="M126 78 L194 78" stroke="#ff4fa3" stroke-width="3" stroke-dasharray="6 4"/><path d="M188 70 L198 78 L188 86" fill="none" stroke="#ff4fa3" stroke-width="3"/>` +
-      `<text x="160" y="68" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="700" fill="#ff8ac0">+17 phút</text>` +
-      `<text x="160" y="182" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#cfe8ff">giờ thật = giờ máy + 17 phút</text>` +
-      `</svg>`;
-  }
-
   /* ---------- Thế giới panorama: khung cảnh gốc ở giữa, hai bên là phòng hoặc phố nối tiếp ---------- */
   // Phong cách hai bên theo từng cảnh: "room" là căn phòng, "sgstreet" là phố Sài Gòn
   const FLANK = {
@@ -278,7 +334,17 @@ const ART = (() => {
     sg_lm_party:    { kind: "room", wall: "#1a1426", floor: "#30221b", trim: "#07060c", lamp: "#ffd98e" },
     sg_lm_ops:      { kind: "room", wall: "#222c36", floor: "#29313a", trim: "#080b0f", lamp: "#e8f2ff" },
     sg_lm_office:   { kind: "room", wall: "#2a2f3a", floor: "#3a2c22", trim: "#0a0c12", lamp: "#ffd27a" },
-    sg_lm_ground:   { kind: "roof", wall: "#1c2a40", floor: "#2c333d", trim: "#0a0d12", lamp: "#7fc8ff" }
+    sg_lm_ground:   { kind: "roof", wall: "#1c2a40", floor: "#2c333d", trim: "#0a0d12", lamp: "#7fc8ff" },
+    sg_mt_car:      { kind: "room", wall: "#2b3441", floor: "#39424c", trim: "#0a0d12", lamp: "#eaf4ff" },
+    sg_mt_gate:     { kind: "room", wall: "#2f3a46", floor: "#4a545e", trim: "#0a0d12", lamp: "#eaf4ff" },
+    sg_mt_occ:      { kind: "room", wall: "#1f2a36", floor: "#2c343e", trim: "#080b0f", lamp: "#e8f2ff" },
+    sg_mt_plat:     { kind: "room", wall: "#232c38", floor: "#6a727c", trim: "#0a0d12", lamp: "#eaf4ff" },
+    sg_mt_office:   { kind: "room", wall: "#2a2f3a", floor: "#3a3430", trim: "#0a0c12", lamp: "#ffd27a" },
+    sg_cs_cold:     { kind: "room", wall: "#7d92a4", floor: "#51657a", trim: "#2a3a4a", lamp: "#dff3ff" },
+    sg_cs_blast:    { kind: "room", wall: "#4a5864", floor: "#2a3238", trim: "#10161c", lamp: "#e8f4ff" },
+    sg_cs_dock:     { kind: "room", wall: "#343d49", floor: "#23272d", trim: "#0c0f14", lamp: "#ffd58a" },
+    sg_cs_office:   { kind: "room", wall: "#3a3430", floor: "#3a2c22", trim: "#0e0b09", lamp: "#ffd27a" },
+    sg_cs_hall:     { kind: "room", wall: "#2f3a36", floor: "#2e2e29", trim: "#0a0e0c", lamp: "#e8f2ff" }
   };
 
   // Gradient dùng chung cho hai bên của một cảnh (tiền tố k là tiền tố cảnh + "-w")
@@ -374,7 +440,9 @@ const ART = (() => {
     sg_lobby: sgLobby, sg_secroom: sgSecroom, sg_garage: sgGarage, sg_penthouse: sgPenthouse, sg_street: sgStreet, sg_lab: sgLab, menu_sg: menuSg,
     sg_vani_gate: sgVaniGate, sg_vani_office: sgVaniOffice, sg_vani_ceo: sgVaniCeo, sg_vani_print: sgVaniPrint, sg_vani_dock: sgVaniDock,
     sg_btx_pad: sgBtxPad, sg_btx_lobby: sgBtxLobby, sg_btx_hall: sgBtxHall, sg_btx_lounge: sgBtxLounge, sg_btx_ops: sgBtxOps,
-    sg_lm_deck: sgLmDeck, sg_lm_party: sgLmParty, sg_lm_ops: sgLmOps, sg_lm_office: sgLmOffice, sg_lm_ground: sgLmGround
+    sg_lm_deck: sgLmDeck, sg_lm_party: sgLmParty, sg_lm_ops: sgLmOps, sg_lm_office: sgLmOffice, sg_lm_ground: sgLmGround,
+    sg_mt_car: sgMtCar, sg_mt_gate: sgMtGate, sg_mt_occ: sgMtOcc, sg_mt_plat: sgMtPlat, sg_mt_office: sgMtOffice,
+    sg_cs_cold: sgCsCold, sg_cs_blast: sgCsBlast, sg_cs_dock: sgCsDock, sg_cs_office: sgCsOffice, sg_cs_hall: sgCsHall
   };
 
   return {
@@ -391,8 +459,6 @@ const ART = (() => {
       if (v.k === "paper") return paper(v);
       if (v.k === "cam") return camView(v);
       if (v.k === "tide") return tideView();
-      if (v.k === "skew") return skewView();
-      if (v.k === "tz") return tzView();
       return "";
     }
   };
